@@ -1,0 +1,22 @@
+{
+  "title": "حالة المستودعات والمخزون",
+  "subtitle": "مراقبة سعة التخزين وتوزيع البضائع، وتحويل البنود بين المستودعات المختلفة.",
+  "transferBtn": "تحويل بين المستودعات",
+  "addWarehouse": "إضافة مستودع",
+  "locationLabel": "الموقع الفعلي: ",
+  "unitsLabel": "إجمالي الوحدات المخزنة: ",
+  "unitsSuffix": "حبة",
+  "modalAddTitle": "إضافة مستودع جديد",
+  "nameField": "اسم المستودع*",
+  "codeField": "كود المستودع (فريد)*",
+  "locationField": "الموقع الفعلي",
+  "placeholderName": "مثال: مستودع بغداد المركزي",
+  "placeholderLocation": "مثال: بغداد، حي الكرادة",
+  "saveWarehouseBtn": "حفظ المستودع",
+  "modalTransferTitle": "تحويل البضائع بين المستودعات",
+  "transferProductField": "المنتج المراد نقله*",
+  "fromField": "من مستودع*",
+  "toField": "إلى مستودع*",
+  "qtyField": "الكمية المنقولة*",
+  "transferSubmitBtn": "تأكيد وإجراء النقل"
+}

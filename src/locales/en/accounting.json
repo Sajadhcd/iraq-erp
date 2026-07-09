@@ -1,0 +1,30 @@
+{
+  "title": "Operating Expenses & Taxation",
+  "subtitle": "Record business expenses, administrative costs, and calculate tax input values.",
+  "addExpense": "Log New Expense",
+  "searchPlaceholder": "Search by category or description...",
+  "tableReference": "Voucher / Reference No",
+  "tableCategory": "Category",
+  "tableTotal": "Total Amount (Gross)",
+  "tableTax": "Calculated Tax",
+  "tableDate": "Record Date",
+  "tableDescription": "Voucher Details / Description",
+  "internalVoucher": "Internal Voucher",
+  "noDescription": "No description",
+  "modalTitle": "Log Operating Expenditure",
+  "categoryLabel": "Expense Category*",
+  "amountLabel": "Total Amount Paid (Gross)*",
+  "taxLabel": "Input Tax Value",
+  "referenceLabel": "Reference Number (Vendor Invoice)",
+  "descriptionLabel": "Voucher Memo / Description",
+  "placeholderReference": "EXP-XXXXX",
+  "placeholderDescription": "Write detailed memo (e.g., Warehouse electricity bill for June)...",
+  "submitBtn": "Log Expense Record",
+  "categoriesList": {
+    "rent": "Rent & Public Utilities",
+    "salaries": "Employee Wages & Salaries",
+    "maintenance": "Equipment & Site Maintenance",
+    "marketing": "Marketing & Public Advertisements",
+    "stationery": "Office Stationery & Tools"
+  }
+}

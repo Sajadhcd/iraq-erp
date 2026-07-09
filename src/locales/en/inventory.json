@@ -1,0 +1,22 @@
+{
+  "title": "Inventory & Warehouse Status",
+  "subtitle": "Monitor storage capacities, distribution maps, and transfer items across sites.",
+  "transferBtn": "Stock Transfer",
+  "addWarehouse": "Add Warehouse",
+  "locationLabel": "Physical Location: ",
+  "unitsLabel": "Total Stored Units: ",
+  "unitsSuffix": "pcs",
+  "modalAddTitle": "Register New Warehouse",
+  "nameField": "Warehouse Name*",
+  "codeField": "Warehouse Unique Code*",
+  "locationField": "Physical Location / Address",
+  "placeholderName": "e.g., Baghdad Central Warehouse",
+  "placeholderLocation": "e.g., Baghdad, Karrada District",
+  "saveWarehouseBtn": "Save Warehouse",
+  "modalTransferTitle": "Transfer Goods Between Warehouses",
+  "transferProductField": "Product to Move*",
+  "fromField": "From Warehouse*",
+  "toField": "To Warehouse*",
+  "qtyField": "Quantity to Move*",
+  "transferSubmitBtn": "Confirm & Execute Transfer"
+}

@@ -1,0 +1,23 @@
+{
+  "title": "أوامر الشراء والتوريد",
+  "subtitle": "إنشاء ومتابعة أوامر الشراء الصادرة للموردين واستلام البضائع للمخازن.",
+  "newPurchaseOrder": "طلب شراء جديد (PO)",
+  "searchPlaceholder": "ابحث برقم الطلب PO أو المورد...",
+  "tablePoNumber": "رقم الطلب (PO)",
+  "tableSupplier": "المورد",
+  "tableWarehouse": "مستودع التخزين",
+  "tableTotal": "المجموع الكلي",
+  "tableDate": "تاريخ التحرير",
+  "tableStatus": "الحالة",
+  "statusReceived": "تم الاستلام",
+  "statusSent": "مرسل ومسجل",
+  "receiveGoodsBtn": "استلام البضائع",
+  "modalTitle": "إنشاء أمر شراء وتوريد",
+  "supplierField": "مورد السلع*",
+  "warehouseField": "مستودع الاستلام المالي*",
+  "itemTitle": "البند المراد شراؤه",
+  "productLabel": "المنتج*",
+  "qtyLabel": "الكمية*",
+  "unitPriceLabel": "سعر الشراء للوحدة*",
+  "submitBtn": "إرسال أمر الشراء والتوريد"
+}

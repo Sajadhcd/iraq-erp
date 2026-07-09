@@ -1,0 +1,30 @@
+{
+  "title": "مصاريف التشغيل والضرائب",
+  "subtitle": "تسجيل المصاريف، الفواتير التشغيلية واحتساب ضريبة المدخلات تلقائياً.",
+  "addExpense": "تسجيل مصروف جديد",
+  "searchPlaceholder": "ابحث بقسم المصروف أو الوصف...",
+  "tableReference": "رقم السند/الفاتورة",
+  "tableCategory": "تصنيف المصروف",
+  "tableTotal": "إجمالي المبلغ (شامل)",
+  "tableTax": "الضريبة المحتسبة",
+  "tableDate": "تاريخ التسجيل",
+  "tableDescription": "الوصف والبيان",
+  "internalVoucher": "سند داخلي",
+  "noDescription": "لا يوجد بيان",
+  "modalTitle": "تسجيل مصروف جديد",
+  "categoryLabel": "تصنيف المصروف*",
+  "amountLabel": "إجمالي المبلغ (شامل)*",
+  "taxLabel": "الضريبة المضافة",
+  "referenceLabel": "رقم السند المرجعي (فاتورة التوريد)",
+  "descriptionLabel": "وصف المصروف والبيان",
+  "placeholderReference": "EXP-XXXXX",
+  "placeholderDescription": "أكتب بياناً تفصيلياً (مثال: سداد فاتورة كهرباء المستودع لشهر يونيو)...",
+  "submitBtn": "حفظ وتسجيل المصروف",
+  "categoriesList": {
+    "rent": "إيجارات ومرافق عامة",
+    "salaries": "رواتب وأجور موظفين",
+    "maintenance": "صيانة وإصلاحات تشغيلية",
+    "marketing": "تسويق وإعلانات رقمية",
+    "stationery": "قرطاسية وأدوات مكتبية"
+  }
+}

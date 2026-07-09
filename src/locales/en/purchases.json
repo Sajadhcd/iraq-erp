@@ -1,0 +1,23 @@
+{
+  "title": "Purchase Orders & Procurement",
+  "subtitle": "Create and manage procurement purchase orders sent to vendors, and receive inventory.",
+  "newPurchaseOrder": "New Purchase Order (PO)",
+  "searchPlaceholder": "Search by PO number or supplier...",
+  "tablePoNumber": "Order No (PO)",
+  "tableSupplier": "Supplier Company",
+  "tableWarehouse": "Target Warehouse",
+  "tableTotal": "Total Amount",
+  "tableDate": "Issue Date",
+  "tableStatus": "Status",
+  "statusReceived": "Goods Received",
+  "statusSent": "PO Sent & Registered",
+  "receiveGoodsBtn": "Receive Goods",
+  "modalTitle": "Generate Procurement Purchase Order",
+  "supplierField": "Vendor / Supplier*",
+  "warehouseField": "Receiving Warehouse*",
+  "itemTitle": "Line Item to Procure",
+  "productLabel": "Product*",
+  "qtyLabel": "Quantity*",
+  "unitPriceLabel": "Unit Purchase Price*",
+  "submitBtn": "Generate & Submit Purchase Order"
+}

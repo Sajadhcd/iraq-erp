@@ -1,0 +1,9 @@
+{
+  "loginTitle": "System Portal Login",
+  "loginSubtitle": "Enter your login credentials to access the POS terminal and admin dashboards.",
+  "email": "Email Address*",
+  "password": "Login Password*",
+  "loginBtn": "Secure Login",
+  "invalidCreds": "Invalid email address or login password.",
+  "errorOccurred": "An error occurred during communication with the server."
+}

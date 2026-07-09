@@ -1,0 +1,17 @@
+{
+  "title": "Financial & Tax Reporting",
+  "subtitle": "Generate and display trial balances, profit & loss, and quarterly tax return statements.",
+  "printReport": "Print Tax Return Report",
+  "revenueLabel": "Total Revenue (Sales)",
+  "expenseLabel": "Total Procurement & Expenses",
+  "netProfitLabel": "Net Operating Income",
+  "vatDeclaration": "VAT Tax Return Draft Statement",
+  "outputTaxTitle": "1. Output Tax (Taxable Standard-Rate Sales)",
+  "outputTaxBase": "Total Taxable Sales Volume:",
+  "outputTaxVal": "Total Output Tax Liability: ",
+  "inputTaxTitle": "2. Input Tax (Taxable Standard-Rate Procurement & Expenses)",
+  "inputTaxBase": "Total Taxable Purchases Volume:",
+  "inputTaxVal": "Total Recoverable Input Tax: ",
+  "netVatDueLabel": "Net VAT Tax Payable (or Refundable):",
+  "netVatDueFormula": "Net VAT = Output VAT - Input VAT"
+}
