@@ -34,5 +34,6 @@
   "superAdmin": "مدير نظام",
   "salesAgent": "كاشير مبيعات",
   "crm": "علاقات العملاء CRM",
-  "quotations": "عروض الأسعار"
+  "quotations": "عروض الأسعار",
+  "sales-orders": "أوامر البيع والتسليم"
 }

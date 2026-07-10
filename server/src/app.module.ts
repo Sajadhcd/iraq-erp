@@ -15,6 +15,7 @@ import { SettingsModule } from './settings/settings.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { CRMModule } from './crm/crm.module';
 import { QuotationsModule } from './quotations/quotations.module';
+import { SalesOrdersModule } from './sales-orders/sales-orders.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { QuotationsModule } from './quotations/quotations.module';
     AccountingModule,
     CRMModule,
     QuotationsModule,
+    SalesOrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

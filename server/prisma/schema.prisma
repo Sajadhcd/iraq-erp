@@ -140,6 +140,7 @@ model User {
   submittedQuotations Quotation[]    @relation("QuotationSubmittedBy")
   approvedQuotations  Quotation[]    @relation("QuotationApprovedBy")
   rejectedQuotations  Quotation[]    @relation("QuotationRejectedBy")
+  salesOrders         SalesOrder[]   @relation("SalesOrderSalesperson")
 
   @@index([email])
   @@map("users")
@@ -216,6 +217,8 @@ model Product {
   productSerials     ProductSerial[]
   inventoryMovements InventoryMovement[]
   quotationItems     QuotationItem[]
+  salesOrderItems    SalesOrderItem[]
+  deliveryNoteItems  DeliveryNoteItem[]
 
   @@index([name])
   @@index([sku])
@@ -236,6 +239,8 @@ model Warehouse {
   purchases   Purchase[]
   expenses    Expense[]
   cashRegisters CashRegister[]
+  salesOrders   SalesOrder[]
+  deliveryNotes DeliveryNote[]
 
   @@map("warehouses")
 }
@@ -245,6 +250,7 @@ model Inventory {
   productId   String    @map("product_id") @db.Uuid
   warehouseId String    @map("warehouse_id") @db.Uuid
   quantity    Decimal   @default(0.0) @db.Decimal(15, 3)
+  reserved    Decimal   @default(0.0) @db.Decimal(15, 3)
   batchNumber String?   @map("batch_number") @db.VarChar(100)
   expiryDate  DateTime? @map("expiry_date") @db.Date
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
@@ -271,6 +277,7 @@ model Customer {
   updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
   sales         Sale[]
   quotations    Quotation[]
+  salesOrders   SalesOrder[]
 
   @@map("customers")
 }
@@ -390,6 +397,8 @@ model Sale {
   customer       Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
   invoice        Invoice?
   payments       Payment[]
+  salesOrderId   String?       @map("sales_order_id") @db.Uuid
+  salesOrder     SalesOrder?   @relation("SalesOrderSales", fields: [salesOrderId], references: [id], onDelete: SetNull)
 
   @@map("sales")
 }
@@ -818,6 +827,7 @@ model Quotation {
   updatedAt        DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   items            QuotationItem[]
+  salesOrders      SalesOrder[]
 
   @@unique([quotationNumber, version])
   @@index([quotationNumber])
@@ -842,4 +852,88 @@ model QuotationItem {
 
   @@map("crm_quotation_items")
 }
+
+model SalesOrder {
+  id                    String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  salesOrderNumber      String            @unique @map("sales_order_number") @db.VarChar(100)
+  customerId            String            @map("customer_id") @db.Uuid
+  customer              Customer          @relation(fields: [customerId], references: [id])
+  quotationId           String?           @map("quotation_id") @db.Uuid
+  quotation             Quotation?        @relation(fields: [quotationId], references: [id], onDelete: SetNull)
+  salespersonId         String?           @map("salesperson_id") @db.Uuid
+  salesperson           User?             @relation("SalesOrderSalesperson", fields: [salespersonId], references: [id], onDelete: SetNull)
+  warehouseId           String            @map("warehouse_id") @db.Uuid
+  warehouse             Warehouse         @relation(fields: [warehouseId], references: [id])
+  currency              String            @default("IQD") @db.VarChar(10)
+  exchangeRate          Decimal           @default(1.0) @map("exchange_rate") @db.Decimal(15, 4)
+  orderDate             DateTime          @map("order_date") @db.Timestamptz
+  expectedDeliveryDate  DateTime          @map("expected_delivery_date") @db.Timestamptz
+  status                String            @default("DRAFT") @db.VarChar(50) // DRAFT, CONFIRMED, PROCESSING, READY_FOR_DELIVERY, PARTIALLY_DELIVERED, DELIVERED, CANCELLED, CLOSED
+  notes                 String?           @db.Text
+  internalNotes         String?           @map("internal_notes") @db.Text
+  createdAt             DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt             DateTime?         @map("deleted_at") @db.Timestamptz
+
+  items                 SalesOrderItem[]
+  deliveryNotes         DeliveryNote[]
+  sales                 Sale[]            @relation("SalesOrderSales")
+
+  @@map("sales_orders")
+}
+
+model SalesOrderItem {
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  salesOrderId      String      @map("sales_order_id") @db.Uuid
+  salesOrder        SalesOrder  @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  productId         String      @map("product_id") @db.Uuid
+  product           Product     @relation(fields: [productId], references: [id])
+  description       String?     @db.Text
+  quantity          Decimal     @db.Decimal(15, 3)
+  deliveredQuantity Decimal     @default(0.0) @map("delivered_quantity") @db.Decimal(15, 3)
+  invoicedQuantity  Decimal     @default(0.0) @map("invoiced_quantity") @db.Decimal(15, 3)
+  remainingQuantity Decimal     @map("remaining_quantity") @db.Decimal(15, 3)
+  unit              String      @db.VarChar(50)
+  unitPrice         Decimal     @map("unit_price") @db.Decimal(15, 4)
+  discountPct       Decimal     @default(0.0) @map("discount_pct") @db.Decimal(5, 2)
+  taxPct            Decimal     @default(0.0) @map("tax_pct") @db.Decimal(5, 2)
+  subtotal          Decimal     @db.Decimal(15, 4)
+  total             Decimal     @db.Decimal(15, 4)
+
+  @@map("sales_order_items")
+}
+
+model DeliveryNote {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  deliveryNumber   String             @unique @map("delivery_number") @db.VarChar(100)
+  salesOrderId     String             @map("sales_order_id") @db.Uuid
+  salesOrder       SalesOrder         @relation(fields: [salesOrderId], references: [id], onDelete: Restrict)
+  warehouseId      String             @map("warehouse_id") @db.Uuid
+  warehouse        Warehouse          @relation(fields: [warehouseId], references: [id])
+  deliveryDate     DateTime           @map("delivery_date") @db.Timestamptz
+  driver           String?            @db.VarChar(255)
+  receiver         String?            @db.VarChar(255)
+  status           String             @default("DRAFT") @db.VarChar(50) // DRAFT, COMPLETED, CANCELLED
+  notes            String?            @db.Text
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt        DateTime?          @map("deleted_at") @db.Timestamptz
+
+  items            DeliveryNoteItem[]
+
+  @@map("delivery_notes")
+}
+
+model DeliveryNoteItem {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  deliveryNoteId String       @map("delivery_note_id") @db.Uuid
+  deliveryNote   DeliveryNote @relation(fields: [deliveryNoteId], references: [id], onDelete: Cascade)
+  productId      String       @map("product_id") @db.Uuid
+  product        Product      @relation(fields: [productId], references: [id])
+  quantity       Decimal      @db.Decimal(15, 3)
+  unit           String       @db.VarChar(50)
+
+  @@map("delivery_note_items")
+}
+
 

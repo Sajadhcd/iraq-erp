@@ -34,5 +34,6 @@
   "superAdmin": "System Admin",
   "salesAgent": "Sales Agent",
   "crm": "CRM / Leads",
-  "quotations": "Quotations"
+  "quotations": "Quotations",
+  "sales-orders": "Sales Orders & Deliveries"
 }

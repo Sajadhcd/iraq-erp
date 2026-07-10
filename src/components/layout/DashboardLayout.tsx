@@ -25,6 +25,7 @@ import {
   Globe,
   Briefcase,
   FileText,
+  ClipboardList,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -47,6 +48,7 @@ const sidebarItems: SidebarItem[] = [
   { key: "accounting", name: "الحسابات العامة", href: "/accounting", icon: Receipt },
   { key: "crm", name: "علاقات العملاء CRM", href: "/crm", icon: Briefcase },
   { key: "quotations", name: "عروض الأسعار", href: "/crm/quotations", icon: FileText },
+  { key: "sales-orders", name: "أوامر البيع والتسليم", href: "/sales-orders", icon: ClipboardList },
   { key: "customers", name: "العملاء", href: "/customers", icon: Users },
   { key: "suppliers", name: "الموردين", href: "/suppliers", icon: Users },
   { key: "reports", name: "التقارير والتحليلات", href: "/reports", icon: BarChart3 },
