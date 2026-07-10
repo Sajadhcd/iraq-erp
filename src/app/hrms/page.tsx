@@ -173,7 +173,7 @@ export default function HrmsPage() {
       const [depts, poses, systemRoles, systemUsers] = await Promise.all([
         apiRequest("/hrms/departments"),
         apiRequest("/hrms/positions"),
-        apiRequest("/users/roles"), // existing roles api
+        apiRequest("/employees/roles"), // existing roles api
         apiRequest("/users"), // existing users api
       ]);
       setDepartments(depts || []);
