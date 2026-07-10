@@ -16,6 +16,7 @@ import { AccountingModule } from './accounting/accounting.module';
 import { CRMModule } from './crm/crm.module';
 import { QuotationsModule } from './quotations/quotations.module';
 import { SalesOrdersModule } from './sales-orders/sales-orders.module';
+import { HrmsModule } from './hrms/hrms.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { SalesOrdersModule } from './sales-orders/sales-orders.module';
     CRMModule,
     QuotationsModule,
     SalesOrdersModule,
+    HrmsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

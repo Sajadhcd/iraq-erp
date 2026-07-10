@@ -148,19 +148,116 @@ model User {
 
 model Employee {
   id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeNumber       String                @unique @default(dbgenerated("concat('EMP-', floor(random() * 900000 + 100000)::text)")) @map("employee_number") @db.VarChar(50)
   firstName            String                @map("first_name") @db.VarChar(100)
   lastName             String                @map("last_name") @db.VarChar(100)
+  arabicFullName       String?               @map("arabic_full_name") @db.VarChar(255)
+  englishFullName      String?               @map("english_full_name") @db.VarChar(255)
+  nationalId           String?               @map("national_id") @db.VarChar(50)
+  passportNumber       String?               @map("passport_number") @db.VarChar(50)
+  gender               String?               @db.VarChar(20)
+  dateOfBirth          DateTime?             @map("date_of_birth") @db.Date
+  nationality          String?               @db.VarChar(100)
+  maritalStatus        String?               @map("marital_status") @db.VarChar(50)
+  hireDate             DateTime?             @map("hire_date") @db.Date
+  employmentType       String?               @map("employment_type") @db.VarChar(50)
+  branch               String?               @db.VarChar(100)
+  
+  departmentId         String?               @map("department_id") @db.Uuid
+  department           Department?           @relation("EmployeeDept", fields: [departmentId], references: [id])
+  
+  positionId           String?               @map("position_id") @db.Uuid
+  position             JobPosition?          @relation("EmployeePosition", fields: [positionId], references: [id])
+  
+  managerId            String?               @map("manager_id") @db.Uuid
+  manager              Employee?             @relation("EmployeeManager", fields: [managerId], references: [id], onDelete: SetNull)
+  subordinates         Employee[]            @relation("EmployeeManager")
+  
+  email                String?               @db.VarChar(255)
   phone                String?               @db.VarChar(20)
+  address              String?               @db.Text
+  emergencyContact     String?               @map("emergency_contact") @db.Text
+  notes                String?               @db.Text
+  status               String                @default("ACTIVE") @db.VarChar(50) // ACTIVE, INACTIVE, SUSPENDED, TERMINATED, LEAVE
+  
   userId               String?               @unique @map("user_id") @db.Uuid
   roleId               String                @map("role_id") @db.Uuid
   deletedAt            DateTime?             @map("deleted_at") @db.Timestamptz
   createdAt            DateTime              @default(now()) @map("created_at") @db.Timestamptz
   updatedAt            DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  
   user                 User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
   role                 Role                  @relation(fields: [roleId], references: [id])
   cashRegisterSessions CashRegisterSession[]
+  
+  managedDepartments   Department[]          @relation("DeptManager")
+  documents            EmployeeDocument[]
+  timeline             EmployeeTimeline[]
 
   @@map("employees")
+}
+
+model Department {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  departmentCode String        @unique @default(dbgenerated("concat('DEP-', floor(random() * 90000 + 10000)::text)")) @map("department_code") @db.VarChar(50)
+  arabicName     String        @map("arabic_name") @db.VarChar(150)
+  englishName    String        @map("english_name") @db.VarChar(150)
+  parentId       String?       @map("parent_id") @db.Uuid
+  managerId      String?       @map("manager_id") @db.Uuid
+  description    String?       @db.Text
+  isActive       Boolean       @default(true) @map("is_active")
+  deletedAt      DateTime?     @map("deleted_at") @db.Timestamptz
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  parent         Department?   @relation("DeptToDept", fields: [parentId], references: [id], onDelete: Restrict)
+  children       Department[]  @relation("DeptToDept")
+  manager        Employee?     @relation("DeptManager", fields: [managerId], references: [id], onDelete: SetNull)
+  employees      Employee[]    @relation("EmployeeDept")
+  positions      JobPosition[]
+
+  @@map("hr_departments")
+}
+
+model JobPosition {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  positionCode String     @unique @map("position_code") @db.VarChar(50)
+  arabicName   String     @map("arabic_name") @db.VarChar(150)
+  englishName  String     @map("english_name") @db.VarChar(150)
+  departmentId String     @map("department_id") @db.Uuid
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  description  String?    @db.Text
+  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  employees    Employee[] @relation("EmployeePosition")
+
+  @@map("hr_job_positions")
+}
+
+model EmployeeDocument {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId  String    @map("employee_id") @db.Uuid
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  fileName    String    @map("file_name") @db.VarChar(255)
+  fileType    String    @map("file_type") @db.VarChar(100) // National ID, Passport, Contract, Certificate, Other
+  fileUrl     String    @map("file_url") @db.Text
+  uploadDate  DateTime  @default(now()) @map("upload_date") @db.Timestamptz
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+
+  @@map("hr_employee_documents")
+}
+
+model EmployeeTimeline {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId  String   @map("employee_id") @db.Uuid
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  type        String   @db.VarChar(100) // CREATED, UPDATED, DOCUMENT_UPLOADED, STATUS_CHANGED, etc.
+  description String   @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("hr_employee_timelines")
 }
 
 model Category {

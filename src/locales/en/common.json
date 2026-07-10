@@ -35,5 +35,6 @@
   "salesAgent": "Sales Agent",
   "crm": "CRM / Leads",
   "quotations": "Quotations",
-  "sales-orders": "Sales Orders & Deliveries"
+  "sales-orders": "Sales Orders & Deliveries",
+  "hrms": "HRMS Portal"
 }

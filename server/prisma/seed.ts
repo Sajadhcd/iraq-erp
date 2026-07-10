@@ -50,6 +50,11 @@ async function main() {
     { action: "quotations:delete", description: "حذف عروض الأسعار" },
     { action: "quotations:approve", description: "اعتماد ورفض وتحويل العروض" },
     { action: "quotations:print", description: "طباعة وتصدير عروض الأسعار" },
+    { action: "hr:view", description: "عرض الموظفين والأقسام والوظائف" },
+    { action: "hr:create", description: "إنشاء الموظفين والهيكل الإداري" },
+    { action: "hr:edit", description: "تعديل بيانات الموظفين والوظائف" },
+    { action: "hr:delete", description: "حذف الموظفين أو إزالتهم من الخدمة" },
+    { action: "hr:documents", description: "رفع وإدارة وثائق ومستندات الموظف" },
   ];
 
   for (const p of permissions) {
