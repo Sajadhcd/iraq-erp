@@ -195,6 +195,8 @@ model Employee {
   timeline             EmployeeTimeline[]
   attendances          Attendance[]
   leaveRequests        LeaveRequest[]
+  salaryStructure      SalaryStructure?
+  payrollItems         PayrollItem[]
 
   @@map("employees")
 }
@@ -1092,6 +1094,131 @@ model LeaveRequest {
 
   @@map("hr_leave_requests")
 }
+
+model PayrollPeriod {
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code      String       @unique @db.VarChar(50)
+  nameAr    String       @map("name_ar") @db.VarChar(150)
+  nameEn    String       @map("name_en") @db.VarChar(150)
+  startDate DateTime     @map("start_date") @db.Date
+  endDate   DateTime     @map("end_date") @db.Date
+  status    String       @default("OPEN") @db.VarChar(50) // OPEN, LOCKED
+  runs      PayrollRun[]
+
+  @@map("hr_payroll_periods")
+}
+
+model SalaryStructure {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId      String   @unique @map("employee_id") @db.Uuid
+  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  basicSalary     Decimal  @default(0.00) @map("basic_salary") @db.Decimal(15, 4)
+  housing         Decimal  @default(0.00) @db.Decimal(15, 4)
+  transportation  Decimal  @default(0.00) @db.Decimal(15, 4)
+  food            Decimal  @default(0.00) @db.Decimal(15, 4)
+  risk            Decimal  @default(0.00) @db.Decimal(15, 4)
+  otherAllowances Decimal  @default(0.00) @map("other_allowances") @db.Decimal(15, 4)
+  taxPct          Decimal  @default(0.00) @map("tax_pct") @db.Decimal(5, 2)
+  insurance       Decimal  @default(0.00) @db.Decimal(15, 4)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("hr_salary_structures")
+}
+
+model PayrollRun {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  payrollPeriodId String        @map("payroll_period_id") @db.Uuid
+  payrollPeriod   PayrollPeriod @relation(fields: [payrollPeriodId], references: [id])
+  status          String        @default("DRAFT") @db.VarChar(50) // DRAFT, APPROVED, LOCKED
+  totalGross      Decimal       @default(0.00) @map("total_gross") @db.Decimal(15, 4)
+  totalAllowances Decimal       @default(0.00) @map("total_allowances") @db.Decimal(15, 4)
+  totalDeductions Decimal       @default(0.00) @map("total_deductions") @db.Decimal(15, 4)
+  totalNet        Decimal       @default(0.00) @map("total_net") @db.Decimal(15, 4)
+  journalEntryId  String?       @map("journal_entry_id") @db.Uuid
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  items           PayrollItem[]
+
+  @@map("hr_payroll_runs")
+}
+
+model PayrollItem {
+  id                 String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  payrollRunId       String      @map("payroll_run_id") @db.Uuid
+  payrollRun         PayrollRun  @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  employeeId         String      @map("employee_id") @db.Uuid
+  employee           Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  basicSalary        Decimal     @map("basic_salary") @db.Decimal(15, 4)
+  housing            Decimal     @db.Decimal(15, 4)
+  transportation     Decimal     @db.Decimal(15, 4)
+  food               Decimal     @db.Decimal(15, 4)
+  risk               Decimal     @db.Decimal(15, 4)
+  otherAllowances    Decimal     @map("other_allowances") @db.Decimal(15, 4)
+  overtimePay        Decimal     @default(0.00) @map("overtime_pay") @db.Decimal(15, 4)
+  
+  taxDeduction       Decimal     @map("tax_deduction") @db.Decimal(15, 4)
+  insuranceDeduction Decimal     @map("insurance_deduction") @db.Decimal(15, 4)
+  lateDeduction      Decimal     @default(0.00) @map("late_deduction") @db.Decimal(15, 4)
+  absentDeduction    Decimal     @default(0.00) @map("absent_deduction") @db.Decimal(15, 4)
+  loanDeduction      Decimal     @default(0.00) @map("loan_deduction") @db.Decimal(15, 4)
+  penaltyDeduction   Decimal     @default(0.00) @map("penalty_deduction") @db.Decimal(15, 4)
+  manualAdjustment   Decimal     @default(0.00) @map("manual_adjustment") @db.Decimal(15, 4)
+  
+  grossSalary        Decimal     @map("gross_salary") @db.Decimal(15, 4)
+  totalAllowances    Decimal     @map("total_allowances") @db.Decimal(15, 4)
+  totalDeductions    Decimal     @map("total_deductions") @db.Decimal(15, 4)
+  netSalary          Decimal     @map("net_salary") @db.Decimal(15, 4)
+  
+  workingHours       Decimal     @default(0.00) @map("working_hours") @db.Decimal(15, 2)
+  lateMinutes        Int         @default(0) @map("late_minutes")
+  overtimeHours      Decimal     @default(0.00) @map("overtime_hours") @db.Decimal(15, 2)
+  absentDays         Int         @default(0) @map("absent_days")
+  leaveDays          Int         @default(0) @map("leave_days")
+  
+  allowances         Allowance[]
+  deductions         Deduction[]
+  payslips           Payslip[]
+
+  @@map("hr_payroll_items")
+}
+
+model Allowance {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  payrollItemId String      @map("payroll_item_id") @db.Uuid
+  payrollItem   PayrollItem @relation(fields: [payrollItemId], references: [id], onDelete: Cascade)
+  nameAr        String      @map("name_ar") @db.VarChar(150)
+  nameEn        String      @map("name_en") @db.VarChar(150)
+  amount        Decimal     @db.Decimal(15, 4)
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("hr_payroll_item_allowances")
+}
+
+model Deduction {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  payrollItemId String      @map("payroll_item_id") @db.Uuid
+  payrollItem   PayrollItem @relation(fields: [payrollItemId], references: [id], onDelete: Cascade)
+  nameAr        String      @map("name_ar") @db.VarChar(150)
+  nameEn        String      @map("name_en") @db.VarChar(150)
+  amount        Decimal     @db.Decimal(15, 4)
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("hr_payroll_item_deductions")
+}
+
+model Payslip {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  payrollItemId String      @map("payroll_item_id") @db.Uuid
+  payrollItem   PayrollItem @relation(fields: [payrollItemId], references: [id], onDelete: Cascade)
+  payslipNumber String      @unique @default(dbgenerated("concat('PS-', floor(random() * 900000 + 100000)::text)")) @map("payslip_number") @db.VarChar(100)
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("hr_payslips")
+}
+
 
 
 

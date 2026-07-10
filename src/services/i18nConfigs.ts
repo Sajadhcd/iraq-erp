@@ -45,6 +45,8 @@ import attendanceAr from "../locales/ar/attendance.json";
 import attendanceEn from "../locales/en/attendance.json";
 import leaveAr from "../locales/ar/leave.json";
 import leaveEn from "../locales/en/leave.json";
+import payrollAr from "../locales/ar/payroll.json";
+import payrollEn from "../locales/en/payroll.json";
 
 const resources = {
   ar: {
@@ -70,6 +72,7 @@ const resources = {
     hrms: hrmsAr,
     attendance: attendanceAr,
     leave: leaveAr,
+    payroll: payrollAr,
   },
   en: {
     common: commonEn,
@@ -94,6 +97,7 @@ const resources = {
     hrms: hrmsEn,
     attendance: attendanceEn,
     leave: leaveEn,
+    payroll: payrollEn,
   },
 };
 
@@ -127,6 +131,7 @@ if (!i18n.isInitialized) {
         "hrms",
         "attendance",
         "leave",
+        "payroll",
       ],
       defaultNS: "common",
       interpolation: {

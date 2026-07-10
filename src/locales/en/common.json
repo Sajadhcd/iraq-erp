@@ -38,5 +38,6 @@
   "sales-orders": "Sales Orders & Deliveries",
   "hrms": "HRMS Portal",
   "attendance": "Attendance Management",
-  "leave": "Leave Management"
+  "leave": "Leave Management",
+  "payroll": "Payroll Management"
 }
