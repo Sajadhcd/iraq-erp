@@ -39,5 +39,19 @@
   "successCheckOut": "تم تسجيل الانصراف بنجاح!",
   "successCreated": "تم إنشاء قيد الحضور بنجاح.",
   "successUpdated": "تم تحديث سجل الحضور بنجاح.",
-  "successDeleted": "تم حذف سجل الحضور بنجاح."
+  "successDeleted": "تم حذف سجل الحضور بنجاح.",
+  "tabLogs": "سجلات الحضور",
+  "tabDashboard": "لوحة الحضور اليومية",
+  "tabSettings": "إعدادات سياسة الحضور والدوام",
+  "lblStartTime": "وقت بدء الدوام اليومي",
+  "lblEndTime": "وقت انتهاء الدوام اليومي",
+  "lblGracePeriod": "فترة السماح بالدقائق (المغادرة/التأخر)",
+  "lblMinWorkHours": "الحد الأدنى لساعات العمل اليومية",
+  "lblOvertimeRule": "بدء ساعات العمل الإضافي بعد (ساعة)",
+  "lblWeekends": "أيام عطلة نهاية الأسبوع",
+  "lblTodayPresentList": "الموظفين الحاضرين اليوم",
+  "lblTodayLateList": "الموظفين المتأخرين اليوم",
+  "lblTodayAbsentList": "الموظفين الغائبين اليوم",
+  "lblTodayOvertimeList": "الموظفين المسجل لهم عمل إضافي اليوم",
+  "successPolicySaved": "تم تحديث سياسة الحضور والدوام بنجاح!"
 }

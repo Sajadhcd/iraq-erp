@@ -10,6 +10,31 @@ export class AttendanceController {
   constructor(private readonly service: AttendanceService) {}
 
   // ==========================================
+  // DASHBOARD
+  // ==========================================
+  @Get('dashboard')
+  @Roles('SUPER_ADMIN')
+  async getDashboard() {
+    return this.service.getAttendanceDashboard();
+  }
+
+  // ==========================================
+  // POLICY SETTINGS
+  // ==========================================
+  @Get('policy')
+  @Roles('SUPER_ADMIN')
+  async getPolicy() {
+    return this.service.getPolicy();
+  }
+
+  @Post('policy')
+  @Roles('SUPER_ADMIN')
+  async updatePolicy(@Body() dto: any, @Req() req: any) {
+    const currentUserId = req.user?.userId;
+    return this.service.updatePolicy(dto, currentUserId);
+  }
+
+  // ==========================================
   // CHECK IN
   // ==========================================
   @Post('check-in')

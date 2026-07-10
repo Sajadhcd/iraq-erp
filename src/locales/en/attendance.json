@@ -39,5 +39,19 @@
   "successCheckOut": "Check-out logged successfully!",
   "successCreated": "Attendance record created successfully.",
   "successUpdated": "Attendance record updated successfully.",
-  "successDeleted": "Attendance record deleted successfully."
+  "successDeleted": "Attendance record deleted successfully.",
+  "tabLogs": "Attendance Logs",
+  "tabDashboard": "Today's Dashboard",
+  "tabSettings": "Attendance Policy Settings",
+  "lblStartTime": "Working Day Start Time",
+  "lblEndTime": "Working Day End Time",
+  "lblGracePeriod": "Grace Period (Minutes)",
+  "lblMinWorkHours": "Minimum Working Hours",
+  "lblOvertimeRule": "Overtime Starts After (Hours)",
+  "lblWeekends": "Weekend Days",
+  "lblTodayPresentList": "Present Employees Today",
+  "lblTodayLateList": "Late Employees Today",
+  "lblTodayAbsentList": "Absent Employees Today",
+  "lblTodayOvertimeList": "Overtime Employees Today",
+  "successPolicySaved": "Attendance Policy updated successfully!"
 }

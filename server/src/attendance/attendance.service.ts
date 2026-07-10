@@ -5,18 +5,68 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AttendanceService {
   constructor(private prisma: PrismaService) {}
 
-  // Helper to calculate hours, overtime, and late minutes
-  private calculateMetrics(checkIn: Date | null, checkOut: Date | null, attendanceDate: Date) {
+  // ==========================================
+  // ATTENDANCE POLICY
+  // ==========================================
+  async getPolicy() {
+    const setting = await this.prisma.setting.findUnique({
+      where: { key: 'attendance_policy' },
+    });
+    if (setting) {
+      try {
+        return JSON.parse(setting.value);
+      } catch (e) {
+        // Fallback to default
+      }
+    }
+    return {
+      startTime: '09:00',
+      endTime: '17:00',
+      gracePeriod: 15,
+      minWorkHours: 8,
+      overtimeStartsAfter: 8,
+      weekendDays: [5, 6], // 5 = Friday, 6 = Saturday
+    };
+  }
+
+  async updatePolicy(policy: any, currentUserId?: string) {
+    const value = JSON.stringify(policy);
+    const updated = await this.prisma.setting.upsert({
+      where: { key: 'attendance_policy' },
+      update: { value },
+      create: { key: 'attendance_policy', value },
+    });
+
+    // Audit Log
+    await this.prisma.auditLog.create({
+      data: {
+        action: 'ATTENDANCE_POLICY_UPDATED',
+        entityName: 'Setting',
+        entityId: updated.id,
+        userId: currentUserId || null,
+        newValues: policy,
+      },
+    });
+
+    return policy;
+  }
+
+  // Calculate metrics based on policy
+  private calculateMetricsWithPolicy(checkIn: Date | null, checkOut: Date | null, policy: any) {
     let workHours = 0;
     let overtimeHours = 0;
     let lateMinutes = 0;
 
     if (checkIn) {
-      // Calculate late minutes: baseline is 09:00 AM on the attendance date
       const checkInTime = new Date(checkIn);
+      const startParts = policy.startTime.split(':');
       const baseline = new Date(checkInTime);
-      baseline.setHours(9, 0, 0, 0);
-      if (checkInTime.getTime() > baseline.getTime()) {
+      baseline.setHours(parseInt(startParts[0]), parseInt(startParts[1]), 0, 0);
+
+      const gracePeriodMs = policy.gracePeriod * 60000;
+      const cutoffMs = baseline.getTime() + gracePeriodMs;
+
+      if (checkInTime.getTime() > cutoffMs) {
         lateMinutes = Math.floor((checkInTime.getTime() - baseline.getTime()) / 60000);
       }
 
@@ -28,9 +78,10 @@ export class AttendanceService {
         }
         const totalHours = Number((diffMs / 3600000).toFixed(2));
         workHours = totalHours;
-        // Overtime is any work exceeding 8 hours
-        if (totalHours > 8) {
-          overtimeHours = Number((totalHours - 8).toFixed(2));
+
+        // Overtime starts after configured value
+        if (totalHours > policy.overtimeStartsAfter) {
+          overtimeHours = Number((totalHours - policy.overtimeStartsAfter).toFixed(2));
         }
       }
     }
@@ -47,9 +98,10 @@ export class AttendanceService {
     }
 
     const checkInDate = dto.checkInTime ? new Date(dto.checkInTime) : new Date();
-    // Normalize date to YYYY-MM-DD
     const attendanceDate = new Date(checkInDate);
     attendanceDate.setHours(0, 0, 0, 0);
+
+    const policy = await this.getPolicy();
 
     return this.prisma.$transaction(async (tx) => {
       // Check for duplicate attendance on the same day
@@ -66,7 +118,7 @@ export class AttendanceService {
         throw new BadRequestException('تم تسجيل حضور للموظف بالفعل في هذا اليوم.');
       }
 
-      const metrics = this.calculateMetrics(checkInDate, null, attendanceDate);
+      const metrics = this.calculateMetricsWithPolicy(checkInDate, null, policy);
 
       const att = await tx.attendance.create({
         data: {
@@ -107,9 +159,10 @@ export class AttendanceService {
     }
 
     const checkOutDate = dto.checkOutTime ? new Date(dto.checkOutTime) : new Date();
-    // Normalize date to YYYY-MM-DD
     const attendanceDate = new Date(checkOutDate);
     attendanceDate.setHours(0, 0, 0, 0);
+
+    const policy = await this.getPolicy();
 
     return this.prisma.$transaction(async (tx) => {
       const existing = await tx.attendance.findUnique({
@@ -133,7 +186,7 @@ export class AttendanceService {
         throw new BadRequestException('سجل الحضور لا يحتوي على وقت دخول.');
       }
 
-      const metrics = this.calculateMetrics(existing.checkIn, checkOutDate, attendanceDate);
+      const metrics = this.calculateMetricsWithPolicy(existing.checkIn, checkOutDate, policy);
 
       const updated = await tx.attendance.update({
         where: { id: existing.id },
@@ -180,6 +233,8 @@ export class AttendanceService {
       throw new BadRequestException('وقت الانصراف لا يمكن أن يكون قبل وقت الحضور.');
     }
 
+    const policy = await this.getPolicy();
+
     return this.prisma.$transaction(async (tx) => {
       const existing = await tx.attendance.findUnique({
         where: {
@@ -194,7 +249,7 @@ export class AttendanceService {
         throw new BadRequestException('تم تسجيل حضور للموظف بالفعل في هذا اليوم.');
       }
 
-      const metrics = this.calculateMetrics(checkIn, checkOut, attendanceDate);
+      const metrics = this.calculateMetricsWithPolicy(checkIn, checkOut, policy);
 
       const att = await tx.attendance.create({
         data: {
@@ -245,7 +300,8 @@ export class AttendanceService {
       throw new BadRequestException('وقت الانصراف لا يمكن أن يكون قبل وقت الحضور.');
     }
 
-    const metrics = this.calculateMetrics(checkIn, checkOut, existing.attendanceDate);
+    const policy = await this.getPolicy();
+    const metrics = this.calculateMetricsWithPolicy(checkIn, checkOut, policy);
 
     return this.prisma.$transaction(async (tx) => {
       const updated = await tx.attendance.update({
@@ -381,7 +437,7 @@ export class AttendanceService {
   // ==========================================
   async getMonthlyAttendance(year: number, month: number) {
     const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0); // last day of month
+    const endDate = new Date(year, month, 0);
 
     const attendances = await this.prisma.attendance.findMany({
       where: {
@@ -393,7 +449,6 @@ export class AttendanceService {
       include: { employee: true },
     });
 
-    // Compute basic statistics
     const totalRecords = attendances.length;
     const presentCount = attendances.filter((a) => a.status === 'PRESENT').length;
     const absentCount = attendances.filter((a) => a.status === 'ABSENT').length;
@@ -416,6 +471,50 @@ export class AttendanceService {
         totalLateMinutes,
       },
       records: attendances,
+    };
+  }
+
+  // ==========================================
+  // GET ATTENDANCE DASHBOARD
+  // ==========================================
+  async getAttendanceDashboard() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const activeEmployees = await this.prisma.employee.findMany({
+      where: { deletedAt: null, status: 'ACTIVE' },
+    });
+
+    const todayRecords = await this.prisma.attendance.findMany({
+      where: { attendanceDate: today },
+      include: { employee: true },
+    });
+
+    const presentCount = todayRecords.filter((r) => r.status === 'PRESENT' && r.checkIn).length;
+    const lateCount = todayRecords.filter((r) => r.lateMinutes > 0).length;
+    const overtimeCount = todayRecords.filter((r) => Number(r.overtimeHours) > 0).length;
+
+    const presentEmployeeIds = new Set(todayRecords.map((r) => r.employeeId));
+    // Absent active employees who have no record today or are marked ABSENT
+    const absentEmployees = activeEmployees.filter(
+      (e) => !presentEmployeeIds.has(e.id) || todayRecords.some((r) => r.employeeId === e.id && r.status === 'ABSENT'),
+    );
+
+    const lateEmployees = todayRecords.filter((r) => r.lateMinutes > 0).map((r) => r.employee);
+    const overtimeEmployees = todayRecords.filter((r) => Number(r.overtimeHours) > 0).map((r) => r.employee);
+    const presentEmployees = todayRecords.filter((r) => r.status === 'PRESENT' && r.checkIn).map((r) => r.employee);
+
+    return {
+      todayStats: {
+        presentCount,
+        lateCount,
+        absentCount: absentEmployees.length,
+        overtimeCount,
+      },
+      presentEmployees,
+      lateEmployees,
+      absentEmployees,
+      overtimeEmployees,
     };
   }
 }
