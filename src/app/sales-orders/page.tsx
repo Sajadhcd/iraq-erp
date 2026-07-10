@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useTranslation } from "react-i18next";
+import { apiRequest } from "@/services/api";
 import {
   FileText,
   Warehouse,
@@ -142,9 +143,8 @@ export default function SalesOrdersPage() {
 
   const fetchDashboard = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/sales-orders/dashboard");
-      const data = await res.json();
-      setDashboard(data);
+      const data = await apiRequest("/sales-orders/dashboard");
+      setDashboard(data || {});
     } catch (e) {
       console.error("Error fetching dashboard KPIs", e);
     }
@@ -152,17 +152,17 @@ export default function SalesOrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const query = new URLSearchParams({
-        page: page.toString(),
-        limit: "10",
-        search,
-        status: statusFilter,
-        warehouseId: warehouseFilter,
+      const data = await apiRequest("/sales-orders", {
+        params: {
+          page: page.toString(),
+          limit: "10",
+          search,
+          status: statusFilter,
+          warehouseId: warehouseFilter,
+        }
       });
-      const res = await fetch(`http://localhost:3001/api/sales-orders?${query}`);
-      const data = await res.json();
-      setOrders(data.items);
-      setTotal(data.total);
+      setOrders(data.items || []);
+      setTotal(data.total || 0);
     } catch (e) {
       console.error("Error fetching sales orders", e);
     }
@@ -170,16 +170,16 @@ export default function SalesOrdersPage() {
 
   const fetchDropdowns = async () => {
     try {
-      const [cRes, wRes, pRes, uRes] = await Promise.all([
-        fetch("http://localhost:3001/api/customers"),
-        fetch("http://localhost:3001/api/inventory/warehouses"),
-        fetch("http://localhost:3001/api/products"),
-        fetch("http://localhost:3001/api/users"),
+      const [custData, whData, prodData, userData] = await Promise.all([
+        apiRequest("/customers"),
+        apiRequest("/inventory/warehouses"),
+        apiRequest("/products"),
+        apiRequest("/users"),
       ]);
-      setCustomers(await cRes.json());
-      setWarehouses(await wRes.json());
-      setProducts(await pRes.json());
-      setSalespersons(await uRes.json());
+      setCustomers(custData?.items || custData || []);
+      setWarehouses(whData?.items || whData || []);
+      setProducts(prodData?.items || prodData || []);
+      setSalespersons(userData?.items || userData || []);
     } catch (e) {
       console.error("Error fetching dropdown assets", e);
     }
@@ -187,8 +187,7 @@ export default function SalesOrdersPage() {
 
   const handleSelectOrder = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/sales-orders/${id}`);
-      const data = await res.json();
+      const data = await apiRequest(`/sales-orders/${id}`);
       setSelectedOrder(data);
     } catch (e) {
       console.error("Error fetching details", e);
@@ -197,13 +196,7 @@ export default function SalesOrdersPage() {
 
   const handleConfirmOrder = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/sales-orders/${id}/confirm`, {
-        method: "PUT",
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to confirm Sales Order");
-      }
+      await apiRequest(`/sales-orders/${id}/confirm`, { method: "PUT" });
       fetchDashboard();
       fetchOrders();
       handleSelectOrder(id);
@@ -216,15 +209,10 @@ export default function SalesOrdersPage() {
   const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:3001/api/sales-orders", {
+      await apiRequest("/sales-orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message);
-      }
       setCreateModalOpen(false);
       fetchDashboard();
       fetchOrders();
@@ -247,15 +235,10 @@ export default function SalesOrdersPage() {
     e.preventDefault();
     if (!selectedOrder) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/sales-orders/${selectedOrder.id}/deliveries`, {
+      await apiRequest(`/sales-orders/${selectedOrder.id}/deliveries`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(deliveryForm),
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message);
-      }
       setDeliveryModalOpen(false);
       fetchDashboard();
       fetchOrders();
@@ -268,13 +251,7 @@ export default function SalesOrdersPage() {
   const handleCompleteDeliveryNote = async (deliveryId: string) => {
     if (!selectedOrder) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/sales-orders/deliveries/${deliveryId}/complete`, {
-        method: "PUT",
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message);
-      }
+      await apiRequest(`/sales-orders/deliveries/${deliveryId}/complete`, { method: "PUT" });
       fetchDashboard();
       fetchOrders();
       handleSelectOrder(selectedOrder.id);
@@ -287,15 +264,10 @@ export default function SalesOrdersPage() {
     e.preventDefault();
     if (!selectedOrder) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/sales-orders/${selectedOrder.id}/invoice`, {
+      await apiRequest(`/sales-orders/${selectedOrder.id}/invoice`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(invoiceForm),
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message);
-      }
       setInvoiceModalOpen(false);
       fetchDashboard();
       fetchOrders();
@@ -308,13 +280,7 @@ export default function SalesOrdersPage() {
   const handleCancelOrder = async (id: string) => {
     if (!confirm(isRtl ? "هل أنت متأكد من إلغاء أمر البيع هذا؟" : "Are you sure you want to cancel this order?")) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/sales-orders/${id}/cancel`, {
-        method: "PUT",
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message);
-      }
+      await apiRequest(`/sales-orders/${id}/cancel`, { method: "PUT" });
       fetchDashboard();
       fetchOrders();
       handleSelectOrder(id);
@@ -399,7 +365,7 @@ export default function SalesOrdersPage() {
             <div className="bg-white p-5 rounded-2xl border border-slate-100 flex flex-col justify-between shadow-sm">
               <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{t("lblOpenOrders")}</span>
               <div className="flex justify-between items-end mt-4">
-                <span className="text-2xl font-black text-slate-800">{dashboard.openOrders}</span>
+                <span className="text-2xl font-black text-slate-800">{dashboard.openOrders || 0}</span>
                 <div className="h-8 w-8 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center">
                   <Clock className="h-4 w-4" />
                 </div>
@@ -409,7 +375,7 @@ export default function SalesOrdersPage() {
             <div className="bg-white p-5 rounded-2xl border border-slate-100 flex flex-col justify-between shadow-sm">
               <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{t("lblProcessingOrders")}</span>
               <div className="flex justify-between items-end mt-4">
-                <span className="text-2xl font-black text-slate-800">{dashboard.processingOrders}</span>
+                <span className="text-2xl font-black text-slate-800">{dashboard.processingOrders || 0}</span>
                 <div className="h-8 w-8 bg-orange-50 text-orange-500 rounded-lg flex items-center justify-center">
                   <TrendingUp className="h-4 w-4" />
                 </div>
@@ -419,7 +385,7 @@ export default function SalesOrdersPage() {
             <div className="bg-white p-5 rounded-2xl border border-slate-100 flex flex-col justify-between shadow-sm">
               <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{t("lblReadyForDelivery")}</span>
               <div className="flex justify-between items-end mt-4">
-                <span className="text-2xl font-black text-slate-800">{dashboard.readyForDelivery}</span>
+                <span className="text-2xl font-black text-slate-800">{dashboard.readyForDelivery || 0}</span>
                 <div className="h-8 w-8 bg-amber-50 text-amber-500 rounded-lg flex items-center justify-center">
                   <Truck className="h-4 w-4" />
                 </div>
@@ -429,7 +395,7 @@ export default function SalesOrdersPage() {
             <div className="bg-white p-5 rounded-2xl border border-slate-100 flex flex-col justify-between shadow-sm">
               <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{t("lblDeliveredToday")}</span>
               <div className="flex justify-between items-end mt-4">
-                <span className="text-2xl font-black text-slate-800">{dashboard.deliveredToday}</span>
+                <span className="text-2xl font-black text-slate-800">{dashboard.deliveredToday || 0}</span>
                 <div className="h-8 w-8 bg-emerald-50 text-emerald-500 rounded-lg flex items-center justify-center">
                   <CheckCircle className="h-4 w-4" />
                 </div>
@@ -439,7 +405,7 @@ export default function SalesOrdersPage() {
             <div className="bg-white p-5 rounded-2xl border border-slate-100 flex flex-col justify-between shadow-sm col-span-2 lg:col-span-1">
               <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{t("lblPendingDeliveries")}</span>
               <div className="flex justify-between items-end mt-4">
-                <span className="text-2xl font-black text-slate-800">{dashboard.pendingDeliveries}</span>
+                <span className="text-2xl font-black text-slate-800">{dashboard.pendingDeliveries || 0}</span>
                 <div className="h-8 w-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center">
                   <AlertCircle className="h-4 w-4" />
                 </div>
@@ -490,7 +456,7 @@ export default function SalesOrdersPage() {
                       onChange={(e) => setWarehouseFilter(e.target.value)}
                     >
                       <option value="">{isRtl ? "تصفية المستودع" : "Warehouse"}</option>
-                      {warehouses.map((w) => (
+                      {(Array.isArray(warehouses) ? warehouses : []).map((w) => (
                         <option key={w.id} value={w.id}>
                           {w.name}
                         </option>
@@ -512,7 +478,7 @@ export default function SalesOrdersPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
-                      {orders.map((o) => (
+                      {(Array.isArray(orders) ? orders : []).map((o) => (
                         <tr
                           key={o.id}
                           onClick={() => handleSelectOrder(o.id)}
@@ -521,8 +487,8 @@ export default function SalesOrdersPage() {
                           }`}
                         >
                           <td className="py-3.5 px-4 font-mono font-bold text-blue-600">{o.salesOrderNumber}</td>
-                          <td className="py-3.5 px-4">{o.customer.name}</td>
-                          <td className="py-3.5 px-4 text-slate-500">{o.warehouse.name}</td>
+                          <td className="py-3.5 px-4">{o.customer?.name}</td>
+                          <td className="py-3.5 px-4 text-slate-500">{o.warehouse?.name}</td>
                           <td className="py-3.5 px-4 text-center">
                             <span
                               className={`px-2 py-1 rounded-md text-[10px] font-bold ${
@@ -547,7 +513,7 @@ export default function SalesOrdersPage() {
                             </span>
                           </td>
                           <td className="py-3.5 px-4 text-left font-mono font-bold">
-                            {o.items.reduce((sum, item) => sum + item.total, 0).toLocaleString()} IQD
+                            {(Array.isArray(o.items) ? o.items : []).reduce((sum, item) => sum + (item.total || 0), 0).toLocaleString()} IQD
                           </td>
                         </tr>
                       ))}
@@ -594,7 +560,7 @@ export default function SalesOrdersPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-black text-slate-800 text-md uppercase tracking-tight">{selectedOrder.salesOrderNumber}</h3>
-                      <p className="text-[10px] text-slate-400 mt-0.5">{selectedOrder.customer.name}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{selectedOrder.customer?.name}</p>
                     </div>
                     <button
                       onClick={() => handlePrint("SO", selectedOrder)}
@@ -615,7 +581,7 @@ export default function SalesOrdersPage() {
                   <div className="grid grid-cols-2 gap-4 text-xs">
                     <div>
                       <span className="block font-bold text-slate-400 uppercase text-[9px] tracking-wider">{t("colWarehouse")}</span>
-                      <span className="font-semibold text-slate-700 mt-1 block">{selectedOrder.warehouse.name}</span>
+                      <span className="font-semibold text-slate-700 mt-1 block">{selectedOrder.warehouse?.name}</span>
                     </div>
                     <div>
                       <span className="block font-bold text-slate-400 uppercase text-[9px] tracking-wider">{t("colOrderDate")}</span>
@@ -643,9 +609,9 @@ export default function SalesOrdersPage() {
                         <button
                           onClick={() => {
                             // Populate delivery draft form matching remaining quantities
-                            const items = selectedOrder.items
+                            const items = (Array.isArray(selectedOrder?.items) ? selectedOrder.items : [])
                               .filter((i) => i.remainingQuantity > 0)
-                              .map((i) => ({ productId: i.productId, name: i.product.name, quantity: i.remainingQuantity }));
+                              .map((i) => ({ productId: i.productId, name: i.product?.name, quantity: i.remainingQuantity }));
                             setDeliveryForm({
                               deliveryDate: new Date().toISOString().split("T")[0],
                               driver: "",
@@ -665,7 +631,7 @@ export default function SalesOrdersPage() {
                         <button
                           onClick={() => {
                             // Verify there are delivered quantities not yet invoiced
-                            const hasDeliveredUninvoiced = selectedOrder.items.some(
+                            const hasDeliveredUninvoiced = (Array.isArray(selectedOrder?.items) ? selectedOrder.items : []).some(
                               (i) => i.deliveredQuantity > i.invoicedQuantity,
                             );
                             if (!hasDeliveredUninvoiced) {
@@ -698,11 +664,11 @@ export default function SalesOrdersPage() {
                   <div className="pt-4 border-t border-slate-50 space-y-3">
                     <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">{isRtl ? "بنود الطلب" : "Order Items"}</h4>
                     <div className="space-y-3">
-                      {selectedOrder.items.map((item) => (
+                      {(Array.isArray(selectedOrder?.items) ? selectedOrder.items : []).map((item) => (
                         <div key={item.id} className="p-3 bg-slate-50 rounded-xl space-y-2 text-xs">
                           <div className="flex justify-between items-start font-semibold text-slate-700">
-                            <span>{item.product.name}</span>
-                            <span>{(item.quantity * item.unitPrice).toLocaleString()} IQD</span>
+                            <span>{item.product?.name}</span>
+                            <span>{((item.quantity || 0) * (item.unitPrice || 0)).toLocaleString()} IQD</span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 text-[10px] text-slate-500 font-bold">
                             <div>
@@ -724,11 +690,11 @@ export default function SalesOrdersPage() {
                   </div>
 
                   {/* Completed Delivery Notes */}
-                  {selectedOrder.deliveryNotes.length > 0 && (
+                  {(Array.isArray(selectedOrder?.deliveryNotes) ? selectedOrder.deliveryNotes : []).length > 0 && (
                     <div className="pt-4 border-t border-slate-50 space-y-3">
                       <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">{isRtl ? "أذونات التسليم الصادرة" : "Delivery Notes"}</h4>
                       <div className="space-y-2">
-                        {selectedOrder.deliveryNotes.map((dn) => (
+                        {(Array.isArray(selectedOrder?.deliveryNotes) ? selectedOrder.deliveryNotes : []).map((dn) => (
                           <div key={dn.id} className="flex justify-between items-center p-2.5 bg-slate-50/70 border border-slate-100 rounded-xl text-xs">
                             <div>
                               <span className="font-bold text-slate-700 block">{dn.deliveryNumber}</span>
@@ -794,7 +760,7 @@ export default function SalesOrdersPage() {
                       onChange={(e) => setForm({ ...form, customerId: e.target.value })}
                     >
                       <option value="">Select Customer</option>
-                      {customers.map((c) => (
+                      {(Array.isArray(customers) ? customers : []).map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
                         </option>
@@ -811,7 +777,7 @@ export default function SalesOrdersPage() {
                       onChange={(e) => setForm({ ...form, warehouseId: e.target.value })}
                     >
                       <option value="">Select Warehouse</option>
-                      {warehouses.map((w) => (
+                      {(Array.isArray(warehouses) ? warehouses : []).map((w) => (
                         <option key={w.id} value={w.id}>
                           {w.name}
                         </option>
@@ -845,7 +811,7 @@ export default function SalesOrdersPage() {
                   </div>
 
                   <div className="space-y-3 max-h-[30vh] overflow-y-auto pr-1">
-                    {form.items.map((item, idx) => (
+                    {(Array.isArray(form.items) ? form.items : []).map((item, idx) => (
                       <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end p-3 bg-slate-50 rounded-xl">
                         <div className="md:col-span-2">
                           <label className="block text-[10px] font-bold text-slate-500 mb-1">Product</label>
@@ -856,7 +822,7 @@ export default function SalesOrdersPage() {
                             onChange={(e) => updateFormItem(idx, "productId", e.target.value)}
                           >
                             <option value="">Select Product</option>
-                            {products.map((p) => (
+                            {(Array.isArray(products) ? products : []).map((p) => (
                               <option key={p.id} value={p.id}>
                                 {p.name} ({p.sku})
                               </option>
@@ -897,7 +863,7 @@ export default function SalesOrdersPage() {
                           <button
                             type="button"
                             onClick={() => removeItemFromForm(idx)}
-                            className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg border border-red-200 transition"
+                            className="p-2 bg-red-50 hover:bg-red-100 text-red-650 rounded-lg border border-red-200 transition"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -987,7 +953,7 @@ export default function SalesOrdersPage() {
 
                 <div className="space-y-3">
                   <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">{isRtl ? "بنود الشحنة" : "Shipment Items"}</h4>
-                  {deliveryForm.items.map((item, idx) => (
+                  {(Array.isArray(deliveryForm.items) ? deliveryForm.items : []).map((item, idx) => (
                     <div key={item.productId} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl text-xs">
                       <span className="font-semibold text-slate-700">{item.name}</span>
                       <div className="flex gap-2 items-center">
@@ -1150,15 +1116,15 @@ export default function SalesOrdersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 text-[10px]">
-                  {printDoc.data.items.map((item: any, idx: number) => (
+                  {(Array.isArray(printDoc.data.items) ? printDoc.data.items : []).map((item: any, idx: number) => (
                     <tr key={idx}>
                       <td className="py-2 px-3 border border-slate-200">{idx + 1}</td>
                       <td className="py-2 px-3 border border-slate-200">{item.product?.name}</td>
                       <td className="py-2 px-3 border border-slate-200 text-center">{item.quantity}</td>
                       {printDoc.type === "SO" && (
                         <>
-                          <td className="py-2 px-3 border border-slate-200 text-left font-mono">{item.unitPrice.toLocaleString()} IQD</td>
-                          <td className="py-2 px-3 border border-slate-200 text-left font-mono">{item.total.toLocaleString()} IQD</td>
+                          <td className="py-2 px-3 border border-slate-200 text-left font-mono">{(item.unitPrice || 0).toLocaleString()} IQD</td>
+                          <td className="py-2 px-3 border border-slate-200 text-left font-mono">{(item.total || 0).toLocaleString()} IQD</td>
                         </>
                       )}
                     </tr>
@@ -1174,7 +1140,7 @@ export default function SalesOrdersPage() {
                   <div className="flex justify-between font-bold border-b border-slate-300 pb-1">
                     <span>{isRtl ? "الإجمالي الكلي: " : "Grand Total: "}</span>
                     <span className="font-mono text-blue-700">
-                      {printDoc.data.items.reduce((sum: number, i: any) => sum + i.total, 0).toLocaleString()} IQD
+                      {(Array.isArray(printDoc.data.items) ? printDoc.data.items : []).reduce((sum: number, i: any) => sum + (i.total || 0), 0).toLocaleString()} IQD
                     </span>
                   </div>
                 </div>
