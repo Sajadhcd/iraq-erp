@@ -89,7 +89,8 @@ export default function EmployeesPage() {
     setEditFirstName(emp.firstName);
     setEditLastName(emp.lastName);
     setEditPhone(emp.phone || "");
-    setEditRoleId(roles[0]?.id || "");
+    const matchingRole = roles.find((r) => r.name === emp.role?.name);
+    setEditRoleId(matchingRole?.id || roles[0]?.id || "");
     setEditModalOpen(true);
   };
 

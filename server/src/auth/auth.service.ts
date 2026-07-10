@@ -17,8 +17,14 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: loginDto.email },
+    const user = await this.prisma.user.findFirst({
+      where: {
+        deletedAt: null,
+        OR: [
+          { email: loginDto.email },
+          { username: loginDto.email },
+        ],
+      },
       include: {
         employee: {
           include: {
@@ -36,6 +42,12 @@ export class AuthService {
     if (!isMatch) {
       throw new UnauthorizedException('كلمة المرور غير صحيحة.');
     }
+
+    // Update lastLogin timestamp asynchronously
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLogin: new Date() },
+    });
 
     const payload = { sub: user.id, email: user.email };
     return {

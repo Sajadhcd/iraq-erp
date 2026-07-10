@@ -120,8 +120,10 @@ model RolePermission {
 model User {
   id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email         String         @unique @db.VarChar(255)
+  username      String?        @unique @db.VarChar(150)
   passwordHash  String         @map("password_hash") @db.VarChar(255)
   isActive      Boolean        @default(true) @map("is_active")
+  lastLogin     DateTime?      @map("last_login") @db.Timestamptz
   deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz
   createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz

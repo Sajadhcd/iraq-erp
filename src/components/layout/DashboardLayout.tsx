@@ -62,6 +62,46 @@ const sidebarItems: SidebarItem[] = [
   { key: "settings", name: "الإعدادات العامة", href: "/settings", icon: SettingsIcon },
 ];
 
+const ROLE_PAGE_ACCESS: Record<string, string[]> = {
+  SUPER_ADMIN: [
+    "dashboard", "pos", "products", "categories", "sales", "inventory", "purchases",
+    "expenses", "accounting", "crm", "quotations", "sales-orders", "customers", "suppliers",
+    "reports", "hrms", "attendance", "leave", "payroll", "employees", "users", "settings"
+  ],
+  ADMIN: [
+    "dashboard", "pos", "products", "categories", "sales", "inventory", "purchases",
+    "expenses", "accounting", "crm", "quotations", "sales-orders", "customers", "suppliers",
+    "reports", "hrms", "attendance", "leave", "payroll", "employees"
+  ],
+  HR_MANAGER: [
+    "dashboard", "hrms", "attendance", "leave", "payroll", "employees"
+  ],
+  HR_EMPLOYEE: [
+    "dashboard", "hrms", "attendance", "leave", "employees"
+  ],
+  SALES_MANAGER: [
+    "dashboard", "crm", "quotations", "sales-orders", "pos", "sales", "customers", "reports"
+  ],
+  SALES_AGENT: [
+    "dashboard", "crm", "quotations", "pos"
+  ],
+  PURCHASE_MANAGER: [
+    "dashboard", "purchases", "suppliers", "products"
+  ],
+  INVENTORY_MANAGER: [
+    "dashboard", "products", "categories", "inventory"
+  ],
+  ACCOUNTANT: [
+    "dashboard", "accounting", "expenses", "reports", "payroll"
+  ],
+  CASHIER: [
+    "dashboard", "pos"
+  ],
+  EMPLOYEE: [
+    "dashboard", "attendance", "leave", "payroll"
+  ],
+};
+
 export default function DashboardLayout({
   children,
 }: {
@@ -109,6 +149,14 @@ export default function DashboardLayout({
   }
 
   const isRtl = i18n.language === "ar";
+  const userAllowedKeys = ROLE_PAGE_ACCESS[currentUser.role] || [];
+
+  // Match current pathname to a sidebar key
+  const matchedItem = sidebarItems.find(item => pathname === item.href) ||
+                      sidebarItems.find(item => item.href !== "/dashboard" && pathname.startsWith(item.href));
+
+  // Determine if authorized
+  const isAuthorized = !matchedItem || userAllowedKeys.includes(matchedItem.key);
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans" dir={isRtl ? "rtl" : "ltr"}>
@@ -120,24 +168,26 @@ export default function DashboardLayout({
         </div>
 
         <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
-          {sidebarItems.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                    : "hover:bg-slate-800 hover:text-white"
-                }`}
-              >
-                <Icon className={`h-5 w-5 shrink-0 ${isActive ? "text-white" : "text-slate-400"}`} />
-                <span>{t(item.key)}</span>
-              </Link>
-            );
-          })}
+          {sidebarItems
+            .filter(item => userAllowedKeys.includes(item.key))
+            .map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                      : "hover:bg-slate-800 hover:text-white"
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 shrink-0 ${isActive ? "text-white" : "text-slate-400"}`} />
+                  <span>{t(item.key)}</span>
+                </Link>
+              );
+            })}
         </nav>
 
         <div className="p-4 border-t border-slate-800 bg-slate-950">
@@ -149,7 +199,7 @@ export default function DashboardLayout({
               <div className="flex flex-col">
                 <span className="text-xs font-semibold text-white leading-tight">{currentUser.name}</span>
                 <span className="text-[10px] text-slate-400 leading-tight">
-                  {currentUser.role === "SUPER_ADMIN" ? t("superAdmin") : t("salesAgent")}
+                  {t(currentUser.role)}
                 </span>
               </div>
             </div>
@@ -181,25 +231,27 @@ export default function DashboardLayout({
               </button>
             </div>
             <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
-              {sidebarItems.map((item) => {
-                const isActive = pathname === item.href;
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                      isActive
-                        ? "bg-blue-600 text-white shadow-lg"
-                        : "hover:bg-slate-800 hover:text-white"
-                    }`}
-                  >
-                    <Icon className="h-5 w-5 shrink-0" />
-                    <span>{t(item.key)}</span>
-                  </Link>
-                );
-              })}
+              {sidebarItems
+                .filter(item => userAllowedKeys.includes(item.key))
+                .map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                        isActive
+                          ? "bg-blue-600 text-white shadow-lg"
+                          : "hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      <Icon className="h-5 w-5 shrink-0" />
+                      <span>{t(item.key)}</span>
+                    </Link>
+                  );
+                })}
             </nav>
             <div className="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -209,7 +261,7 @@ export default function DashboardLayout({
                 <div className="flex flex-col">
                   <span className="text-xs font-semibold text-white leading-tight">{currentUser.name}</span>
                   <span className="text-[10px] text-slate-400">
-                    {currentUser.role === "SUPER_ADMIN" ? t("superAdmin") : t("salesAgent")}
+                    {t(currentUser.role)}
                   </span>
                 </div>
               </div>
@@ -271,7 +323,7 @@ export default function DashboardLayout({
               <div className={`hidden md:flex flex-col ${isRtl ? "text-right" : "text-left"}`}>
                 <span className="text-sm font-semibold text-slate-800 leading-tight">{currentUser.name}</span>
                 <span className="text-xs text-slate-500 leading-tight">
-                  {currentUser.role === "SUPER_ADMIN" ? t("superAdmin") : t("salesAgent")}
+                  {t(currentUser.role)}
                 </span>
               </div>
             </div>
@@ -280,7 +332,29 @@ export default function DashboardLayout({
 
         {/* Content Viewport */}
         <main className="flex-1 overflow-y-auto p-6 bg-slate-50">
-          {children}
+          {isAuthorized ? (
+            children
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] text-center p-6 space-y-4">
+              <div className="h-16 w-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-600">
+                <ShieldCheck className="h-10 w-10 animate-pulse" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-800">
+                {isRtl ? "دخول غير مصرح به" : "Unauthorized Access"}
+              </h2>
+              <p className="text-slate-500 text-sm max-w-md">
+                {isRtl
+                  ? "ليس لديك الصلاحيات الكافية للوصول إلى هذه الصفحة. يرجى مراجعة مدير النظام."
+                  : "You do not have the required permissions to access this page. Please contact your system administrator."}
+              </p>
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md transition"
+              >
+                {isRtl ? "العودة للوحة التحكم" : "Go to Dashboard"}
+              </button>
+            </div>
+          )}
         </main>
       </div>
     </div>

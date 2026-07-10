@@ -39,5 +39,16 @@
   "hrms": "HRMS Portal",
   "attendance": "Attendance Management",
   "leave": "Leave Management",
-  "payroll": "Payroll Management"
+  "payroll": "Payroll Management",
+  "SUPER_ADMIN": "Super Admin",
+  "ADMIN": "Admin",
+  "HR_MANAGER": "HR Manager",
+  "HR_EMPLOYEE": "HR Employee",
+  "SALES_MANAGER": "Sales Manager",
+  "SALES_AGENT": "Sales Agent",
+  "PURCHASE_MANAGER": "Purchase Manager",
+  "INVENTORY_MANAGER": "Inventory Manager",
+  "ACCOUNTANT": "Accountant",
+  "CASHIER": "Cashier",
+  "EMPLOYEE": "Employee"
 }
