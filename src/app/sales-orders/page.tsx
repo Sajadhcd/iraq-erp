@@ -170,12 +170,12 @@ export default function SalesOrdersPage() {
 
   const fetchDropdowns = async () => {
     try {
-      const [custData, whData, prodData, userData] = await Promise.all([
-        apiRequest("/customers"),
-        apiRequest("/inventory/warehouses"),
-        apiRequest("/products"),
-        apiRequest("/users"),
-      ]);
+    const [custData, whData, prodData, userData] = await Promise.all([
+      apiRequest("/customers"),
+      apiRequest("/inventory/warehouses"),
+      apiRequest("/inventory/products"),
+      apiRequest("/users"),
+    ]);
       setCustomers(custData?.items || custData || []);
       setWarehouses(whData?.items || whData || []);
       setProducts(prodData?.items || prodData || []);
