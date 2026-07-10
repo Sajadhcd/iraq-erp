@@ -401,7 +401,7 @@ export default function AttendancePage() {
               <option value="">{t("filterEmployee")}</option>
               {employees.map((e) => (
                 <option key={e.id} value={e.id}>
-                  {isRtl ? e.arabicFullName : e.englishFullName}
+                  {(isRtl ? e.arabicFullName : e.englishFullName) || `${e.firstName} ${e.lastName}`}
                 </option>
               ))}
             </select>
@@ -474,7 +474,7 @@ export default function AttendancePage() {
                       {new Date(record.attendanceDate).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4 font-bold text-slate-800">
-                      {record.employee ? (isRtl ? record.employee.arabicFullName : record.employee.englishFullName) : "-"}
+                      {record.employee ? ((isRtl ? record.employee.arabicFullName : record.employee.englishFullName) || `${record.employee.firstName} ${record.employee.lastName}`) : "-"}
                     </td>
                     <td className="py-3 px-4 text-slate-500 font-mono">
                       {record.checkIn ? new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "-"}
@@ -591,7 +591,7 @@ export default function AttendancePage() {
                     <option value="">Select Employee</option>
                     {employees.map((e) => (
                       <option key={e.id} value={e.id}>
-                        {isRtl ? e.arabicFullName : e.englishFullName}
+                        {(isRtl ? e.arabicFullName : e.englishFullName) || `${e.firstName} ${e.lastName}`}
                       </option>
                     ))}
                   </select>
@@ -654,7 +654,7 @@ export default function AttendancePage() {
                     <option value="">Select Employee</option>
                     {employees.map((e) => (
                       <option key={e.id} value={e.id}>
-                        {isRtl ? e.arabicFullName : e.englishFullName}
+                        {(isRtl ? e.arabicFullName : e.englishFullName) || `${e.firstName} ${e.lastName}`}
                       </option>
                     ))}
                   </select>
@@ -718,7 +718,7 @@ export default function AttendancePage() {
                       <option value="">Select Employee</option>
                       {employees.map((e) => (
                         <option key={e.id} value={e.id}>
-                          {isRtl ? e.arabicFullName : e.englishFullName}
+                          {(isRtl ? e.arabicFullName : e.englishFullName) || `${e.firstName} ${e.lastName}`}
                         </option>
                       ))}
                     </select>
