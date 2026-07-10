@@ -41,6 +41,8 @@ import salesOrdersAr from "../locales/ar/sales_orders.json";
 import salesOrdersEn from "../locales/en/sales_orders.json";
 import hrmsAr from "../locales/ar/hrms.json";
 import hrmsEn from "../locales/en/hrms.json";
+import attendanceAr from "../locales/ar/attendance.json";
+import attendanceEn from "../locales/en/attendance.json";
 
 const resources = {
   ar: {
@@ -64,6 +66,7 @@ const resources = {
     quotations: quotationsAr,
     sales_orders: salesOrdersAr,
     hrms: hrmsAr,
+    attendance: attendanceAr,
   },
   en: {
     common: commonEn,
@@ -86,6 +89,7 @@ const resources = {
     quotations: quotationsEn,
     sales_orders: salesOrdersEn,
     hrms: hrmsEn,
+    attendance: attendanceEn,
   },
 };
 
@@ -117,6 +121,7 @@ if (!i18n.isInitialized) {
         "quotations",
         "sales_orders",
         "hrms",
+        "attendance",
       ],
       defaultNS: "common",
       interpolation: {

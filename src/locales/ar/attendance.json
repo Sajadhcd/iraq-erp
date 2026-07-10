@@ -1,0 +1,43 @@
+{
+  "title": "نظام إدارة الحضور والانصراف",
+  "subtitle": "متابعة سجلات حضور وانصراف الموظفين، أوقات تسجيل الدخول والخروج، وساعات العمل الإضافي والتأخر.",
+  
+  "lblPresent": "حاضر",
+  "lblAbsent": "غائب",
+  "lblOnLeave": "في إجازة",
+  "lblHoliday": "عطلة رسمية",
+  "lblTotalWorkHours": "إجمالي ساعات العمل",
+  "lblTotalOvertime": "ساعات العمل الإضافي",
+  "lblTotalLate": "دقائق التأخير",
+  
+  "colDate": "التاريخ",
+  "colEmployee": "الموظف",
+  "colCheckIn": "حضور",
+  "colCheckOut": "انصراف",
+  "colWorkHours": "ساعات العمل",
+  "colOvertime": "ساعات إضافية",
+  "colLate": "تأخير (د)",
+  "colStatus": "الحالة",
+  "colNotes": "ملاحظات",
+  "colActions": "الإجراءات",
+  
+  "btnCheckIn": "تسجيل حضور",
+  "btnCheckOut": "تسجيل انصراف",
+  "btnManualEntry": "إضافة قيد حضور يدوي",
+  "btnSave": "حفظ السجل",
+  "btnCancel": "إلغاء",
+  
+  "filterEmployee": "تصفية حسب الموظف",
+  "filterStatus": "تصفية حسب الحالة",
+  "filterMonth": "الشهر",
+  "filterYear": "السنة",
+  "filterStartDate": "تاريخ البداية",
+  "filterEndDate": "تاريخ النهاية",
+  
+  "errCheckOutBeforeCheckIn": "وقت الانصراف لا يمكن أن يكون قبل وقت الحضور.",
+  "successCheckIn": "تم تسجيل الحضور بنجاح!",
+  "successCheckOut": "تم تسجيل الانصراف بنجاح!",
+  "successCreated": "تم إنشاء قيد الحضور بنجاح.",
+  "successUpdated": "تم تحديث سجل الحضور بنجاح.",
+  "successDeleted": "تم حذف سجل الحضور بنجاح."
+}

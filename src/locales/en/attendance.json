@@ -1,0 +1,43 @@
+{
+  "title": "Attendance Management System",
+  "subtitle": "Track employee attendance logs, check-in/out timings, late arrivals, and overtime calculations.",
+  
+  "lblPresent": "Present",
+  "lblAbsent": "Absent",
+  "lblOnLeave": "On Leave",
+  "lblHoliday": "Holiday",
+  "lblTotalWorkHours": "Total Work Hours",
+  "lblTotalOvertime": "Total Overtime",
+  "lblTotalLate": "Late (Minutes)",
+  
+  "colDate": "Date",
+  "colEmployee": "Employee",
+  "colCheckIn": "Check In",
+  "colCheckOut": "Check Out",
+  "colWorkHours": "Work Hours",
+  "colOvertime": "Overtime Hours",
+  "colLate": "Late (Min)",
+  "colStatus": "Status",
+  "colNotes": "Notes",
+  "colActions": "Actions",
+  
+  "btnCheckIn": "Register Check-In",
+  "btnCheckOut": "Register Check-Out",
+  "btnManualEntry": "Add Manual Record",
+  "btnSave": "Save Record",
+  "btnCancel": "Cancel",
+  
+  "filterEmployee": "Select Employee",
+  "filterStatus": "Select Status",
+  "filterMonth": "Select Month",
+  "filterYear": "Select Year",
+  "filterStartDate": "Start Date",
+  "filterEndDate": "End Date",
+  
+  "errCheckOutBeforeCheckIn": "Check-out time cannot be before check-in time.",
+  "successCheckIn": "Check-in logged successfully!",
+  "successCheckOut": "Check-out logged successfully!",
+  "successCreated": "Attendance record created successfully.",
+  "successUpdated": "Attendance record updated successfully.",
+  "successDeleted": "Attendance record deleted successfully."
+}

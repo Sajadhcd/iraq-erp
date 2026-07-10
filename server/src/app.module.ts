@@ -17,6 +17,7 @@ import { CRMModule } from './crm/crm.module';
 import { QuotationsModule } from './quotations/quotations.module';
 import { SalesOrdersModule } from './sales-orders/sales-orders.module';
 import { HrmsModule } from './hrms/hrms.module';
+import { AttendanceModule } from './attendance/attendance.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { HrmsModule } from './hrms/hrms.module';
     QuotationsModule,
     SalesOrdersModule,
     HrmsModule,
+    AttendanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

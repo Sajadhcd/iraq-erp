@@ -26,6 +26,7 @@ import {
   Briefcase,
   FileText,
   ClipboardList,
+  Calendar,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -53,6 +54,7 @@ const sidebarItems: SidebarItem[] = [
   { key: "suppliers", name: "الموردين", href: "/suppliers", icon: Users },
   { key: "reports", name: "التقارير والتحليلات", href: "/reports", icon: BarChart3 },
   { key: "hrms", name: "الموارد البشرية HRMS", href: "/hrms", icon: ShieldCheck },
+  { key: "attendance", name: "الحضور والانصراف", href: "/hrms/attendance", icon: Calendar },
   { key: "employees", name: "الموظفين", href: "/employees", icon: ShieldCheck },
   { key: "users", name: "مستخدمي النظام", href: "/users", icon: UserCheck },
   { key: "settings", name: "الإعدادات العامة", href: "/settings", icon: SettingsIcon },
