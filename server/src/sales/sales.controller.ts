@@ -1,23 +1,28 @@
-import { Controller, Post, Get, Body, Param, UseGuards } from "@nestjs/common";
-import { SalesService } from "./sales.service";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { RolesGuard } from "../auth/roles.guard";
-import { Roles } from "../auth/roles.decorator";
-import { PaymentMethod } from "@prisma/client";
+import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
+import { SalesService } from './sales.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { PaymentMethod } from '@prisma/client';
 
-@Controller("sales")
+@Controller('sales')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SalesController {
   constructor(private readonly salesService: SalesService) {}
 
-  @Post("checkout")
-  @Roles("SUPER_ADMIN", "SALES_AGENT")
+  @Post('checkout')
+  @Roles('SUPER_ADMIN', 'SALES_AGENT')
   async checkout(
     @Body()
     dto: {
       customerId?: string;
       cashRegisterId?: string;
-      items: Array<{ productId: string; quantity: number; unitPrice: number; discountAmount?: number }>;
+      items: Array<{
+        productId: string;
+        quantity: number;
+        unitPrice: number;
+        discountAmount?: number;
+      }>;
       paymentMethod: PaymentMethod;
       amountPaid: number;
       discountAmount?: number;
@@ -31,8 +36,8 @@ export class SalesController {
     return this.salesService.getSales();
   }
 
-  @Get("invoice/:invoiceNumber")
-  async getInvoice(@Param("invoiceNumber") invoiceNumber: string) {
+  @Get('invoice/:invoiceNumber')
+  async getInvoice(@Param('invoiceNumber') invoiceNumber: string) {
     return this.salesService.getInvoiceByNumber(invoiceNumber);
   }
 }

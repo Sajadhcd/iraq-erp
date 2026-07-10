@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class SettingsService {
@@ -23,7 +23,7 @@ export class SettingsService {
         where: { key },
         update: { value },
         create: { key, value },
-      })
+      }),
     );
     await Promise.all(promises);
     return this.findAll();

@@ -1,16 +1,25 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from "@nestjs/common";
-import { EmployeesService } from "./employees.service";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { RolesGuard } from "../auth/roles.guard";
-import { Roles } from "../auth/roles.decorator";
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
+import { EmployeesService } from './employees.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
-@Controller("employees")
+@Controller('employees')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Post()
-  @Roles("SUPER_ADMIN")
+  @Roles('SUPER_ADMIN')
   async create(
     @Body()
     data: {
@@ -29,20 +38,20 @@ export class EmployeesController {
     return this.employeesService.findAll();
   }
 
-  @Get("roles")
+  @Get('roles')
   async getRoles() {
     return this.employeesService.getRoles();
   }
 
-  @Get(":id")
-  async findOne(@Param("id") id: string) {
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
     return this.employeesService.findOne(id);
   }
 
-  @Put(":id")
-  @Roles("SUPER_ADMIN")
+  @Put(':id')
+  @Roles('SUPER_ADMIN')
   async update(
-    @Param("id") id: string,
+    @Param('id') id: string,
     @Body()
     data: {
       firstName?: string;
@@ -55,9 +64,9 @@ export class EmployeesController {
     return this.employeesService.update(id, data);
   }
 
-  @Delete(":id")
-  @Roles("SUPER_ADMIN")
-  async remove(@Param("id") id: string) {
+  @Delete(':id')
+  @Roles('SUPER_ADMIN')
+  async remove(@Param('id') id: string) {
     return this.employeesService.remove(id);
   }
 }

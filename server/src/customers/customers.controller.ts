@@ -1,16 +1,25 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from "@nestjs/common";
-import { CustomersService } from "./customers.service";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { RolesGuard } from "../auth/roles.guard";
-import { Roles } from "../auth/roles.decorator";
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
+import { CustomersService } from './customers.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
-@Controller("customers")
+@Controller('customers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Post()
-  @Roles("SUPER_ADMIN", "SALES_AGENT")
+  @Roles('SUPER_ADMIN', 'SALES_AGENT')
   async create(
     @Body()
     data: {
@@ -30,15 +39,15 @@ export class CustomersController {
     return this.customersService.findAll();
   }
 
-  @Get(":id")
-  async findOne(@Param("id") id: string) {
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
     return this.customersService.findOne(id);
   }
 
-  @Put(":id")
-  @Roles("SUPER_ADMIN", "SALES_AGENT")
+  @Put(':id')
+  @Roles('SUPER_ADMIN', 'SALES_AGENT')
   async update(
-    @Param("id") id: string,
+    @Param('id') id: string,
     @Body()
     data: {
       name?: string;
@@ -52,9 +61,9 @@ export class CustomersController {
     return this.customersService.update(id, data);
   }
 
-  @Delete(":id")
-  @Roles("SUPER_ADMIN")
-  async remove(@Param("id") id: string) {
+  @Delete(':id')
+  @Roles('SUPER_ADMIN')
+  async remove(@Param('id') id: string) {
     return this.customersService.remove(id);
   }
 }

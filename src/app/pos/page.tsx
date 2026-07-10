@@ -120,6 +120,7 @@ export default function POSPage() {
     const matchesCategory =
       selectedCategory === "الكل" ||
       selectedCategory === "All" ||
+      selectedCategory === "all" ||
       p.category.name === selectedCategory;
 
     return matchesSearch && matchesCategory;

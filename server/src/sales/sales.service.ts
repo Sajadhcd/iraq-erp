@@ -1,6 +1,11 @@
-import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { PaymentMethod } from "@prisma/client";
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { PaymentMethod } from '@prisma/client';
+import { AccountingService } from '../accounting/accounting.service';
 
 interface CreateSaleItemDto {
   productId: string;
@@ -20,11 +25,16 @@ interface CreateSaleDto {
 
 @Injectable()
 export class SalesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private accountingService: AccountingService,
+  ) {}
 
   async createSale(dto: CreateSaleDto) {
     if (dto.items.length === 0) {
-      throw new BadRequestException("يجب أن تحتوي الفاتورة على بند واحد على الأقل.");
+      throw new BadRequestException(
+        'يجب أن تحتوي الفاتورة على بند واحد على الأقل.',
+      );
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -32,16 +42,18 @@ export class SalesService {
       const settingsList = await tx.setting.findMany();
       const settingsMap = new Map(settingsList.map((s) => [s.key, s.value]));
 
-      const taxRateSetting = parseFloat(settingsMap.get("TAX_RATE") || "0");
-      const currencySetting = settingsMap.get("DEFAULT_CURRENCY") || "IQD";
-      const companyName = settingsMap.get("COMPANY_NAME") || "شركة التجارة العامة";
-      const taxNumber = settingsMap.get("TAX_NUMBER") || "000000000";
-      const invoicePrefix = settingsMap.get("INVOICE_NUMBERING_PREFIX") || "INV-";
+      const taxRateSetting = parseFloat(settingsMap.get('TAX_RATE') || '0');
+      const currencySetting = settingsMap.get('DEFAULT_CURRENCY') || 'IQD';
+      const companyName =
+        settingsMap.get('COMPANY_NAME') || 'شركة التجارة العامة';
+      const taxNumber = settingsMap.get('TAX_NUMBER') || '000000000';
+      const invoicePrefix =
+        settingsMap.get('INVOICE_NUMBERING_PREFIX') || 'INV-';
 
       // 1. Verify and deduct stock for each item
       const itemDetails = [];
       let totalAmountBeforeTax = 0;
-      let totalDiscountAmount = dto.discountAmount || 0;
+      const totalDiscountAmount = dto.discountAmount || 0;
 
       for (const item of dto.items) {
         const product = await tx.product.findUnique({
@@ -50,13 +62,17 @@ export class SalesService {
         });
 
         if (!product) {
-          throw new NotFoundException(`المنتج ذو المعرف ${item.productId} غير موجود.`);
+          throw new NotFoundException(
+            `المنتج ذو المعرف ${item.productId} غير موجود.`,
+          );
         }
 
         // Check stock (simplified to default warehouse / first matching inventory)
         const inventory = product.inventories[0];
         if (!inventory || inventory.quantity.toNumber() < item.quantity) {
-          throw new BadRequestException(`المنتج ${product.name} ليس لديه مخزون كافٍ. المتوفر: ${inventory?.quantity || 0}`);
+          throw new BadRequestException(
+            `المنتج ${product.name} ليس لديه مخزون كافٍ. المتوفر: ${inventory?.quantity || 0}`,
+          );
         }
 
         // Deduct inventory
@@ -71,8 +87,8 @@ export class SalesService {
             productId: product.id,
             warehouseId: inventory.warehouseId,
             quantity: -item.quantity,
-            type: "STOCK_OUT",
-            referenceType: "SALE",
+            type: 'STOCK_OUT',
+            referenceType: 'SALE',
           },
         });
 
@@ -83,7 +99,7 @@ export class SalesService {
         const lineTotal = lineTaxable + lineTax;
 
         totalAmountBeforeTax += lineSubtotal;
-        
+
         itemDetails.push({
           productId: product.id,
           quantity: item.quantity,
@@ -112,8 +128,13 @@ export class SalesService {
           discountAmount: totalDiscountAmount,
           taxAmount: totalTaxAmount,
           netAmount: netAmount,
-          paymentStatus: dto.amountPaid >= netAmount ? "PAID" : dto.amountPaid > 0 ? "PARTIALLY_PAID" : "UNPAID",
-          status: "COMPLETED",
+          paymentStatus:
+            dto.amountPaid >= netAmount
+              ? 'PAID'
+              : dto.amountPaid > 0
+                ? 'PARTIALLY_PAID'
+                : 'UNPAID',
+          status: 'COMPLETED',
         },
       });
 
@@ -126,18 +147,18 @@ export class SalesService {
         amount: netAmount.toFixed(2),
         tax: totalTaxAmount.toFixed(2),
         invoice: invoiceNumber,
-        currency: currencySetting
+        currency: currencySetting,
       };
-      const qrHash = Buffer.from(JSON.stringify(qrData)).toString("base64");
+      const qrHash = Buffer.from(JSON.stringify(qrData)).toString('base64');
 
       // 3. Create Invoice record
       const invoice = await tx.invoice.create({
         data: {
           saleId: sale.id,
           invoiceNumber,
-          invoiceType: dto.customerId ? "STANDARD" : "SIMPLIFIED",
+          invoiceType: dto.customerId ? 'STANDARD' : 'SIMPLIFIED',
           qrHash,
-          status: "ACCEPTED",
+          status: 'ACCEPTED',
         },
       });
 
@@ -164,10 +185,36 @@ export class SalesService {
             saleId: sale.id,
             amount: dto.amountPaid,
             method: dto.paymentMethod,
-            status: "COMPLETED",
+            status: 'COMPLETED',
           },
         });
       }
+
+      // 6. Calculate COGS amount
+      let cogsAmount = 0;
+      for (const details of itemDetails) {
+        const product = await tx.product.findUnique({
+          where: { id: details.productId },
+        });
+        if (product) {
+          cogsAmount +=
+            parseFloat(product.costPrice.toString()) * details.quantity;
+        }
+      }
+
+      // 7. Auto-generate accounting journal entry
+      await this.accountingService.autoGenerateJournal(
+        {
+          type: 'SALE',
+          referenceId: sale.id,
+          referenceNumber: invoiceNumber,
+          amount: netAmount,
+          taxAmount: totalTaxAmount,
+          paymentMethod: dto.paymentMethod,
+          cogsAmount: cogsAmount,
+        },
+        tx,
+      );
 
       return {
         saleId: sale.id,
@@ -192,7 +239,7 @@ export class SalesService {
         },
         payments: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -210,7 +257,7 @@ export class SalesService {
     });
 
     if (!invoice) {
-      throw new NotFoundException("الفاتورة غير موجودة.");
+      throw new NotFoundException('الفاتورة غير موجودة.');
     }
 
     return invoice;

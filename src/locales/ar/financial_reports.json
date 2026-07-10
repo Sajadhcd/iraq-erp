@@ -1,0 +1,64 @@
+{
+  "title": "التقارير المالية والحسابية",
+  "subtitle": "عرض وتصدير ميزان المراجعة، قائمة الدخل (الأرباح والخسائر)، الميزانية العمومية، كشوف حسابات العملاء والموردين، ودفاتر الأستاذ النقدية والبنكية.",
+  "tabTrialBalance": "ميزان المراجعة",
+  "tabProfitLoss": "قائمة الدخل",
+  "tabBalanceSheet": "الميزانية العمومية",
+  "tabCustomerStatement": "كشف حساب عميل",
+  "tabSupplierStatement": "كشف حساب مورد",
+  "tabLedgers": "دفاتر نقدية وبنوك",
+  
+  "filterStartDate": "تاريخ البدء",
+  "filterEndDate": "تاريخ الانتهاء",
+  "filterAsOfDate": "حتى تاريخ",
+  "filterCustomer": "اختر العميل",
+  "filterSupplier": "اختر المورد",
+  "filterAccount": "اختر حساب النقدية/البنك",
+  "btnUpdateReport": "عرض التقرير",
+  
+  "colCode": "رمز الحساب",
+  "colAccountName": "اسم الحساب",
+  "colType": "نوع الحساب",
+  "colDebit": "مدين",
+  "colCredit": "دائن",
+  
+  "colDate": "التاريخ",
+  "colTypeHeader": "النوع",
+  "colRefNo": "رقم المستند",
+  "colNotes": "البيان / الوصف",
+  "colDebitMovement": "الحركة المدنية",
+  "colCreditMovement": "الحركة الدائنة",
+  "colBalance": "الرصيد التراكمي",
+  
+  "lblOpeningBalance": "الرصيد الافتتاحي",
+  "lblClosingBalance": "الرصيد الختامي",
+  "lblCurrentBalance": "الرصيد الحالي",
+  "lblNetChange": "صافي التغير",
+  "lblTotal": "الإجمالي",
+  
+  "plRevenue": "إيرادات المبيعات",
+  "plCOGS": "تكلفة البضاعة المباعة",
+  "plGrossProfit": "إجمالي الربح",
+  "plExpenses": "المصروفات التشغيلية",
+  "plNetProfit": "صافي الربح",
+  
+  "bsAssets": "الأصول (Assets)",
+  "bsLiabilities": "الالتزامات (Liabilities)",
+  "bsEquity": "حقوق الملكية (Equity)",
+  "bsTotalAssets": "إجمالي الأصول",
+  "bsTotalLiabilities": "إجمالي الالتزامات",
+  "bsTotalEquity": "إجمالي حقوق الملكية",
+  "bsTotalLiabilitiesAndEquity": "إجمالي الالتزامات وحقوق الملكية",
+  
+  "btnExportExcel": "تصدير Excel",
+  "btnPrint": "طباعة التقرير",
+  
+  "typeAsset": "أصول",
+  "typeLiability": "خصوم / التزامات",
+  "typeEquity": "حقوق ملكية",
+  "typeRevenue": "إيرادات",
+  "typeExpense": "مصروفات",
+  
+  "statementCompany": "سجلات نظام النهرين المتكامل لإدارة الموارد ERP",
+  "statementDocTitle": "تقرير مالي رسمي معتمد"
+}

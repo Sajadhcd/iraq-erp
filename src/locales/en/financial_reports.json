@@ -1,0 +1,64 @@
+{
+  "title": "Financial Statements & Analytics",
+  "subtitle": "Review and export Trial Balance, Profit & Loss (Income Statement), Balance Sheet, customer/supplier ledgers, and cash/bank statements.",
+  "tabTrialBalance": "Trial Balance",
+  "tabProfitLoss": "Profit & Loss",
+  "tabBalanceSheet": "Balance Sheet",
+  "tabCustomerStatement": "Customer Statement",
+  "tabSupplierStatement": "Supplier Statement",
+  "tabLedgers": "Cash & Bank Ledgers",
+  
+  "filterStartDate": "Start Date",
+  "filterEndDate": "End Date",
+  "filterAsOfDate": "As of Date",
+  "filterCustomer": "Select Customer",
+  "filterSupplier": "Select Supplier",
+  "filterAccount": "Select Account",
+  "btnUpdateReport": "Generate Report",
+  
+  "colCode": "Account Code",
+  "colAccountName": "Account Name",
+  "colType": "Account Type",
+  "colDebit": "Debit",
+  "colCredit": "Credit",
+  
+  "colDate": "Date",
+  "colTypeHeader": "Type",
+  "colRefNo": "Reference Number",
+  "colNotes": "Description / Memo",
+  "colDebitMovement": "Debit Movement",
+  "colCreditMovement": "Credit Movement",
+  "colBalance": "Running Balance",
+  
+  "lblOpeningBalance": "Opening Balance",
+  "lblClosingBalance": "Closing Balance",
+  "lblCurrentBalance": "Current Balance",
+  "lblNetChange": "Net Change",
+  "lblTotal": "Total",
+  
+  "plRevenue": "Sales Revenue",
+  "plCOGS": "Cost of Goods Sold (COGS)",
+  "plGrossProfit": "Gross Profit",
+  "plExpenses": "Operating Expenses",
+  "plNetProfit": "Net Profit",
+  
+  "bsAssets": "Assets",
+  "bsLiabilities": "Liabilities",
+  "bsEquity": "Equity",
+  "bsTotalAssets": "Total Assets",
+  "bsTotalLiabilities": "Total Liabilities",
+  "bsTotalEquity": "Total Equity",
+  "bsTotalLiabilitiesAndEquity": "Total Liabilities & Equity",
+  
+  "btnExportExcel": "Export Excel",
+  "btnPrint": "Print Statement",
+  
+  "typeAsset": "Asset",
+  "typeLiability": "Liability",
+  "typeEquity": "Equity",
+  "typeRevenue": "Revenue",
+  "typeExpense": "Expense",
+  
+  "statementCompany": "Integrated Enterprise ERP Roster",
+  "statementDocTitle": "Official Ledger Statement"
+}

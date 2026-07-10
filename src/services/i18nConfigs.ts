@@ -29,6 +29,14 @@ import settingsAr from "../locales/ar/settings.json";
 import settingsEn from "../locales/en/settings.json";
 import authenticationAr from "../locales/ar/authentication.json";
 import authenticationEn from "../locales/en/authentication.json";
+import accountingFoundationAr from "../locales/ar/accounting_foundation.json";
+import accountingFoundationEn from "../locales/en/accounting_foundation.json";
+import financialReportsAr from "../locales/ar/financial_reports.json";
+import financialReportsEn from "../locales/en/financial_reports.json";
+import crmAr from "../locales/ar/crm.json";
+import crmEn from "../locales/en/crm.json";
+import quotationsAr from "../locales/ar/quotations.json";
+import quotationsEn from "../locales/en/quotations.json";
 
 const resources = {
   ar: {
@@ -46,6 +54,10 @@ const resources = {
     hr: hrAr,
     settings: settingsAr,
     authentication: authenticationAr,
+    accounting_foundation: accountingFoundationAr,
+    financial_reports: financialReportsAr,
+    crm: crmAr,
+    quotations: quotationsAr,
   },
   en: {
     common: commonEn,
@@ -62,6 +74,10 @@ const resources = {
     hr: hrEn,
     settings: settingsEn,
     authentication: authenticationEn,
+    accounting_foundation: accountingFoundationEn,
+    financial_reports: financialReportsEn,
+    crm: crmEn,
+    quotations: quotationsEn,
   },
 };
 
@@ -87,6 +103,10 @@ if (!i18n.isInitialized) {
         "hr",
         "settings",
         "authentication",
+        "accounting_foundation",
+        "financial_reports",
+        "crm",
+        "quotations",
       ],
       defaultNS: "common",
       interpolation: {

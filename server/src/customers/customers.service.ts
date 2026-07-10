@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CustomersService {
@@ -20,7 +20,7 @@ export class CustomersService {
         email: data.email || null,
         address: data.address || null,
         taxNumber: data.taxNumber || null,
-        creditLimit: data.creditLimit || 0.00,
+        creditLimit: data.creditLimit || 0.0,
       },
     });
   }
@@ -28,7 +28,7 @@ export class CustomersService {
   async findAll() {
     return this.prisma.customer.findMany({
       where: { deletedAt: null },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -36,7 +36,7 @@ export class CustomersService {
     const customer = await this.prisma.customer.findFirst({
       where: { id, deletedAt: null },
     });
-    if (!customer) throw new NotFoundException("العميل غير موجود أو تم حذفه.");
+    if (!customer) throw new NotFoundException('العميل غير موجود أو تم حذفه.');
     return customer;
   }
 

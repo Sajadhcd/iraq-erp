@@ -1,15 +1,31 @@
-import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { UnitOfMeasure } from "@prisma/client";
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { UnitOfMeasure } from '@prisma/client';
+import { AccountingService } from '../accounting/accounting.service';
 
 @Injectable()
 export class InventoryService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private accountingService: AccountingService,
+  ) {}
 
   // Categories
-  async createCategory(data: { name: string; slug: string; description?: string; parentId?: string }) {
-    const existing = await this.prisma.category.findUnique({ where: { slug: data.slug } });
-    if (existing) throw new BadRequestException("الرمز اللطيف للقسم مسجل بالفعل.");
+  async createCategory(data: {
+    name: string;
+    slug: string;
+    description?: string;
+    parentId?: string;
+  }) {
+    const existing = await this.prisma.category.findUnique({
+      where: { slug: data.slug },
+    });
+    if (existing)
+      throw new BadRequestException('الرمز اللطيف للقسم مسجل بالفعل.');
 
     return this.prisma.category.create({ data });
   }
@@ -35,17 +51,23 @@ export class InventoryService {
     initialStock?: number;
     warehouseId?: string;
   }) {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!data.categoryId || !uuidRegex.test(data.categoryId)) {
-      throw new BadRequestException("يرجى اختيار قسم صالح للمنتج.");
+      throw new BadRequestException('يرجى اختيار قسم صالح للمنتج.');
     }
 
-    const existingSku = await this.prisma.product.findUnique({ where: { sku: data.sku } });
-    if (existingSku) throw new BadRequestException("رمز SKU مسجل بالفعل.");
+    const existingSku = await this.prisma.product.findUnique({
+      where: { sku: data.sku },
+    });
+    if (existingSku) throw new BadRequestException('رمز SKU مسجل بالفعل.');
 
     if (data.barcode) {
-      const existingBarcode = await this.prisma.product.findUnique({ where: { barcode: data.barcode } });
-      if (existingBarcode) throw new BadRequestException("رمز الباركود مسجل بالفعل.");
+      const existingBarcode = await this.prisma.product.findUnique({
+        where: { barcode: data.barcode },
+      });
+      if (existingBarcode)
+        throw new BadRequestException('رمز الباركود مسجل بالفعل.');
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -67,9 +89,9 @@ export class InventoryService {
       await tx.priceHistory.create({
         data: {
           productId: product.id,
-          oldCost: 0.00,
+          oldCost: 0.0,
           newCost: data.costPrice,
-          oldRetail: 0.00,
+          oldRetail: 0.0,
           newRetail: data.retailPrice,
         },
       });
@@ -85,15 +107,28 @@ export class InventoryService {
         });
 
         // Log initial stock movement
-        await tx.inventoryMovement.create({
+        const movement = await tx.inventoryMovement.create({
           data: {
             productId: product.id,
             warehouseId: data.warehouseId,
             quantity: data.initialStock,
-            type: "STOCK_IN",
-            referenceType: "INITIAL_STOCK",
+            type: 'STOCK_IN',
+            referenceType: 'INITIAL_STOCK',
           },
         });
+
+        // Integrate with Accounting (initial stock cost value)
+        const value =
+          data.initialStock * parseFloat(product.costPrice.toString());
+        await this.accountingService.autoGenerateJournal(
+          {
+            type: 'STOCK_ADJUSTMENT',
+            referenceId: movement.id,
+            referenceNumber: `INIT-${Date.now().toString().slice(-6)}`,
+            amount: value,
+          },
+          tx,
+        );
       }
 
       return product;
@@ -108,9 +143,15 @@ export class InventoryService {
   }
 
   // Warehouses
-  async createWarehouse(data: { name: string; code: string; location?: string }) {
-    const existing = await this.prisma.warehouse.findUnique({ where: { code: data.code } });
-    if (existing) throw new BadRequestException("كود المستودع مسجل بالفعل.");
+  async createWarehouse(data: {
+    name: string;
+    code: string;
+    location?: string;
+  }) {
+    const existing = await this.prisma.warehouse.findUnique({
+      where: { code: data.code },
+    });
+    if (existing) throw new BadRequestException('كود المستودع مسجل بالفعل.');
 
     return this.prisma.warehouse.create({ data });
   }
@@ -130,7 +171,7 @@ export class InventoryService {
     batchNumber?: string;
   }) {
     if (data.fromWarehouseId === data.toWarehouseId) {
-      throw new BadRequestException("مستودع المصدر يطابق مستودع الهدف.");
+      throw new BadRequestException('مستودع المصدر يطابق مستودع الهدف.');
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -144,7 +185,9 @@ export class InventoryService {
       });
 
       if (!sourceStock || sourceStock.quantity.toNumber() < data.quantity) {
-        throw new BadRequestException("الكمية المطلوبة للتحويل غير متوفرة في مستودع المصدر.");
+        throw new BadRequestException(
+          'الكمية المطلوبة للتحويل غير متوفرة في مستودع المصدر.',
+        );
       }
 
       // 2. Deduct source stock
@@ -184,8 +227,8 @@ export class InventoryService {
           productId: data.productId,
           warehouseId: data.fromWarehouseId,
           quantity: -data.quantity,
-          type: "TRANSFER_OUT",
-          referenceType: "WAREHOUSE_TRANSFER",
+          type: 'TRANSFER_OUT',
+          referenceType: 'WAREHOUSE_TRANSFER',
         },
       });
 
@@ -194,8 +237,8 @@ export class InventoryService {
           productId: data.productId,
           warehouseId: data.toWarehouseId,
           quantity: data.quantity,
-          type: "TRANSFER_IN",
-          referenceType: "WAREHOUSE_TRANSFER",
+          type: 'TRANSFER_IN',
+          referenceType: 'WAREHOUSE_TRANSFER',
         },
       });
 
@@ -221,6 +264,81 @@ export class InventoryService {
     return this.prisma.warehouse.update({
       where: { id },
       data: { deletedAt: new Date() },
+    });
+  }
+
+  async adjustStock(data: {
+    productId: string;
+    warehouseId: string;
+    quantity: number;
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.findUnique({
+        where: { id: data.productId },
+      });
+      if (!product) throw new NotFoundException('المنتج غير موجود.');
+
+      const inventory = await tx.inventory.findFirst({
+        where: {
+          productId: data.productId,
+          warehouseId: data.warehouseId,
+        },
+      });
+
+      const previousQty = inventory
+        ? parseFloat(inventory.quantity.toString())
+        : 0;
+      const newQty = previousQty + data.quantity;
+
+      if (newQty < 0) {
+        throw new BadRequestException(
+          'الكمية الناتجة بعد التسوية لا يمكن أن تكون سالبة.',
+        );
+      }
+
+      let updatedInventory;
+      if (inventory) {
+        updatedInventory = await tx.inventory.update({
+          where: { id: inventory.id },
+          data: { quantity: newQty },
+        });
+      } else {
+        updatedInventory = await tx.inventory.create({
+          data: {
+            productId: data.productId,
+            warehouseId: data.warehouseId,
+            quantity: data.quantity,
+          },
+        });
+      }
+
+      // Log movement
+      const adjNumber = `ADJ-${Date.now().toString().slice(-8)}`;
+      const movement = await tx.inventoryMovement.create({
+        data: {
+          productId: data.productId,
+          warehouseId: data.warehouseId,
+          quantity: data.quantity,
+          type: 'ADJUSTMENT',
+          referenceType: 'STOCK_ADJUSTMENT',
+          referenceId: product.id,
+        },
+      });
+
+      // Integrate with Accounting:
+      const value =
+        Math.abs(data.quantity) * parseFloat(product.costPrice.toString());
+      await this.accountingService.autoGenerateJournal(
+        {
+          type: 'STOCK_ADJUSTMENT',
+          referenceId: movement.id,
+          referenceNumber: adjNumber,
+          amount: data.quantity > 0 ? value : -value, // Positive value represents net increase (Debit Inventory / Credit Gain), Negative represents net decrease (Debit Loss / Credit Inventory)
+        },
+        tx,
+      );
+
+      return updatedInventory;
     });
   }
 }

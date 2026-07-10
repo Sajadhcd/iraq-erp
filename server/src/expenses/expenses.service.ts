@@ -1,5 +1,5 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ExpensesService {
@@ -33,7 +33,7 @@ export class ExpensesService {
         supplier: true,
         warehouse: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 }

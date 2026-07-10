@@ -1,0 +1,86 @@
+{
+  "title": "General Ledger & Accounting",
+  "subtitle": "Manage Chart of Accounts, record double-entry journal entries, and issue receipts & payments.",
+  "tabAccounts": "Chart of Accounts",
+  "tabJournals": "Journal Entries",
+  "tabVouchers": "Receipts & Payments",
+  "addAccount": "New Account",
+  "addJournal": "New Journal Entry",
+  "addVoucher": "New Voucher",
+  
+  "colCode": "Account Code",
+  "colNameEn": "Name (English)",
+  "colNameAr": "Name (Arabic)",
+  "colType": "Account Type",
+  "colBalance": "Current Balance",
+  "colStatus": "Status",
+  "colActions": "Actions",
+  
+  "colEntryNo": "Entry Number",
+  "colDate": "Date",
+  "colReference": "Reference",
+  "colNotes": "Notes",
+  "colTotal": "Total (Balanced)",
+  "colPosted": "Post Status",
+  
+  "colVoucherNo": "Voucher Number",
+  "colVoucherType": "Voucher Type",
+  "colAmount": "Amount",
+  "colFromAccount": "From Account",
+  "colToAccount": "To Account",
+  
+  "statusActive": "Active",
+  "statusInactive": "Inactive",
+  "statusDraft": "Draft",
+  "statusPosted": "Posted",
+  
+  "typeAsset": "Asset",
+  "typeLiability": "Liability",
+  "typeEquity": "Equity",
+  "typeRevenue": "Revenue",
+  "typeExpense": "Expense",
+  
+  "voucherReceipt": "Receive Voucher",
+  "voucherPayment": "Payment Voucher",
+  "voucherTransfer": "Transfer Voucher",
+  
+  "modalAddAccount": "Create Account",
+  "modalAddJournal": "Create Journal Entry",
+  "modalAddVoucher": "Create Receipt / Payment Voucher",
+  
+  "fieldCode": "Account Code*",
+  "fieldNameEn": "Name (English)*",
+  "fieldNameAr": "Name (Arabic)*",
+  "fieldType": "Account Type*",
+  "fieldParent": "Parent Account",
+  "fieldIsCashBank": "Is Cash or Bank Account",
+  "fieldCashBankType": "Cash/Bank Type",
+  "fieldOpeningBalance": "Opening Balance",
+  
+  "fieldDate": "Date*",
+  "fieldReference": "Reference",
+  "fieldNotes": "Notes / Description",
+  
+  "fieldVoucherType": "Voucher Type*",
+  "fieldAmount": "Amount*",
+  "fieldFromAccount": "Pay From (Credit Account)*",
+  "fieldToAccount": "Pay To (Debit Account)*",
+  
+  "journalLines": "Journal Entry Lines",
+  "lineAccount": "Account*",
+  "lineDebit": "Debit*",
+  "lineCredit": "Credit*",
+  "lineDescription": "Description",
+  "addLine": "Add Line",
+  "removeLine": "Remove",
+  
+  "validationUnbalanced": "Journal is unbalanced! Total debits must equal total credits.",
+  "validationMinLines": "A journal entry must have at least 2 lines.",
+  "validationRequired": "Please fill all required fields.",
+  "validationPositive": "Amount must be a positive number.",
+  
+  "toastAccountCreated": "Account created successfully.",
+  "toastJournalCreated": "Journal entry created successfully.",
+  "toastJournalPosted": "Journal entry posted successfully.",
+  "toastVoucherCreated": "Voucher created and posted successfully."
+}

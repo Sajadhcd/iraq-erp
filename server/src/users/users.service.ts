@@ -1,14 +1,25 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import * as bcrypt from "bcrypt";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: { email: string; passwordHash: string; employeeId?: string }) {
-    const existing = await this.prisma.user.findUnique({ where: { email: data.email } });
-    if (existing) throw new BadRequestException("البريد الإلكتروني مسجل بالفعل.");
+  async create(data: {
+    email: string;
+    passwordHash: string;
+    employeeId?: string;
+  }) {
+    const existing = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+    if (existing)
+      throw new BadRequestException('البريد الإلكتروني مسجل بالفعل.');
 
     const passwordHash = await bcrypt.hash(data.passwordHash, 10);
 
@@ -39,7 +50,7 @@ export class UsersService {
           include: { role: true },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -48,7 +59,7 @@ export class UsersService {
       where: { id, deletedAt: null },
       include: { employee: true },
     });
-    if (!user) throw new NotFoundException("المستخدم غير موجود أو تم حذفه.");
+    if (!user) throw new NotFoundException('المستخدم غير موجود أو تم حذفه.');
     return user;
   }
 

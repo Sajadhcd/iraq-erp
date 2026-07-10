@@ -128,6 +128,18 @@ model User {
   employee      Employee?
   notifications Notification[]
   auditLogs     AuditLog[]
+  journalEntries JournalEntry[]
+  vouchers       Voucher[]
+
+  crmLeads           Lead[]         @relation("LeadSalesperson")
+  crmOpportunities   Opportunity[]  @relation("OpportunityUser")
+  crmActivities      Activity[]     @relation("ActivityUser")
+  crmTimelineEvents  LeadTimeline[]
+  crmQuotations      Quotation[]    @relation("QuotationSalesperson")
+  
+  submittedQuotations Quotation[]    @relation("QuotationSubmittedBy")
+  approvedQuotations  Quotation[]    @relation("QuotationApprovedBy")
+  rejectedQuotations  Quotation[]    @relation("QuotationRejectedBy")
 
   @@index([email])
   @@map("users")
@@ -203,6 +215,7 @@ model Product {
   priceHistories     PriceHistory[]
   productSerials     ProductSerial[]
   inventoryMovements InventoryMovement[]
+  quotationItems     QuotationItem[]
 
   @@index([name])
   @@index([sku])
@@ -257,6 +270,7 @@ model Customer {
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
   sales         Sale[]
+  quotations    Quotation[]
 
   @@map("customers")
 }
@@ -507,3 +521,325 @@ model InventoryMovement {
 
   @@map("inventory_movements")
 }
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+
+  @@map("account_type")
+}
+
+enum JournalStatus {
+  DRAFT
+  POSTED
+
+  @@map("journal_status")
+}
+
+enum VoucherType {
+  RECEIPT
+  PAYMENT
+  TRANSFER
+
+  @@map("voucher_type")
+}
+
+model Account {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code           String        @unique @db.VarChar(50)
+  nameEn         String        @map("name_en") @db.VarChar(150)
+  nameAr         String        @map("name_ar") @db.VarChar(150)
+  type           AccountType
+  parentId       String?       @map("parent_id") @db.Uuid
+  isActive       Boolean       @default(true) @map("is_active")
+  isCashOrBank   Boolean       @default(false) @map("is_cash_or_bank")
+  cashBankType   String?       @map("cash_bank_type") @db.VarChar(50) // CASH, BANK
+  openingBalance Decimal       @default(0.0000) @map("opening_balance") @db.Decimal(15, 4)
+  currentBalance Decimal       @default(0.0000) @map("current_balance") @db.Decimal(15, 4)
+  deletedAt      DateTime?     @map("deleted_at") @db.Timestamptz
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  parent         Account?      @relation("AccountToAccount", fields: [parentId], references: [id], onDelete: Restrict)
+  children       Account[]     @relation("AccountToAccount")
+  journalItems   JournalItem[]
+  fromVouchers   Voucher[]     @relation("VoucherFromAccount")
+  toVouchers     Voucher[]     @relation("VoucherToAccount")
+
+  @@map("accounts")
+}
+
+model JournalEntry {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entryNumber   String        @unique @map("entry_number") @db.VarChar(100)
+  date          DateTime      @default(now()) @db.Timestamptz
+  reference     String?       @db.VarChar(150)
+  referenceType String?       @map("reference_type") @db.VarChar(100)
+  referenceId   String?       @map("reference_id") @db.Uuid
+  notes         String?       @db.Text
+  status        JournalStatus @default(DRAFT)
+  createdById   String?       @map("created_by_id") @db.Uuid
+  createdBy     User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  items         JournalItem[]
+  voucher       Voucher?
+
+  @@map("journal_entries")
+}
+
+model JournalItem {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  journalEntryId String       @map("journal_entry_id") @db.Uuid
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  accountId      String       @map("account_id") @db.Uuid
+  account        Account      @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  debit          Decimal      @db.Decimal(15, 4)
+  credit         Decimal      @db.Decimal(15, 4)
+  description    String?      @db.Text
+
+  @@map("journal_items")
+}
+
+model Voucher {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  voucherNumber  String        @unique @map("voucher_number") @db.VarChar(100)
+  type           VoucherType
+  date           DateTime      @default(now()) @db.Timestamptz
+  amount         Decimal       @db.Decimal(15, 4)
+  fromAccountId  String?       @map("from_account_id") @db.Uuid
+  fromAccount    Account?      @relation("VoucherFromAccount", fields: [fromAccountId], references: [id], onDelete: Restrict)
+  toAccountId    String?       @map("to_account_id") @db.Uuid
+  toAccount      Account?      @relation("VoucherToAccount", fields: [toAccountId], references: [id], onDelete: Restrict)
+  reference      String?       @db.VarChar(150)
+  notes          String?       @db.Text
+  status         JournalStatus @default(DRAFT)
+  journalEntryId String?       @unique @map("journal_entry_id") @db.Uuid
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+  createdById    String?       @map("created_by_id") @db.Uuid
+  createdBy      User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("vouchers")
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum LeadPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ActivityType {
+  CALL
+  MEETING
+  EMAIL
+  TASK
+}
+
+enum ActivityStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum OpportunityStage {
+  QUALIFICATION
+  PROPOSAL
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+model Lead {
+  id                   String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadNumber           String        @unique @map("lead_number") @db.VarChar(100)
+  companyName          String        @map("company_name") @db.VarChar(200)
+  contactPerson        String        @map("contact_person") @db.VarChar(100)
+  mobile               String?       @db.VarChar(50)
+  email                String?       @db.VarChar(255)
+  country              String?       @db.VarChar(100)
+  city                 String?       @db.VarChar(100)
+  address              String?       @db.Text
+  industry             String?       @db.VarChar(100)
+  source               String?       @db.VarChar(100)
+  assignedSalespersonId String?      @map("assigned_salesperson_id") @db.Uuid
+  assignedSalesperson   User?        @relation("LeadSalesperson", fields: [assignedSalespersonId], references: [id], onDelete: SetNull)
+  expectedValue        Decimal?      @map("expected_value") @db.Decimal(15, 4)
+  probability          Int?          @default(0)
+  status               LeadStatus    @default(NEW)
+  priority             LeadPriority  @default(MEDIUM)
+  notes                String?       @db.Text
+  deletedAt            DateTime?     @map("deleted_at") @db.Timestamptz
+  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  opportunities        Opportunity[]
+  activities           Activity[]
+  timelineEvents       LeadTimeline[]
+  attachments          Attachment[]
+  quotations           Quotation[]
+
+  @@index([companyName])
+  @@index([contactPerson])
+  @@index([mobile])
+  @@index([email])
+  @@index([leadNumber])
+  @@map("crm_leads")
+}
+
+model Opportunity {
+  id                  String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId              String           @map("lead_id") @db.Uuid
+  lead                Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  expectedRevenue     Decimal          @map("expected_revenue") @db.Decimal(15, 4)
+  expectedClosingDate DateTime         @map("expected_closing_date") @db.Timestamptz
+  probability         Int              @default(50)
+  stage               OpportunityStage @default(QUALIFICATION)
+  assignedUserId      String?          @map("assigned_user_id") @db.Uuid
+  assignedUser        User?            @relation("OpportunityUser", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  notes               String?          @db.Text
+  deletedAt           DateTime?        @map("deleted_at") @db.Timestamptz
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  activities           Activity[]
+  quotations           Quotation[]
+
+  @@map("crm_opportunities")
+}
+
+model Activity {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId        String?        @map("lead_id") @db.Uuid
+  lead          Lead?          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  opportunityId String?        @map("opportunity_id") @db.Uuid
+  opportunity   Opportunity?   @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  type          ActivityType
+  date          DateTime       @db.Timestamptz
+  reminder      DateTime?      @db.Timestamptz
+  notes         String?        @db.Text
+  assignedUserId String?       @map("assigned_user_id") @db.Uuid
+  assignedUser  User?          @relation("ActivityUser", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  status        ActivityStatus @default(PENDING)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("crm_activities")
+}
+
+model LeadTimeline {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId      String   @map("lead_id") @db.Uuid
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type        String   @db.VarChar(100)
+  description String   @db.Text
+  userId      String?  @map("user_id") @db.Uuid
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("crm_lead_timeline")
+}
+
+model Attachment {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId      String   @map("lead_id") @db.Uuid
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  fileName    String   @map("file_name") @db.VarChar(255)
+  filePath    String   @map("file_path") @db.VarChar(512)
+  mimeType    String   @map("mime_type") @db.VarChar(100)
+  size        Int
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("crm_attachments")
+}
+
+model Quotation {
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quotationNumber  String          @map("quotation_number") @db.VarChar(100)
+  version          Int             @default(1)
+  isCurrent        Boolean         @default(true) @map("is_current")
+  
+  customerId       String          @map("customer_id") @db.Uuid
+  customer         Customer        @relation(fields: [customerId], references: [id])
+  leadId           String?         @map("lead_id") @db.Uuid
+  lead             Lead?           @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  opportunityId    String?         @map("opportunity_id") @db.Uuid
+  opportunity      Opportunity?    @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  
+  salespersonId    String?         @map("salesperson_id") @db.Uuid
+  salesperson      User?           @relation("QuotationSalesperson", fields: [salespersonId], references: [id], onDelete: SetNull)
+  
+  status           String          @db.VarChar(50) // DRAFT, SUBMITTED, APPROVED, REJECTED, CONVERTED
+  currency         String          @default("IQD") @db.VarChar(10)
+  exchangeRate     Decimal         @default(1.0) @map("exchange_rate") @db.Decimal(15, 4)
+  
+  issueDate        DateTime        @map("issue_date") @db.Timestamptz
+  expiryDate       DateTime        @map("expiry_date") @db.Timestamptz
+  paymentTerms     String?         @map("payment_terms") @db.Text
+  deliveryTerms    String?         @map("delivery_terms") @db.Text
+  notes            String?         @db.Text
+  internalNotes    String?         @map("internal_notes") @db.Text
+  
+  // Tracking Dates
+  sentAt           DateTime?       @map("sent_at") @db.Timestamptz
+  viewedAt         DateTime?       @map("viewed_at") @db.Timestamptz
+  acceptedAt       DateTime?       @map("accepted_at") @db.Timestamptz
+  rejectedAt       DateTime?       @map("rejected_at") @db.Timestamptz
+  convertedAt      DateTime?       @map("converted_at") @db.Timestamptz
+  
+  // Approval Workflow Fields
+  submittedById    String?         @map("submitted_by_id") @db.Uuid
+  submittedBy      User?           @relation("QuotationSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedAt      DateTime?       @map("submitted_at") @db.Timestamptz
+  approvedById     String?         @map("approved_by_id") @db.Uuid
+  approvedBy       User?           @relation("QuotationApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt       DateTime?       @map("approved_at") @db.Timestamptz
+  rejectedById     String?         @map("rejected_by_id") @db.Uuid
+  rejectedBy       User?           @relation("QuotationRejectedBy", fields: [rejectedById], references: [id], onDelete: SetNull)
+  rejectionComment String?         @map("rejection_comment") @db.Text
+
+  deletedAt        DateTime?       @map("deleted_at") @db.Timestamptz
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  items            QuotationItem[]
+
+  @@unique([quotationNumber, version])
+  @@index([quotationNumber])
+  @@index([customerId])
+  @@map("crm_quotations")
+}
+
+model QuotationItem {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quotationId  String        @map("quotation_id") @db.Uuid
+  quotation    Quotation     @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  productId    String        @map("product_id") @db.Uuid
+  product      Product       @relation(fields: [productId], references: [id])
+  description  String?       @db.Text
+  quantity     Decimal       @db.Decimal(15, 4)
+  unit         UnitOfMeasure
+  unitPrice    Decimal       @map("unit_price") @db.Decimal(15, 4)
+  discountPct  Decimal       @default(0) @map("discount_pct") @db.Decimal(5, 2)
+  taxPct       Decimal       @default(0) @map("tax_pct") @db.Decimal(5, 2)
+  subtotal     Decimal       @db.Decimal(15, 4)
+  total        Decimal       @db.Decimal(15, 4)
+
+  @@map("crm_quotation_items")
+}
+

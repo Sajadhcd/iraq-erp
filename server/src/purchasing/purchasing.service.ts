@@ -1,6 +1,11 @@
-import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { PurchaseStatus, PaymentStatus } from "@prisma/client";
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { PurchaseStatus, PaymentStatus } from '@prisma/client';
+import { AccountingService } from '../accounting/accounting.service';
 
 interface CreatePurchaseItemDto {
   productId: string;
@@ -18,7 +23,10 @@ interface CreatePurchaseDto {
 
 @Injectable()
 export class PurchasingService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private accountingService: AccountingService,
+  ) {}
 
   // Suppliers CRUD
   async createSupplier(data: {
@@ -65,7 +73,9 @@ export class PurchasingService {
   // Purchases CRUD
   async createPurchase(dto: CreatePurchaseDto) {
     if (dto.items.length === 0) {
-      throw new BadRequestException("يجب أن يحتوي أمر الشراء على بند واحد على الأقل.");
+      throw new BadRequestException(
+        'يجب أن يحتوي أمر الشراء على بند واحد على الأقل.',
+      );
     }
 
     const purchaseNumber = `PO-${Date.now().toString().slice(-8)}`;
@@ -74,7 +84,7 @@ export class PurchasingService {
       // 0. Fetch tax rate from settings
       const settingsList = await tx.setting.findMany();
       const settingsMap = new Map(settingsList.map((s) => [s.key, s.value]));
-      const taxRateSetting = parseFloat(settingsMap.get("TAX_RATE") || "0");
+      const taxRateSetting = parseFloat(settingsMap.get('TAX_RATE') || '0');
 
       let totalAmountBeforeTax = 0;
       let totalTaxAmount = 0;
@@ -82,7 +92,9 @@ export class PurchasingService {
       const purchaseItemsData = [];
 
       for (const item of dto.items) {
-        const product = await tx.product.findUnique({ where: { id: item.productId } });
+        const product = await tx.product.findUnique({
+          where: { id: item.productId },
+        });
         if (!product) {
           throw new NotFoundException(`المنتج ${item.productId} غير موجود.`);
         }
@@ -143,11 +155,11 @@ export class PurchasingService {
     });
 
     if (!purchase) {
-      throw new NotFoundException("طلب الشراء غير موجود.");
+      throw new NotFoundException('طلب الشراء غير موجود.');
     }
 
     if (purchase.status === PurchaseStatus.RECEIVED) {
-      throw new BadRequestException("طلب الشراء تم استلامه بالفعل.");
+      throw new BadRequestException('طلب الشراء تم استلامه بالفعل.');
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -185,6 +197,18 @@ export class PurchasingService {
         }
       }
 
+      // 3. Auto-generate accounting journal entry for Purchase
+      await this.accountingService.autoGenerateJournal(
+        {
+          type: 'PURCHASE',
+          referenceId: updatedPurchase.id,
+          referenceNumber: updatedPurchase.purchaseNumber,
+          amount: parseFloat(updatedPurchase.totalAmount.toString()),
+          taxAmount: parseFloat(updatedPurchase.taxAmount.toString()),
+        },
+        tx,
+      );
+
       return updatedPurchase;
     });
   }
@@ -198,7 +222,7 @@ export class PurchasingService {
           include: { product: true },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 }

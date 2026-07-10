@@ -1,0 +1,86 @@
+{
+  "title": "الحسابات العامة ودفتر الأستاذ",
+  "subtitle": "إدارة شجرة الحسابات، تسجيل قيود اليومية مزدوجة القيد، وإصدار سندات القبض والصرف.",
+  "tabAccounts": "شجرة الحسابات",
+  "tabJournals": "القيود اليومية",
+  "tabVouchers": "المقبوضات والمدفوعات",
+  "addAccount": "حساب جديد",
+  "addJournal": "قيد يومية جديد",
+  "addVoucher": "سند جديد",
+  
+  "colCode": "رمز الحساب",
+  "colNameEn": "الاسم (بالإنجليزي)",
+  "colNameAr": "الاسم (بالعربي)",
+  "colType": "نوع الحساب",
+  "colBalance": "الرصيد الحالي",
+  "colStatus": "الحالة",
+  "colActions": "الإجراءات",
+  
+  "colEntryNo": "رقم القيد",
+  "colDate": "التاريخ",
+  "colReference": "المرجع",
+  "colNotes": "ملاحظات",
+  "colTotal": "الإجمالي المتزن",
+  "colPosted": "حالة الترحيل",
+  
+  "colVoucherNo": "رقم السند",
+  "colVoucherType": "نوع السند",
+  "colAmount": "المبلغ",
+  "colFromAccount": "من حساب",
+  "colToAccount": "إلى حساب",
+  
+  "statusActive": "نشط",
+  "statusInactive": "غير نشط",
+  "statusDraft": "مسودة",
+  "statusPosted": "مرحل",
+  
+  "typeAsset": "أصول",
+  "typeLiability": "التزامات",
+  "typeEquity": "حقوق ملكية",
+  "typeRevenue": "إيرادات",
+  "typeExpense": "مصروفات",
+  
+  "voucherReceipt": "سند قبض",
+  "voucherPayment": "سند صرف",
+  "voucherTransfer": "سند تحويل",
+  
+  "modalAddAccount": "إنشاء حساب جديد",
+  "modalAddJournal": "إنشاء قيد يومية جديد",
+  "modalAddVoucher": "إنشاء سند قبض / صرف جديد",
+  
+  "fieldCode": "رمز الحساب*",
+  "fieldNameEn": "الاسم (بالإنجليزي)*",
+  "fieldNameAr": "الاسم (بالعربي)*",
+  "fieldType": "نوع الحساب*",
+  "fieldParent": "الحساب الأب",
+  "fieldIsCashBank": "هل هو حساب نقدية أو بنك",
+  "fieldCashBankType": "نوع النقدية/البنك",
+  "fieldOpeningBalance": "الرصيد الافتتاحي",
+  
+  "fieldDate": "التاريخ*",
+  "fieldReference": "المرجع",
+  "fieldNotes": "البيان / الوصف",
+  
+  "fieldVoucherType": "نوع السند*",
+  "fieldAmount": "المبلغ*",
+  "fieldFromAccount": "الدفع من (حساب دائن)*",
+  "fieldToAccount": "الدفع إلى (حساب مدين)*",
+  
+  "journalLines": "بنود قيد اليومية",
+  "lineAccount": "الحساب*",
+  "lineDebit": "مدين*",
+  "lineCredit": "دائن*",
+  "lineDescription": "الوصف والبيان",
+  "addLine": "إضافة بند",
+  "removeLine": "حذف",
+  
+  "validationUnbalanced": "القيد غير متزن! إجمالي المدين يجب أن يساوي إجمالي الدائن.",
+  "validationMinLines": "يجب أن يحتوي القيد على بندين على الأقل.",
+  "validationRequired": "يرجى تعبئة كافة الحقول المطلوبة.",
+  "validationPositive": "المبلغ يجب أن يكون قيمة موجبة.",
+  
+  "toastAccountCreated": "تم إنشاء الحساب بنجاح.",
+  "toastJournalCreated": "تم إنشاء قيد اليومية بنجاح.",
+  "toastJournalPosted": "تم ترحيل قيد اليومية بنجاح وتحديث الحسابات.",
+  "toastVoucherCreated": "تم إنشاء وترحيل السند بنجاح وتوليد قيده."
+}

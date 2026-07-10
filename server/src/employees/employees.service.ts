@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class EmployeesService {
@@ -27,7 +27,7 @@ export class EmployeesService {
     return this.prisma.employee.findMany({
       where: { deletedAt: null },
       include: { role: true, user: true },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -36,7 +36,7 @@ export class EmployeesService {
       where: { id, deletedAt: null },
       include: { role: true, user: true },
     });
-    if (!employee) throw new NotFoundException("الموظف غير موجود أو تم حذفه.");
+    if (!employee) throw new NotFoundException('الموظف غير موجود أو تم حذفه.');
     return employee;
   }
 

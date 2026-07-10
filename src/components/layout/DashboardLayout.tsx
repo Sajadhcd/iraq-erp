@@ -23,6 +23,8 @@ import {
   User,
   ShieldCheck,
   Globe,
+  Briefcase,
+  FileText,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -42,6 +44,9 @@ const sidebarItems: SidebarItem[] = [
   { key: "inventory", name: "المخزون والمستودعات", href: "/inventory", icon: Warehouse },
   { key: "purchases", name: "المشتريات", href: "/purchases", icon: Truck },
   { key: "expenses", name: "المصروفات", href: "/expenses", icon: TrendingDown },
+  { key: "accounting", name: "الحسابات العامة", href: "/accounting", icon: Receipt },
+  { key: "crm", name: "علاقات العملاء CRM", href: "/crm", icon: Briefcase },
+  { key: "quotations", name: "عروض الأسعار", href: "/crm/quotations", icon: FileText },
   { key: "customers", name: "العملاء", href: "/customers", icon: Users },
   { key: "suppliers", name: "الموردين", href: "/suppliers", icon: Users },
   { key: "reports", name: "التقارير والتحليلات", href: "/reports", icon: BarChart3 },

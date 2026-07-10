@@ -24,6 +24,7 @@
   "inventory": "Inventory & Stock",
   "purchases": "Procurement",
   "expenses": "Expenses",
+  "accounting": "General Ledger",
   "customers": "Customers",
   "suppliers": "Suppliers",
   "reports": "Reports & Analytics",
@@ -31,5 +32,7 @@
   "users": "Logins & Security",
   "settings": "Global Settings",
   "superAdmin": "System Admin",
-  "salesAgent": "Sales Agent"
+  "salesAgent": "Sales Agent",
+  "crm": "CRM / Leads",
+  "quotations": "Quotations"
 }
