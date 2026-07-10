@@ -37,5 +37,6 @@
   "quotations": "Quotations",
   "sales-orders": "Sales Orders & Deliveries",
   "hrms": "HRMS Portal",
-  "attendance": "Attendance Management"
+  "attendance": "Attendance Management",
+  "leave": "Leave Management"
 }

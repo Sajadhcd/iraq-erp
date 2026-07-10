@@ -55,6 +55,7 @@ const sidebarItems: SidebarItem[] = [
   { key: "reports", name: "التقارير والتحليلات", href: "/reports", icon: BarChart3 },
   { key: "hrms", name: "الموارد البشرية HRMS", href: "/hrms", icon: ShieldCheck },
   { key: "attendance", name: "الحضور والانصراف", href: "/hrms/attendance", icon: Calendar },
+  { key: "leave", name: "إدارة الإجازات", href: "/hrms/leave", icon: Calendar },
   { key: "employees", name: "الموظفين", href: "/employees", icon: ShieldCheck },
   { key: "users", name: "مستخدمي النظام", href: "/users", icon: UserCheck },
   { key: "settings", name: "الإعدادات العامة", href: "/settings", icon: SettingsIcon },

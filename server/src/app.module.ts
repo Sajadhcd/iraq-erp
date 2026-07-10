@@ -18,6 +18,7 @@ import { QuotationsModule } from './quotations/quotations.module';
 import { SalesOrdersModule } from './sales-orders/sales-orders.module';
 import { HrmsModule } from './hrms/hrms.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { LeaveModule } from './leave/leave.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AttendanceModule } from './attendance/attendance.module';
     SalesOrdersModule,
     HrmsModule,
     AttendanceModule,
+    LeaveModule,
   ],
   controllers: [AppController],
   providers: [AppService],
