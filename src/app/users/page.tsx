@@ -432,11 +432,11 @@ export default function UsersPage() {
   };
 
   // Filtering users list
-  const filteredUsers = users.filter((u) => {
-    const term = searchTerm.toLowerCase();
-    const emailMatch = u.email.toLowerCase().includes(term);
-    const usernameMatch = u.username ? u.username.toLowerCase().includes(term) : false;
-    const employeeMatch = u.employee ? `${u.employee.firstName} ${u.employee.lastName}`.toLowerCase().includes(term) : false;
+  const filteredUsers = (Array.isArray(users) ? users : []).filter((u) => {
+    const term = (searchTerm ?? "").toLowerCase().trim();
+    const emailMatch = (u?.email ?? "").toLowerCase().includes(term);
+    const usernameMatch = (u?.username ?? "").toLowerCase().includes(term);
+    const employeeMatch = u?.employee ? `${u.employee?.firstName ?? ""} ${u.employee?.lastName ?? ""}`.toLowerCase().includes(term) : false;
     return emailMatch || usernameMatch || employeeMatch;
   });
 
@@ -552,20 +552,20 @@ export default function UsersPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {filteredUsers.map((u) => (
+                    {(Array.isArray(filteredUsers) ? filteredUsers : []).map((u) => (
                       <tr key={u.id} className="hover:bg-slate-50/50 transition">
                         <td className="py-4 px-6 font-semibold text-slate-800">
                           <div className="flex items-center gap-2">
                             <Mail className="h-4 w-4 text-slate-400" />
-                            {u.email}
+                            {u?.email || "—"}
                           </div>
                         </td>
-                        <td className="py-4 px-6 font-mono font-semibold">{u.username || "—"}</td>
+                        <td className="py-4 px-6 font-mono font-semibold">{u?.username || "—"}</td>
                         <td className="py-4 px-6 text-slate-700">
-                          {u.employee ? `${u.employee.firstName} ${u.employee.lastName}` : <span className="text-red-500 font-bold">{isRtl ? "غير مرتبط بموظف" : "Unlinked"}</span>}
+                          {u?.employee ? `${u.employee?.firstName || ""} ${u.employee?.lastName || ""}` : <span className="text-red-500 font-bold">{isRtl ? "غير مرتبط بموظف" : "Unlinked"}</span>}
                         </td>
                         <td className="py-4 px-6">
-                          {u.employee?.role ? (
+                          {u?.employee?.role ? (
                             <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded font-bold">
                               {u.employee.role.name}
                             </span>
@@ -573,7 +573,7 @@ export default function UsersPage() {
                             <span className="text-slate-400">—</span>
                           )}
                         </td>
-                        <td className="py-4 px-6 font-mono text-[10px] text-slate-500">{formatDateTime(u.lastLogin)}</td>
+                        <td className="py-4 px-6 font-mono text-[10px] text-slate-500">{formatDateTime(u?.lastLogin ?? null)}</td>
                         <td className="py-4 px-6 text-center">
                           <button
                             onClick={() => handleToggleActive(u.id)}
@@ -752,32 +752,35 @@ export default function UsersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
-                  {auditLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50/50 transition">
-                      <td className="py-3 px-6 text-slate-500 font-mono text-[10px]">{new Date(log.createdAt).toLocaleString(isRtl ? "ar-IQ" : "en-US")}</td>
-                      <td className="py-3 px-6">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-slate-800">
-                            {log.user?.employee ? `${log.user.employee.firstName} ${log.user.employee.lastName}` : (isRtl ? "مدير النظام" : "System Administrator")}
+                  {(Array.isArray(auditLogs) ? auditLogs : []).map((log) => {
+                    const actionStr = (log?.action || "").toUpperCase();
+                    return (
+                      <tr key={log.id} className="hover:bg-slate-50/50 transition">
+                        <td className="py-3 px-6 text-slate-500 font-mono text-[10px]">{log?.createdAt ? new Date(log.createdAt).toLocaleString(isRtl ? "ar-IQ" : "en-US") : "—"}</td>
+                        <td className="py-3 px-6">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-800">
+                              {log?.user?.employee ? `${log.user.employee.firstName} ${log.user.employee.lastName}` : (isRtl ? "مدير النظام" : "System Administrator")}
+                            </span>
+                            <span className="text-[9px] text-slate-400">{log?.user?.email || "system@admin.com"}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-6">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            actionStr.includes("CREATE") || actionStr.includes("CREATED")
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                              : actionStr.includes("DELETE") || actionStr.includes("DELETED")
+                              ? "bg-rose-50 text-rose-700 border border-rose-100"
+                              : "bg-blue-50 text-blue-700 border border-blue-100"
+                          }`}>
+                            {log?.action || "—"}
                           </span>
-                          <span className="text-[9px] text-slate-400">{log.user?.email || "system@admin.com"}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-6">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          log.action.includes("CREATE") || log.action.includes("CREATED")
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                            : log.action.includes("DELETE") || log.action.includes("DELETED")
-                            ? "bg-rose-50 text-rose-700 border border-rose-100"
-                            : "bg-blue-50 text-blue-700 border border-blue-100"
-                        }`}>
-                          {log.action}
-                        </span>
-                      </td>
-                      <td className="py-3 px-6 font-semibold text-slate-650">{log.entityName}</td>
-                      <td className="py-3 px-6 font-mono text-[10px] text-slate-400">{log.entityId || "—"}</td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="py-3 px-6 font-semibold text-slate-650">{log?.entityName || "—"}</td>
+                        <td className="py-3 px-6 font-mono text-[10px] text-slate-400">{log?.entityId || "—"}</td>
+                      </tr>
+                    );
+                  })}
                   {auditLogs.length === 0 && (
                     <tr>
                       <td colSpan={5} className="py-8 text-center text-slate-400 font-bold">
@@ -866,12 +869,12 @@ export default function UsersPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 font-semibold text-slate-650">
-                      {activeSessions.map((sess) => (
+                      {(Array.isArray(activeSessions) ? activeSessions : []).map((sess) => (
                         <tr key={sess.id}>
-                          <td className="py-3 px-3 text-slate-800">{sess.email}</td>
-                          <td className="py-3 px-3 font-mono">{sess.ip}</td>
-                          <td className="py-3 px-3 text-slate-500">{sess.device}</td>
-                          <td className="py-3 px-3 font-mono text-[10px]">{formatDateTime(sess.lastActive)}</td>
+                          <td className="py-3 px-3 text-slate-800">{sess?.email || "—"}</td>
+                          <td className="py-3 px-3 font-mono">{sess?.ip || "—"}</td>
+                          <td className="py-3 px-3 text-slate-500">{sess?.device || "—"}</td>
+                          <td className="py-3 px-3 font-mono text-[10px]">{formatDateTime(sess?.lastActive ?? null)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -895,12 +898,12 @@ export default function UsersPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 font-medium">
-                      {failedLogins.map((fl) => (
+                      {(Array.isArray(failedLogins) ? failedLogins : []).map((fl) => (
                         <tr key={fl.id}>
-                          <td className="py-3 px-3 font-bold text-rose-600">{fl.email}</td>
-                          <td className="py-3 px-3 font-mono">{fl.ip}</td>
-                          <td className="py-3 px-3 font-mono text-[10px]">{formatDateTime(fl.attemptTime)}</td>
-                          <td className="py-3 px-3 text-slate-450">{fl.reason}</td>
+                          <td className="py-3 px-3 font-bold text-rose-600">{fl?.email || "—"}</td>
+                          <td className="py-3 px-3 font-mono">{fl?.ip || "—"}</td>
+                          <td className="py-3 px-3 font-mono text-[10px]">{formatDateTime(fl?.attemptTime ?? null)}</td>
+                          <td className="py-3 px-3 text-slate-450">{fl?.reason || "—"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -943,16 +946,16 @@ export default function UsersPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 font-semibold text-slate-650">
-                    {userOverrides.map((ov) => (
+                    {(Array.isArray(userOverrides) ? userOverrides : []).map((ov) => (
                       <tr key={ov.id} className="hover:bg-slate-50/50 transition">
                         <td className="py-2.5 px-4">
                           <div className="flex flex-col">
-                            <span className="font-mono text-slate-800 font-bold">{ov.action}</span>
-                            <span className="text-[9px] text-slate-400 mt-0.5">{ov.description}</span>
+                            <span className="font-mono text-slate-800 font-bold">{ov?.action || "—"}</span>
+                            <span className="text-[9px] text-slate-400 mt-0.5">{ov?.description || "—"}</span>
                           </div>
                         </td>
                         <td className="py-2.5 px-4">
-                          {ov.inherited ? (
+                          {ov?.inherited ? (
                             <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[9px] font-bold">
                               {isRtl ? "نعم (نشط)" : "Yes (Granted)"}
                             </span>
@@ -966,16 +969,16 @@ export default function UsersPage() {
                           <button
                             onClick={() => handleToggleOverride(ov.id, ov.overrideStatus)}
                             className={`px-3 py-1 rounded-xl text-[10px] font-bold border transition ${
-                              ov.overrideStatus === "ALLOW"
+                              ov?.overrideStatus === "ALLOW"
                                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : ov.overrideStatus === "DENY"
+                                : ov?.overrideStatus === "DENY"
                                 ? "bg-rose-50 text-rose-700 border-rose-250"
                                 : "bg-slate-50 text-slate-500 border-slate-200"
                             }`}
                           >
-                            {ov.overrideStatus === "ALLOW"
+                            {ov?.overrideStatus === "ALLOW"
                               ? (isRtl ? "سماح خاص" : "Explicit Grant")
-                              : ov.overrideStatus === "DENY"
+                              : ov?.overrideStatus === "DENY"
                               ? (isRtl ? "حجب خاص" : "Explicit Deny")
                               : (isRtl ? "موروث" : "Inherit Defaults")}
                           </button>
@@ -1147,8 +1150,8 @@ export default function UsersPage() {
                   onChange={(e) => setEmployeeId(e.target.value)}
                 >
                   <option value="none">{isRtl ? "غير مرتبط" : "Unlinked"}</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
+                  {(Array.isArray(employees) ? employees : []).map((emp) => (
+                    <option key={emp.id} value={emp.id}>{emp?.firstName} {emp?.lastName}</option>
                   ))}
                 </select>
               </div>
@@ -1161,8 +1164,8 @@ export default function UsersPage() {
                   onChange={(e) => setRoleId(e.target.value)}
                 >
                   <option value="none">{isRtl ? "بدون دور" : "No Role"}</option>
-                  {roles.map((r) => (
-                    <option key={r.id} value={r.id}>{r.name} - {r.description}</option>
+                  {(Array.isArray(roles) ? roles : []).map((r) => (
+                    <option key={r.id} value={r.id}>{r?.name} - {r?.description}</option>
                   ))}
                 </select>
               </div>
@@ -1227,8 +1230,8 @@ export default function UsersPage() {
                   onChange={(e) => setEditEmployeeId(e.target.value)}
                 >
                   <option value="none">{isRtl ? "غير مرتبط" : "Unlinked"}</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
+                  {(Array.isArray(employees) ? employees : []).map((emp) => (
+                    <option key={emp.id} value={emp.id}>{emp?.firstName} {emp?.lastName}</option>
                   ))}
                 </select>
               </div>
@@ -1241,8 +1244,8 @@ export default function UsersPage() {
                   onChange={(e) => setEditRoleId(e.target.value)}
                 >
                   <option value="none">{isRtl ? "بدون دور" : "No Role"}</option>
-                  {roles.map((r) => (
-                    <option key={r.id} value={r.id}>{r.name} - {r.description}</option>
+                  {(Array.isArray(roles) ? roles : []).map((r) => (
+                    <option key={r.id} value={r.id}>{r?.name} - {r?.description}</option>
                   ))}
                 </select>
               </div>
