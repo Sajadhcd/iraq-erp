@@ -133,8 +133,9 @@ export default function SuppliersPage() {
     }
   };
 
-  const filteredSuppliers = suppliers.filter(
-    (s) => s.companyName.includes(searchTerm) || (s.contactName && s.contactName.includes(searchTerm)),
+  const term = (searchTerm ?? "").toLowerCase().trim();
+  const filteredSuppliers = (Array.isArray(suppliers) ? suppliers : []).filter(
+    (s) => (s?.companyName ?? "").toLowerCase().includes(term) || (s?.contactName ?? "").toLowerCase().includes(term),
   );
 
   const isRtl = i18n.language === "ar";
@@ -164,7 +165,7 @@ export default function SuppliersPage() {
 
         {/* Grid Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredSuppliers.map((s) => (
+          {(Array.isArray(filteredSuppliers) ? filteredSuppliers : []).map((s) => (
             <div key={s.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 hover:shadow-md transition flex flex-col justify-between">
               <div>
                 <div className="flex items-start justify-between">
@@ -173,23 +174,23 @@ export default function SuppliersPage() {
                       <Building2 className="h-5 w-5" />
                     </div>
                     <div className={isRtl ? "text-right" : "text-left"}>
-                      <h3 className="font-bold text-slate-800 text-sm leading-tight">{s.companyName}</h3>
-                      <span className="text-[10px] text-slate-400 font-medium">{t("taxNumberLabel")}{s.taxNumber || t("notAvailable")}</span>
+                      <h3 className="font-bold text-slate-800 text-sm leading-tight">{s?.companyName || "—"}</h3>
+                      <span className="text-[10px] text-slate-400 font-medium">{t("taxNumberLabel")}{s?.taxNumber || t("notAvailable")}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className={`space-y-2 border-t border-slate-100 mt-4 pt-3 text-xs text-slate-650 ${isRtl ? "text-right" : "text-left"}`}>
-                  {s.contactName && (
+                  {s?.contactName && (
                     <div className="flex items-center gap-2"><User className="h-4 w-4 text-slate-400" /><span>{t("contactNameLabel")}{s.contactName}</span></div>
                   )}
-                  {s.phone && (
+                  {s?.phone && (
                     <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-slate-400" /><span>{s.phone}</span></div>
                   )}
-                  {s.email && (
+                  {s?.email && (
                     <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-slate-400" /><span>{s.email}</span></div>
                   )}
-                  {s.address && (
+                  {s?.address && (
                     <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-slate-400" /><span>{s.address}</span></div>
                   )}
                 </div>

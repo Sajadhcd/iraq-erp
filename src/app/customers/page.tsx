@@ -152,8 +152,9 @@ export default function CustomersPage() {
     }
   };
 
-  const filteredCustomers = customers.filter(
-    (c) => c.name.includes(searchTerm) || (c.phone && c.phone.includes(searchTerm)),
+  const term = (searchTerm ?? "").toLowerCase().trim();
+  const filteredCustomers = (Array.isArray(customers) ? customers : []).filter(
+    (c) => (c?.name ?? "").toLowerCase().includes(term) || (c?.phone ?? "").toLowerCase().includes(term),
   );
 
   const isRtl = i18n.language === "ar";
@@ -189,29 +190,29 @@ export default function CustomersPage() {
 
         {/* Customer Directory Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredCustomers.map((c) => (
+          {(Array.isArray(filteredCustomers) ? filteredCustomers : []).map((c) => (
             <div key={c.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 hover:shadow-md transition">
               <div className="flex justify-between items-start">
                 <div className={isRtl ? "text-right" : "text-left"}>
-                  <h3 className="font-bold text-slate-800 text-md">{c.name}</h3>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">{t("taxNumberLabel")}{c.taxNumber || t("notAvailable")}</span>
+                  <h3 className="font-bold text-slate-800 text-md">{c?.name || "—"}</h3>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">{t("taxNumberLabel")}{c?.taxNumber || t("notAvailable")}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="px-2 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[10px] font-bold flex items-center gap-1">
                     <Award className="h-3 w-3" />
-                    <span>{c.loyaltyPoints} {t("pointsSuffix")}</span>
+                    <span>{c?.loyaltyPoints ?? 0} {t("pointsSuffix")}</span>
                   </div>
                 </div>
               </div>
 
               <div className={`space-y-2 border-t border-b border-slate-100 py-3 text-xs text-slate-600 ${isRtl ? "text-right" : "text-left"}`}>
-                {c.phone && (
+                {c?.phone && (
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-slate-400" />
                     <span>{c.phone}</span>
                   </div>
                 )}
-                {c.email && (
+                {c?.email && (
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-slate-400" />
                     <span>{c.email}</span>
@@ -222,13 +223,13 @@ export default function CustomersPage() {
               <div className="flex justify-between items-center text-xs" dir={isRtl ? "rtl" : "ltr"}>
                 <div className={isRtl ? "text-right" : "text-left"}>
                   <span className="text-slate-400 block">{t("balanceLabel")}</span>
-                  <span className={`font-bold ${parseFloat(c.balance) > 0 ? "text-rose-600" : "text-emerald-600"}`}>
-                    {formatPrice(c.balance)}
+                  <span className={`font-bold ${parseFloat(String(c?.balance ?? 0)) > 0 ? "text-rose-600" : "text-emerald-600"}`}>
+                    {formatPrice(String(c?.balance ?? 0))}
                   </span>
                 </div>
                 <div className={isRtl ? "text-left" : "text-right"}>
                   <span className="text-slate-400 block">{t("creditLimitLabel")}</span>
-                  <span className="font-bold text-slate-700">{formatPrice(c.creditLimit)}</span>
+                  <span className="font-bold text-slate-700">{formatPrice(String(c?.creditLimit ?? 0))}</span>
                 </div>
               </div>
 
