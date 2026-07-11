@@ -34,20 +34,20 @@ export class CRMController {
 
   // 1. CRM Dashboard
   @Get('dashboard')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async getDashboard() {
     return this.crmService.getCRMDashboard();
   }
 
   // 2. Leads Endpoints
   @Post('leads')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async createLead(@Body() dto: CreateLeadDto, @Request() req: any) {
     return this.crmService.createLead(dto, req.user.id);
   }
 
   @Get('leads')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async getLeads(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
@@ -73,13 +73,13 @@ export class CRMController {
   }
 
   @Get('leads/:id')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async getLead(@Param('id') id: string) {
     return this.crmService.getLead(id);
   }
 
   @Put('leads/:id')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async updateLead(
     @Param('id') id: string,
     @Body() dto: UpdateLeadDto,
@@ -89,13 +89,13 @@ export class CRMController {
   }
 
   @Delete('leads/:id')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async deleteLead(@Param('id') id: string, @Request() req: any) {
     return this.crmService.deleteLead(id, req.user.id);
   }
 
   @Post('leads/:id/convert')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async convertLead(
     @Param('id') id: string,
     @Body() dto: ConvertLeadDto,
@@ -106,7 +106,7 @@ export class CRMController {
 
   // 3. Opportunities Endpoints
   @Get('opportunities')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async getOpportunities(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
@@ -122,13 +122,13 @@ export class CRMController {
   }
 
   @Get('opportunities/:id')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async getOpportunity(@Param('id') id: string) {
     return this.crmService.getOpportunity(id);
   }
 
   @Put('opportunities/:id')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async updateOpportunity(
     @Param('id') id: string,
     @Body() dto: any,
@@ -138,20 +138,20 @@ export class CRMController {
   }
 
   @Delete('opportunities/:id')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async deleteOpportunity(@Param('id') id: string, @Request() req: any) {
     return this.crmService.deleteOpportunity(id, req.user.id);
   }
 
   // 4. Activities Endpoints
   @Post('activities')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async createActivity(@Body() dto: CreateActivityDto, @Request() req: any) {
     return this.crmService.createActivity(dto, req.user.id);
   }
 
   @Put('activities/:id')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async updateActivity(
     @Param('id') id: string,
     @Body() dto: UpdateActivityDto,
@@ -161,14 +161,14 @@ export class CRMController {
   }
 
   @Delete('activities/:id')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   async deleteActivity(@Param('id') id: string) {
     return this.crmService.deleteActivity(id);
   }
 
   // 5. Attachments Upload Endpoint
   @Post('leads/:id/attachments')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'SALES_MANAGER', 'SALES_AGENT')
   @UseInterceptors(FileInterceptor('file'))
   async uploadAttachment(
     @Param('id') leadId: string,
