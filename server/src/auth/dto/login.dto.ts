@@ -1,7 +1,7 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
-  @IsEmail({}, { message: 'البريد الإلكتروني المدخل غير صالح.' })
+  @IsString({ message: 'البريد الإلكتروني أو اسم المستخدم المدخل غير صالح.' })
   email!: string;
 
   @IsString()
