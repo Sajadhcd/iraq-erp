@@ -2,10 +2,12 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   UseGuards,
   Delete,
   Param,
+  Query,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -66,6 +68,31 @@ export class InventoryController {
   @Get('products')
   async getProducts() {
     return this.inventoryService.getProducts();
+  }
+
+  @Get('products/:id')
+  async getProductById(@Param('id') id: string) {
+    return this.inventoryService.getProductById(id);
+  }
+
+  @Put('products/:id')
+  @Roles('SUPER_ADMIN', 'INVENTORY_MANAGER')
+  async updateProduct(
+    @Param('id') id: string,
+    @Body()
+    data: {
+      name?: string;
+      sku?: string;
+      barcode?: string;
+      categoryId?: string;
+      brandId?: string;
+      costPrice?: number;
+      retailPrice?: number;
+      unit?: any;
+      alertQuantity?: number;
+    },
+  ) {
+    return this.inventoryService.updateProduct(id, data);
   }
 
   @Delete('products/:id')

@@ -142,6 +142,89 @@ export class InventoryService {
     });
   }
 
+  async getProductById(id: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: { category: true, brand: true, inventories: true },
+    });
+    if (!product || product.deletedAt) {
+      throw new NotFoundException('المنتج غير موجود.');
+    }
+    return product;
+  }
+
+  async updateProduct(
+    id: string,
+    data: {
+      name?: string;
+      sku?: string;
+      barcode?: string;
+      categoryId?: string;
+      brandId?: string;
+      costPrice?: number;
+      retailPrice?: number;
+      unit?: UnitOfMeasure;
+      alertQuantity?: number;
+    },
+  ) {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product || product.deletedAt) {
+      throw new NotFoundException('المنتج غير موجود.');
+    }
+
+    // Check SKU uniqueness if changed
+    if (data.sku && data.sku !== product.sku) {
+      const existingSku = await this.prisma.product.findUnique({
+        where: { sku: data.sku },
+      });
+      if (existingSku && existingSku.id !== id) {
+        throw new BadRequestException('رمز SKU مسجل بالفعل.');
+      }
+    }
+
+    // Check barcode uniqueness if changed
+    if (data.barcode && data.barcode !== (product.barcode || '')) {
+      const existingBarcode = await this.prisma.product.findUnique({
+        where: { barcode: data.barcode },
+      });
+      if (existingBarcode && existingBarcode.id !== id) {
+        throw new BadRequestException('رمز الباركود مسجل بالفعل.');
+      }
+    }
+
+    // Track price changes
+    const costChanged = data.costPrice !== undefined && data.costPrice !== parseFloat(product.costPrice.toString());
+    const retailChanged = data.retailPrice !== undefined && data.retailPrice !== parseFloat(product.retailPrice.toString());
+
+    if (costChanged || retailChanged) {
+      await this.prisma.priceHistory.create({
+        data: {
+          productId: id,
+          oldCost: product.costPrice,
+          newCost: data.costPrice ?? product.costPrice,
+          oldRetail: product.retailPrice,
+          newRetail: data.retailPrice ?? product.retailPrice,
+        },
+      });
+    }
+
+    return this.prisma.product.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.sku !== undefined && { sku: data.sku }),
+        ...(data.barcode !== undefined && { barcode: data.barcode || null }),
+        ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+        ...(data.brandId !== undefined && { brandId: data.brandId || null }),
+        ...(data.costPrice !== undefined && { costPrice: data.costPrice }),
+        ...(data.retailPrice !== undefined && { retailPrice: data.retailPrice }),
+        ...(data.unit !== undefined && { unit: data.unit }),
+        ...(data.alertQuantity !== undefined && { alertQuantity: data.alertQuantity }),
+      },
+      include: { category: true, brand: true, inventories: true },
+    });
+  }
+
   // Warehouses
   async createWarehouse(data: {
     name: string;
