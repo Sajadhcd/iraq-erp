@@ -362,15 +362,16 @@ export default function AttendancePage() {
   };
 
   const toggleWeekendDay = (day: number) => {
-    if (policyForm.weekendDays.includes(day)) {
+    const currentDays = Array.isArray(policyForm.weekendDays) ? policyForm.weekendDays : [];
+    if (currentDays.includes(day)) {
       setPolicyForm({
         ...policyForm,
-        weekendDays: policyForm.weekendDays.filter((d) => d !== day),
+        weekendDays: currentDays.filter((d) => d !== day),
       });
     } else {
       setPolicyForm({
         ...policyForm,
-        weekendDays: [...policyForm.weekendDays, day],
+        weekendDays: [...currentDays, day],
       });
     }
   };
@@ -867,7 +868,7 @@ export default function AttendancePage() {
                 <label className="block text-slate-550 mb-2">{t("lblWeekends")}</label>
                 <div className="flex flex-wrap gap-2">
                   {daysOfWeek.map((day) => {
-                    const isSelected = policyForm.weekendDays.includes(day.val);
+                    const isSelected = (Array.isArray(policyForm.weekendDays) ? policyForm.weekendDays : []).includes(day.val);
                     return (
                       <button
                         type="button"

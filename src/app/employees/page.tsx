@@ -133,9 +133,10 @@ export default function EmployeesPage() {
     }
   };
 
-  const filteredEmployees = employees.filter(
+  const term = (searchTerm ?? "").toLowerCase().trim();
+  const filteredEmployees = (Array.isArray(employees) ? employees : []).filter(
     (emp) =>
-      `${emp.firstName} ${emp.lastName}`.includes(searchTerm) || (emp.phone && emp.phone.includes(searchTerm)),
+      `${emp?.firstName ?? ""} ${emp?.lastName ?? ""}`.toLowerCase().includes(term) || (emp?.phone ?? "").toLowerCase().includes(term),
   );
 
   const isRtl = i18n.language === "ar";
@@ -183,21 +184,21 @@ export default function EmployeesPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredEmployees.map((emp) => (
+                {(Array.isArray(filteredEmployees) ? filteredEmployees : []).map((emp) => (
                   <tr key={emp.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
                     <td className="py-4 px-6 font-semibold text-slate-800">
                       <div className="flex items-center gap-2">
                         <UserCheck className="h-5 w-5 text-blue-500" />
-                        {emp.firstName} {emp.lastName}
+                        {emp?.firstName || ""} {emp?.lastName || ""}
                       </div>
                     </td>
-                    <td className="py-4 px-6 text-slate-650">{emp.phone || t("notAvailable")}</td>
+                    <td className="py-4 px-6 text-slate-650">{emp?.phone || t("notAvailable")}</td>
                     <td className="py-4 px-6">
                       <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-100">
-                        {emp.role?.name === "SUPER_ADMIN" ? t("superAdmin") : emp.role?.name === "SALES_AGENT" ? t("salesAgent") : emp.role?.name}
+                        {emp?.role?.name === "SUPER_ADMIN" ? t("superAdmin") : emp?.role?.name === "SALES_AGENT" ? t("salesAgent") : emp?.role?.name || "—"}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-slate-500 font-mono text-xs">{formatDate(emp.createdAt)}</td>
+                    <td className="py-4 px-6 text-slate-500 font-mono text-xs">{emp?.createdAt ? formatDate(emp.createdAt) : "—"}</td>
                     <td className="py-4 px-6">
                       <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold border border-emerald-100">{t("activeStatusText")}</span>
                     </td>

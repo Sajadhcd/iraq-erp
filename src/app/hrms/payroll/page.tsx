@@ -235,8 +235,8 @@ export default function PayrollPage() {
   };
 
   // Summarize payroll statistics
-  const lockedRuns = payrollRuns.filter(r => r.status === "LOCKED");
-  const totalExpense = lockedRuns.reduce((acc, curr) => acc + Number(curr.totalNet), 0);
+  const lockedRuns = (Array.isArray(payrollRuns) ? payrollRuns : []).filter(r => r?.status === "LOCKED");
+  const totalExpense = lockedRuns.reduce((acc, curr) => acc + (Number(curr?.totalNet) || 0), 0);
 
   return (
     <DashboardLayout>
@@ -299,7 +299,7 @@ export default function PayrollPage() {
               </div>
               <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t("lblPendingRuns")}</span>
-                <span className="text-3xl font-black text-blue-600 mt-3">{payrollRuns.filter(r => r.status === "DRAFT").length}</span>
+                <span className="text-3xl font-black text-blue-600 mt-3">{(Array.isArray(payrollRuns) ? payrollRuns : []).filter(r => r?.status === "DRAFT").length}</span>
               </div>
               <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t("lblLockedRuns")}</span>
@@ -307,7 +307,7 @@ export default function PayrollPage() {
               </div>
               <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t("lblActiveContracts")}</span>
-                <span className="text-3xl font-black text-purple-600 mt-3">{structures.filter(s => s.active).length}</span>
+                <span className="text-3xl font-black text-purple-600 mt-3">{(Array.isArray(structures) ? structures : []).filter(s => s?.active).length}</span>
               </div>
             </div>
 
@@ -864,9 +864,9 @@ export default function PayrollPage() {
                     onChange={(e) => setRunForm({ ...runForm, payrollPeriodId: e.target.value })}
                   >
                     <option value="">Select Period</option>
-                    {periods.filter(p => p.status === "OPEN").map((p) => (
+                    {(Array.isArray(periods) ? periods : []).filter(p => p?.status === "OPEN").map((p) => (
                       <option key={p.id} value={p.id}>
-                        {isRtl ? p.nameAr : p.nameEn} ({p.code})
+                        {isRtl ? p?.nameAr : p?.nameEn} ({p?.code})
                       </option>
                     ))}
                   </select>

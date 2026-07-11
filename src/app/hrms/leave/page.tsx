@@ -478,19 +478,19 @@ export default function LeavePage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 text-slate-650">
-                    {leaveRequests.filter(r => r.status === "SUBMITTED").map((r) => (
+                    {(Array.isArray(leaveRequests) ? leaveRequests : []).filter(r => r?.status === "SUBMITTED").map((r) => (
                       <tr key={r.id} className="hover:bg-slate-50 transition">
-                        <td className="py-3 px-4 font-mono font-bold text-slate-800">{r.requestNumber}</td>
+                        <td className="py-3 px-4 font-mono font-bold text-slate-800">{r?.requestNumber || "—"}</td>
                         <td className="py-3 px-4 text-slate-800">
-                          {(isRtl ? r.employee.arabicFullName : r.employee.englishFullName) || `${r.employee.firstName} ${r.employee.lastName}`}
+                          {(isRtl ? r?.employee?.arabicFullName : r?.employee?.englishFullName) || `${r?.employee?.firstName || ""} ${r?.employee?.lastName || ""}`.trim() || "—"}
                         </td>
-                        <td className="py-3 px-4 font-bold" style={{ color: r.leaveType.color }}>
-                          {isRtl ? r.leaveType.nameAr : r.leaveType.nameEn}
+                        <td className="py-3 px-4 font-bold" style={{ color: r?.leaveType?.color || "#64748B" }}>
+                          {isRtl ? r?.leaveType?.nameAr : r?.leaveType?.nameEn || "—"}
                         </td>
-                        <td className="py-3 px-4 font-mono">{new Date(r.startDate).toLocaleDateString()}</td>
-                        <td className="py-3 px-4 font-mono">{new Date(r.endDate).toLocaleDateString()}</td>
-                        <td className="py-3 px-4 text-center font-bold text-slate-800">{r.totalDays}</td>
-                        <td className="py-3 px-4 max-w-[200px] truncate">{r.reason || "-"}</td>
+                        <td className="py-3 px-4 font-mono">{r?.startDate ? new Date(r.startDate).toLocaleDateString() : "—"}</td>
+                        <td className="py-3 px-4 font-mono">{r?.endDate ? new Date(r.endDate).toLocaleDateString() : "—"}</td>
+                        <td className="py-3 px-4 text-center font-bold text-slate-800">{r?.totalDays || 0}</td>
+                        <td className="py-3 px-4 max-w-[200px] truncate">{r?.reason || "-"}</td>
                         <td className="py-3 px-4 text-left flex gap-1.5 justify-end">
                           <button
                             onClick={() => handleApproveRequest(r.id, r.employeeId)}
@@ -509,7 +509,7 @@ export default function LeavePage() {
                         </td>
                       </tr>
                     ))}
-                    {leaveRequests.filter(r => r.status === "SUBMITTED").length === 0 && (
+                    {(Array.isArray(leaveRequests) ? leaveRequests : []).filter(r => r?.status === "SUBMITTED").length === 0 && (
                       <tr>
                         <td colSpan={8} className="py-8 text-center text-slate-400">
                           {isRtl ? "لا توجد طلبات معلقة للاعتماد حالياً." : "No pending requests in the queue."}
@@ -752,35 +752,35 @@ export default function LeavePage() {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                {leaveRequests.filter(r => r.status === "APPROVED").map((r) => (
+                {(Array.isArray(leaveRequests) ? leaveRequests : []).filter(r => r?.status === "APPROVED").map((r) => (
                   <div key={r.id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl relative overflow-hidden flex flex-col justify-between gap-3">
-                    <div className="absolute top-0 right-0 bottom-0 w-1.5" style={{ backgroundColor: r.leaveType.color }} />
+                    <div className="absolute top-0 right-0 bottom-0 w-1.5" style={{ backgroundColor: r?.leaveType?.color || "#64748B" }} />
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-bold text-slate-800 text-[13px]">
-                          {(isRtl ? r.employee.arabicFullName : r.employee.englishFullName) || `${r.employee.firstName} ${r.employee.lastName}`}
+                          {(isRtl ? r?.employee?.arabicFullName : r?.employee?.englishFullName) || `${r?.employee?.firstName || ""} ${r?.employee?.lastName || ""}`.trim() || "—"}
                         </p>
-                        <p className="text-[10px] text-slate-400 font-mono mt-0.5">{r.employee.employeeNumber}</p>
+                        <p className="text-[10px] text-slate-400 font-mono mt-0.5">{r?.employee?.employeeNumber || "—"}</p>
                       </div>
                       <span
                         className="px-2 py-0.5 text-[9px] font-bold text-white rounded"
-                        style={{ backgroundColor: r.leaveType.color }}
+                        style={{ backgroundColor: r?.leaveType?.color || "#64748B" }}
                       >
-                        {isRtl ? r.leaveType.nameAr : r.leaveType.nameEn}
+                        {isRtl ? r?.leaveType?.nameAr : r?.leaveType?.nameEn || "—"}
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center text-slate-500 text-[11px] font-semibold mt-2">
                       <div className="flex gap-2">
-                        <span>{new Date(r.startDate).toLocaleDateString()}</span>
+                        <span>{r?.startDate ? new Date(r.startDate).toLocaleDateString() : "—"}</span>
                         <span>←</span>
-                        <span>{new Date(r.endDate).toLocaleDateString()}</span>
+                        <span>{r?.endDate ? new Date(r.endDate).toLocaleDateString() : "—"}</span>
                       </div>
-                      <span className="text-slate-800 font-bold">{r.totalDays} {isRtl ? "يوم" : "days"}</span>
+                      <span className="text-slate-800 font-bold">{r?.totalDays || 0} {isRtl ? "يوم" : "days"}</span>
                     </div>
                   </div>
                 ))}
-                {leaveRequests.filter(r => r.status === "APPROVED").length === 0 && (
+                {(Array.isArray(leaveRequests) ? leaveRequests : []).filter(r => r?.status === "APPROVED").length === 0 && (
                   <p className="text-slate-400 text-center py-8 col-span-full">
                     {isRtl ? "لا توجد إجازات معتمدة في الفترة المحددة." : "No approved leaves found in the schedule."}
                   </p>
