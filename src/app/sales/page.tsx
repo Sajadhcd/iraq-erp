@@ -92,8 +92,11 @@ export default function SalesPage() {
 
   const isRtl = i18n.language === "ar";
 
-  const filteredSales = sales.filter((s) => {
-    return s.invoiceNumber.includes(searchTerm) || (s.customer?.name || t("cashCustomer")).includes(searchTerm);
+  const term = (searchTerm ?? "").toLowerCase().trim();
+  const filteredSales = (Array.isArray(sales) ? sales : []).filter((s) => {
+    const invNo = (s?.invoiceNumber ?? "").toLowerCase();
+    const custName = (s?.customer?.name ?? t("cashCustomer")).toLowerCase();
+    return invNo.includes(term) || custName.includes(term);
   });
 
   const formatPrice = (val: string) => {
@@ -151,17 +154,17 @@ export default function SalesPage() {
                   <tr key={s.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
                     <td className="py-4 px-5 font-bold text-slate-800 flex items-center gap-2">
                       <Receipt className="h-4 w-4 text-blue-500" />
-                      {s.invoiceNumber}
+                      {s?.invoiceNumber || "—"}
                     </td>
-                    <td className="py-4 px-5 text-slate-700">{s.customer?.name || t("cashCustomer")}</td>
-                    <td className="py-4 px-5 font-black text-slate-900">{formatPrice(s.netAmount)}</td>
-                    <td className="py-4 px-5 text-slate-500">{formatPrice(s.taxAmount)}</td>
+                    <td className="py-4 px-5 text-slate-700">{s?.customer?.name || t("cashCustomer")}</td>
+                    <td className="py-4 px-5 font-black text-slate-900">{formatPrice(String(s?.netAmount ?? 0))}</td>
+                    <td className="py-4 px-5 text-slate-500">{formatPrice(String(s?.taxAmount ?? 0))}</td>
                     <td className="py-4 px-5 text-slate-600 font-mono text-xs">
-                      {formatDate(s.createdAt)}
+                      {s?.createdAt ? formatDate(s.createdAt) : "—"}
                     </td>
                     <td className="py-4 px-5">
                       <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 rounded text-slate-700 border">
-                        {s.payments[0]?.method === "CASH" ? t("cash") : s.payments[0]?.method === "CARD" ? t("card") : t("cash")}
+                        {Array.isArray(s?.payments) && s.payments[0]?.method === "CASH" ? t("cash") : Array.isArray(s?.payments) && s.payments[0]?.method === "CARD" ? t("card") : t("cash")}
                       </span>
                     </td>
                     <td className="py-4 px-5">

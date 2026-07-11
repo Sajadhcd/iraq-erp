@@ -107,21 +107,25 @@ export default function POSPage() {
   };
 
   const getProductStock = (p: POSProduct) => {
-    return p.inventories.reduce((acc, inv) => acc + parseFloat(inv.quantity as any), 0);
+    if (!p?.inventories || !Array.isArray(p.inventories)) return 0;
+    return p.inventories.reduce((acc, inv) => acc + (parseFloat(String(inv.quantity)) || 0), 0);
   };
 
-  // Filter products based on search
-  const filteredProducts = products.filter((p) => {
+  const term = (searchTerm ?? "").toLowerCase().trim();
+  const filteredProducts = (Array.isArray(products) ? products : []).filter((p) => {
+    const pName = (p?.name ?? "").toLowerCase();
+    const pBarcode = (p?.barcode ?? "").toLowerCase();
+    const pSku = (p?.sku ?? "").toLowerCase();
     const matchesSearch =
-      p.name.includes(searchTerm) ||
-      p.barcode.includes(searchTerm) ||
-      p.sku.toLowerCase().includes(searchTerm.toLowerCase());
+      pName.includes(term) ||
+      pBarcode.includes(term) ||
+      pSku.includes(term);
 
     const matchesCategory =
       selectedCategory === "الكل" ||
       selectedCategory === "All" ||
       selectedCategory === "all" ||
-      p.category.name === selectedCategory;
+      p?.category?.name === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
