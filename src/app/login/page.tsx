@@ -84,13 +84,13 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className={`block text-sm font-semibold text-slate-700 mb-2 ${isRtl ? "text-right" : "text-left"}`}>{t("email")}</label>
+            <label className={`block text-sm font-semibold text-slate-700 mb-2 ${isRtl ? "text-right" : "text-left"}`}>{isRtl ? "اسم المستخدم أو البريد الإلكتروني" : "Username or Email Address"}</label>
             <div className="relative">
               <input
-                type="email"
+                type="text"
                 required
                 className={`w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-800 ${isRtl ? "text-right pr-11 pl-4" : "text-left pl-11 pr-4"}`}
-                placeholder="email@example.com"
+                placeholder={isRtl ? "اسم المستخدم أو البريد الإلكتروني" : "username or email"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
