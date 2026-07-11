@@ -15,13 +15,14 @@ interface PurchaseItem {
 
 interface PurchaseRecord {
   id: string;
-  poNumber: string;
-  supplier: { companyName: string };
-  warehouse: { name: string };
-  totalAmount: string;
-  status: string;
-  createdAt: string;
-  purchaseItems: PurchaseItem[];
+  purchaseNumber?: string;
+  poNumber?: string;
+  supplier?: { companyName?: string };
+  warehouse?: { name?: string };
+  totalAmount?: string | number;
+  status?: string;
+  createdAt?: string;
+  purchaseItems?: PurchaseItem[];
 }
 
 export default function PurchasesPage() {
@@ -135,9 +136,12 @@ export default function PurchasesPage() {
     }
   };
 
-  const filteredPurchases = purchases.filter(
-    (p) => p.poNumber.includes(searchTerm) || p.supplier.companyName.includes(searchTerm),
-  );
+  const term = (searchTerm ?? "").toLowerCase().trim();
+  const filteredPurchases = purchases.filter((p) => {
+    const pNumber = (p?.purchaseNumber ?? p?.poNumber ?? "").toLowerCase();
+    const sName = (p?.supplier?.companyName ?? "").toLowerCase();
+    return pNumber.includes(term) || sName.includes(term);
+  });
 
   const isRtl = i18n.language === "ar";
 
@@ -204,13 +208,13 @@ export default function PurchasesPage() {
                   <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
                     <td className="py-4 px-5 font-bold text-slate-800 flex items-center gap-2">
                       <ShoppingBag className="h-4 w-4 text-slate-400" />
-                      {p.poNumber}
+                      {p.purchaseNumber || p.poNumber || "—"}
                     </td>
-                    <td className="py-4 px-5 text-slate-700">{p.supplier.companyName}</td>
-                    <td className="py-4 px-5 text-slate-650">{p.warehouse.name}</td>
-                    <td className="py-4 px-5 font-bold text-slate-900">{formatPrice(p.totalAmount)}</td>
+                    <td className="py-4 px-5 text-slate-700">{p?.supplier?.companyName || "—"}</td>
+                    <td className="py-4 px-5 text-slate-650">{p?.warehouse?.name || "—"}</td>
+                    <td className="py-4 px-5 font-bold text-slate-900">{formatPrice(String(p?.totalAmount ?? 0))}</td>
                     <td className="py-4 px-5 text-slate-500 font-mono text-xs">
-                      {formatDate(p.createdAt)}
+                      {p?.createdAt ? formatDate(p.createdAt) : "—"}
                     </td>
                     <td className="py-4 px-5">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
