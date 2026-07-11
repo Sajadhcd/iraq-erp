@@ -355,7 +355,6 @@ export class AccountingService {
           },
         });
       }
-
       // Post the journal immediately
       await this.postJournalEntryTx(journalEntry.id, tx);
 
@@ -367,6 +366,301 @@ export class AccountingService {
 
       return updatedVoucher;
     });
+  }
+
+  // Dynamic system account resolver by purpose/type
+  async resolveSystemAccount(
+    db: any,
+    purpose:
+      | 'CASH'
+      | 'BANK'
+      | 'ACCOUNTS_RECEIVABLE'
+      | 'INVENTORY_ASSET'
+      | 'ACCOUNTS_PAYABLE'
+      | 'TAX_PAYABLE'
+      | 'SALES_REVENUE'
+      | 'COGS'
+      | 'INVENTORY_ADJUSTMENT',
+  ): Promise<string> {
+    const client = db || this.prisma;
+
+    if (purpose === 'CASH') {
+      const acc = await client.account.findFirst({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          OR: [
+            { isCashOrBank: true, cashBankType: 'CASH' },
+            { code: '101000' },
+            { type: AccountType.ASSET, nameEn: { contains: 'Cash', mode: 'insensitive' } },
+            { type: AccountType.ASSET, nameAr: { contains: 'خزينة' } },
+          ],
+        },
+      });
+      if (acc) return acc.id;
+      const created = await client.account.create({
+        data: {
+          code: '101000',
+          nameEn: 'Cash on Hand',
+          nameAr: 'الخزينة/النقدية بالخزينة',
+          type: AccountType.ASSET,
+          isCashOrBank: true,
+          cashBankType: 'CASH',
+          isActive: true,
+        },
+      });
+      return created.id;
+    }
+
+    if (purpose === 'BANK') {
+      const acc = await client.account.findFirst({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          OR: [
+            { isCashOrBank: true, cashBankType: 'BANK' },
+            { code: '102000' },
+            { type: AccountType.ASSET, nameEn: { contains: 'Bank', mode: 'insensitive' } },
+            { type: AccountType.ASSET, nameAr: { contains: 'بنك' } },
+          ],
+        },
+      });
+      if (acc) return acc.id;
+      const created = await client.account.create({
+        data: {
+          code: '102000',
+          nameEn: 'Bank Account',
+          nameAr: 'الحساب البنكي',
+          type: AccountType.ASSET,
+          isCashOrBank: true,
+          cashBankType: 'BANK',
+          isActive: true,
+        },
+      });
+      return created.id;
+    }
+
+    if (purpose === 'INVENTORY_ASSET') {
+      const acc = await client.account.findFirst({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          type: AccountType.ASSET,
+          OR: [
+            { code: '120000' },
+            { nameEn: { contains: 'Inventory', mode: 'insensitive' } },
+            { nameAr: { contains: 'مخزون' } },
+          ],
+        },
+      });
+      if (acc) return acc.id;
+      const created = await client.account.create({
+        data: {
+          code: '120000',
+          nameEn: 'Inventory Asset',
+          nameAr: 'مخزون السلع والبضائع',
+          type: AccountType.ASSET,
+          isActive: true,
+        },
+      });
+      return created.id;
+    }
+
+    if (purpose === 'ACCOUNTS_RECEIVABLE') {
+      const acc = await client.account.findFirst({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          type: AccountType.ASSET,
+          OR: [
+            { code: '110000' },
+            { nameEn: { contains: 'Receivable', mode: 'insensitive' } },
+            { nameAr: { contains: 'عملاء' } },
+          ],
+        },
+      });
+      if (acc) return acc.id;
+      const created = await client.account.create({
+        data: {
+          code: '110000',
+          nameEn: 'Accounts Receivable',
+          nameAr: 'ذمم عملاء مدينون',
+          type: AccountType.ASSET,
+          isActive: true,
+        },
+      });
+      return created.id;
+    }
+
+    if (purpose === 'ACCOUNTS_PAYABLE') {
+      const acc = await client.account.findFirst({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          type: AccountType.LIABILITY,
+          OR: [
+            { code: '210000' },
+            { nameEn: { contains: 'Payable', mode: 'insensitive' } },
+            { nameAr: { contains: 'موردين' } },
+          ],
+        },
+      });
+      if (acc) return acc.id;
+      const created = await client.account.create({
+        data: {
+          code: '210000',
+          nameEn: 'Accounts Payable',
+          nameAr: 'ذمم موردين دائنون',
+          type: AccountType.LIABILITY,
+          isActive: true,
+        },
+      });
+      return created.id;
+    }
+
+    if (purpose === 'TAX_PAYABLE') {
+      const acc = await client.account.findFirst({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          type: AccountType.LIABILITY,
+          OR: [
+            { code: '220000' },
+            { nameEn: { contains: 'Tax', mode: 'insensitive' } },
+            { nameAr: { contains: 'ضريبة' } },
+          ],
+        },
+      });
+      if (acc) return acc.id;
+      const created = await client.account.create({
+        data: {
+          code: '220000',
+          nameEn: 'Tax Payable',
+          nameAr: 'حساب ضريبة القيمة المضافة المستحقة',
+          type: AccountType.LIABILITY,
+          isActive: true,
+        },
+      });
+      return created.id;
+    }
+
+    if (purpose === 'SALES_REVENUE') {
+      const acc = await client.account.findFirst({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          type: AccountType.REVENUE,
+          OR: [
+            { code: '401000' },
+            { nameEn: { contains: 'Sales', mode: 'insensitive' } },
+            { nameAr: { contains: 'مبيعات' } },
+          ],
+        },
+      });
+      if (acc) return acc.id;
+      const created = await client.account.create({
+        data: {
+          code: '401000',
+          nameEn: 'Sales Revenue',
+          nameAr: 'إيرادات المبيعات',
+          type: AccountType.REVENUE,
+          isActive: true,
+        },
+      });
+      return created.id;
+    }
+
+    if (purpose === 'COGS') {
+      const acc = await client.account.findFirst({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          type: AccountType.EXPENSE,
+          OR: [
+            { code: '501000' },
+            { nameEn: { contains: 'COGS', mode: 'insensitive' } },
+            { nameEn: { contains: 'Cost of Goods', mode: 'insensitive' } },
+            { nameAr: { contains: 'تكلفة البضاعة' } },
+          ],
+        },
+      });
+      if (acc) return acc.id;
+      const created = await client.account.create({
+        data: {
+          code: '501000',
+          nameEn: 'Cost of Goods Sold (COGS)',
+          nameAr: 'تكلفة البضاعة المباعة',
+          type: AccountType.EXPENSE,
+          isActive: true,
+        },
+      });
+      return created.id;
+    }
+
+    if (purpose === 'INVENTORY_ADJUSTMENT') {
+      const acc = await client.account.findFirst({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          type: AccountType.EXPENSE,
+          OR: [
+            { code: '503000' },
+            { nameEn: { contains: 'Adjustment', mode: 'insensitive' } },
+            { nameAr: { contains: 'فروقات' } },
+            { nameAr: { contains: 'تسوية' } },
+          ],
+        },
+      });
+      if (acc) return acc.id;
+      const created = await client.account.create({
+        data: {
+          code: '503000',
+          nameEn: 'Inventory Adjustment Loss/Gain',
+          nameAr: 'فروقات وتعديلات المخزون',
+          type: AccountType.EXPENSE,
+          isActive: true,
+        },
+      });
+      return created.id;
+    }
+
+    throw new NotFoundException(`Cannot resolve system account for purpose: ${purpose}`);
+  }
+
+  async resolveAccountByCodeOrPurpose(db: any, codeOrPurpose: string): Promise<string> {
+    const client = db || this.prisma;
+    const acc = await client.account.findFirst({
+      where: { code: codeOrPurpose, deletedAt: null },
+    });
+    if (acc) return acc.id;
+
+    const codePurposeMap: Record<string, any> = {
+      '101000': 'CASH',
+      '102000': 'BANK',
+      '110000': 'ACCOUNTS_RECEIVABLE',
+      '120000': 'INVENTORY_ASSET',
+      '210000': 'ACCOUNTS_PAYABLE',
+      '220000': 'TAX_PAYABLE',
+      '401000': 'SALES_REVENUE',
+      '501000': 'COGS',
+      '503000': 'INVENTORY_ADJUSTMENT',
+    };
+
+    const mappedPurpose = codePurposeMap[codeOrPurpose];
+    if (mappedPurpose) {
+      return this.resolveSystemAccount(client, mappedPurpose);
+    }
+
+    const created = await client.account.create({
+      data: {
+        code: codeOrPurpose,
+        nameEn: `Account ${codeOrPurpose}`,
+        nameAr: `حساب ${codeOrPurpose}`,
+        type: AccountType.EXPENSE,
+        isActive: true,
+      },
+    });
+    return created.id;
   }
 
   async getVouchers() {
@@ -406,38 +700,6 @@ export class AccountingService {
   ) {
     const db = tx || this.prisma;
 
-    // Fetch required seeded default accounts
-    const accountsList = await db.account.findMany({
-      where: {
-        code: {
-          in: [
-            '101000',
-            '102000',
-            '110000',
-            '120000',
-            '210000',
-            '220000',
-            '301000',
-            '401000',
-            '501000',
-            '503000',
-          ],
-        },
-      },
-    });
-
-    const accountsMap = new Map<string, string>(
-      accountsList.map((a: any) => [a.code, a.id]),
-    );
-    const getAccountId = (code: string): string => {
-      const id = accountsMap.get(code);
-      if (!id)
-        throw new NotFoundException(
-          `Default account with code ${code} not found in Chart of Accounts.`,
-        );
-      return id;
-    };
-
     const journalItems: JournalItemDto[] = [];
     let entryNotes = '';
 
@@ -448,45 +710,41 @@ export class AccountingService {
       const net = params.amount; // total amount inclusive of tax
       const rev = net - tax;
 
-      // Debit: Cash/Bank (Immediate payment) or Accounts Receivable (on credit)
-      const cashOrBankCode =
-        params.paymentMethod === 'CASH' ? '101000' : '102000';
+      const cashOrBankPurpose =
+        params.paymentMethod === 'CASH' ? 'CASH' : 'BANK';
 
       journalItems.push({
-        accountId: getAccountId(cashOrBankCode),
+        accountId: await this.resolveSystemAccount(db, cashOrBankPurpose),
         debit: net,
         credit: 0,
         description: `فاتورة مبيعات رقم ${params.referenceNumber}`,
       });
 
-      // Credit: Sales Revenue
       journalItems.push({
-        accountId: getAccountId('401000'),
+        accountId: await this.resolveSystemAccount(db, 'SALES_REVENUE'),
         debit: 0,
         credit: rev,
         description: `إيرادات مبيعات فاتورة رقم ${params.referenceNumber}`,
       });
 
-      // Credit: Tax Payable (if any)
       if (tax > 0) {
         journalItems.push({
-          accountId: getAccountId('220000'),
+          accountId: await this.resolveSystemAccount(db, 'TAX_PAYABLE'),
           debit: 0,
           credit: tax,
           description: `ضريبة مبيعات فاتورة رقم ${params.referenceNumber}`,
         });
       }
 
-      // Add COGS transaction if cogsAmount > 0
       if (params.cogsAmount && params.cogsAmount > 0) {
         journalItems.push({
-          accountId: getAccountId('501000'), // Debit COGS Expense
+          accountId: await this.resolveSystemAccount(db, 'COGS'),
           debit: params.cogsAmount,
           credit: 0,
           description: `تكلفة البضاعة المباعة فاتورة رقم ${params.referenceNumber}`,
         });
         journalItems.push({
-          accountId: getAccountId('120000'), // Credit Inventory Asset
+          accountId: await this.resolveSystemAccount(db, 'INVENTORY_ASSET'),
           debit: 0,
           credit: params.cogsAmount,
           description: `تخفيض المخزون للمبيعات فاتورة رقم ${params.referenceNumber}`,
@@ -496,30 +754,27 @@ export class AccountingService {
       entryNotes = `قيد مبيعات تلقائي للفاتورة رقم ${params.referenceNumber}`;
     } else if (params.type === 'PURCHASE') {
       const tax = params.taxAmount || 0;
-      const total = params.amount; // Inclusive of tax
+      const total = params.amount;
       const invCost = total - tax;
 
-      // Debit: Inventory Asset (120000)
       journalItems.push({
-        accountId: getAccountId('120000'),
+        accountId: await this.resolveSystemAccount(db, 'INVENTORY_ASSET'),
         debit: invCost,
         credit: 0,
         description: `شراء مخزون أمر رقم ${params.referenceNumber}`,
       });
 
-      // Debit: Tax Payable Input VAT (220000)
       if (tax > 0) {
         journalItems.push({
-          accountId: getAccountId('220000'),
+          accountId: await this.resolveSystemAccount(db, 'TAX_PAYABLE'),
           debit: tax,
           credit: 0,
           description: `ضريبة مدخلات مشتريات أمر رقم ${params.referenceNumber}`,
         });
       }
 
-      // Credit: Accounts Payable (210000)
       journalItems.push({
-        accountId: getAccountId('210000'),
+        accountId: await this.resolveSystemAccount(db, 'ACCOUNTS_PAYABLE'),
         debit: 0,
         credit: total,
         description: `مستحقات الموردين أمر رقم ${params.referenceNumber}`,
@@ -527,19 +782,18 @@ export class AccountingService {
 
       entryNotes = `قيد مشتريات تلقائي لأمر رقم ${params.referenceNumber}`;
     } else if (params.type === 'CUSTOMER_PAYMENT') {
-      // Customer payment logs: Debit Cash/Bank, Credit Accounts Receivable
-      const cashOrBankCode =
-        params.paymentMethod === 'CASH' ? '101000' : '102000';
+      const cashOrBankPurpose =
+        params.paymentMethod === 'CASH' ? 'CASH' : 'BANK';
 
       journalItems.push({
-        accountId: getAccountId(cashOrBankCode),
+        accountId: await this.resolveSystemAccount(db, cashOrBankPurpose),
         debit: params.amount,
         credit: 0,
         description: `سداد عميل للفاتورة رقم ${params.referenceNumber}`,
       });
 
       journalItems.push({
-        accountId: getAccountId('110000'), // Accounts Receivable
+        accountId: await this.resolveSystemAccount(db, 'ACCOUNTS_RECEIVABLE'),
         debit: 0,
         credit: params.amount,
         description: `تخفيض مستحقات عميل للفاتورة رقم ${params.referenceNumber}`,
@@ -547,19 +801,18 @@ export class AccountingService {
 
       entryNotes = `سداد تلقائي من عميل للفاتورة ${params.referenceNumber}`;
     } else if (params.type === 'SUPPLIER_PAYMENT') {
-      // Supplier payment logs: Debit Accounts Payable, Credit Cash/Bank
-      const cashOrBankCode =
-        params.paymentMethod === 'CASH' ? '101000' : '102000';
+      const cashOrBankPurpose =
+        params.paymentMethod === 'CASH' ? 'CASH' : 'BANK';
 
       journalItems.push({
-        accountId: getAccountId('210000'), // Accounts Payable
+        accountId: await this.resolveSystemAccount(db, 'ACCOUNTS_PAYABLE'),
         debit: params.amount,
         credit: 0,
         description: `سداد دفعة للمورد للفاتورة رقم ${params.referenceNumber}`,
       });
 
       journalItems.push({
-        accountId: getAccountId(cashOrBankCode),
+        accountId: await this.resolveSystemAccount(db, cashOrBankPurpose),
         debit: 0,
         credit: params.amount,
         description: `دفع نقدية للمورد للفاتورة رقم ${params.referenceNumber}`,
@@ -567,46 +820,50 @@ export class AccountingService {
 
       entryNotes = `سداد تلقائي للمورد لأمر رقم ${params.referenceNumber}`;
     } else if (params.type === 'STOCK_ADJUSTMENT') {
-      // Stock Adjustment: Debit/Credit Inventory vs Inventory Adjustment Expense
       if (!params.items || params.items.length === 0) {
-        // Fallback default stock adjustment
         const isStockIn = params.amount > 0;
         const absAmount = Math.abs(params.amount);
 
         if (isStockIn) {
-          // Stock In: Debit Inventory (120000), Credit Inventory Gain (503000)
           journalItems.push({
-            accountId: getAccountId('120000'),
+            accountId: await this.resolveSystemAccount(db, 'INVENTORY_ASSET'),
             debit: absAmount,
             credit: 0,
             description: `تسوية مخزون بالزيادة رقم ${params.referenceNumber}`,
           });
           journalItems.push({
-            accountId: getAccountId('503000'),
+            accountId: await this.resolveSystemAccount(
+              db,
+              'INVENTORY_ADJUSTMENT',
+            ),
             debit: 0,
             credit: absAmount,
             description: `أرباح تسوية المخزون رقم ${params.referenceNumber}`,
           });
         } else {
-          // Stock Out: Debit Inventory Loss (503000), Credit Inventory (120000)
           journalItems.push({
-            accountId: getAccountId('503000'),
+            accountId: await this.resolveSystemAccount(
+              db,
+              'INVENTORY_ADJUSTMENT',
+            ),
             debit: absAmount,
             credit: 0,
             description: `خسائر تسوية المخزون رقم ${params.referenceNumber}`,
           });
           journalItems.push({
-            accountId: getAccountId('120000'),
+            accountId: await this.resolveSystemAccount(db, 'INVENTORY_ASSET'),
             debit: 0,
             credit: absAmount,
             description: `تسوية مخزون بالنقص رقم ${params.referenceNumber}`,
           });
         }
       } else {
-        // Custom items provided
         for (const item of params.items) {
           journalItems.push({
-            accountId: getAccountId(item.accountCode),
+            accountId: await this.resolveAccountByCodeOrPurpose(
+              db,
+              item.accountCode,
+            ),
             debit: item.debit,
             credit: item.credit,
             description:

@@ -163,7 +163,12 @@ export class ReportsService {
         // Revenue increases with credit
         revenue += credit - debit;
       } else if (type === AccountType.EXPENSE) {
-        if (item.account.code === '501000') {
+        if (
+          item.account.code === '501000' ||
+          item.account.nameEn.toLowerCase().includes('cost of goods') ||
+          item.account.nameEn.toLowerCase().includes('cogs') ||
+          item.account.nameAr.includes('تكلفة البضاعة')
+        ) {
           // COGS
           cogs += debit - credit;
         } else {
