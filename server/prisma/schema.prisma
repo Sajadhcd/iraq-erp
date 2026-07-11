@@ -103,6 +103,7 @@ model Permission {
   createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz
   updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
   roles       RolePermission[]
+  users       UserPermission[]
 
   @@map("permissions")
 }
@@ -144,6 +145,9 @@ model User {
   rejectedQuotations  Quotation[]    @relation("QuotationRejectedBy")
   salesOrders         SalesOrder[]   @relation("SalesOrderSalesperson")
 
+  userPermissions     UserPermission[]
+  assignedCustomers   Customer[]     @relation("CustomerSalesperson")
+
   @@index([email])
   @@map("users")
 }
@@ -184,12 +188,14 @@ model Employee {
   
   userId               String?               @unique @map("user_id") @db.Uuid
   roleId               String                @map("role_id") @db.Uuid
+  warehouseId          String?               @map("warehouse_id") @db.Uuid
   deletedAt            DateTime?             @map("deleted_at") @db.Timestamptz
   createdAt            DateTime              @default(now()) @map("created_at") @db.Timestamptz
   updatedAt            DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
   
   user                 User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
   role                 Role                  @relation(fields: [roleId], references: [id])
+  warehouse            Warehouse?            @relation("EmployeeWarehouse", fields: [warehouseId], references: [id], onDelete: SetNull)
   cashRegisterSessions CashRegisterSession[]
   
   managedDepartments   Department[]          @relation("DeptManager")
@@ -363,6 +369,7 @@ model Warehouse {
   cashRegisters CashRegister[]
   salesOrders   SalesOrder[]
   deliveryNotes DeliveryNote[]
+  employees     Employee[]     @relation("EmployeeWarehouse")
 
   @@map("warehouses")
 }
@@ -394,12 +401,14 @@ model Customer {
   balance       Decimal   @default(0.00) @db.Decimal(15, 2)
   taxNumber     String?   @map("tax_number") @db.VarChar(50)
   loyaltyPoints Int       @default(0) @map("loyalty_points")
+  salespersonId String?   @map("salesperson_id") @db.Uuid
   deletedAt     DateTime? @map("deleted_at") @db.Timestamptz
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
   sales         Sale[]
   quotations    Quotation[]
   salesOrders   SalesOrder[]
+  salesperson   User?     @relation("CustomerSalesperson", fields: [salespersonId], references: [id], onDelete: SetNull)
 
   @@map("customers")
 }
@@ -1219,6 +1228,17 @@ model Payslip {
   createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
 
   @@map("hr_payslips")
+}
+
+model UserPermission {
+  userId       String     @map("user_id") @db.Uuid
+  permissionId String     @map("permission_id") @db.Uuid
+  isAllowed    Boolean    @default(true) @map("is_allowed")
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, permissionId])
+  @@map("user_permissions")
 }
 
 

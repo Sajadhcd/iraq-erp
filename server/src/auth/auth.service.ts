@@ -49,15 +49,56 @@ export class AuthService {
       data: { lastLogin: new Date() },
     });
 
-    const payload = { sub: user.id, email: user.email };
+    // Compile active permissions
+    const activePermissions = new Set<string>();
+
+    // 1. Inherit from role
+    if (user.employee?.role?.id) {
+      const rolePermissions = await this.prisma.rolePermission.findMany({
+        where: { roleId: user.employee.roleId },
+        include: { permission: true },
+      });
+      rolePermissions.forEach((rp) => {
+        if (rp.permission?.action) {
+          activePermissions.add(rp.permission.action);
+        }
+      });
+    }
+
+    // 2. User-specific overrides
+    const userPermissions = await this.prisma.userPermission.findMany({
+      where: { userId: user.id },
+      include: { permission: true },
+    });
+    userPermissions.forEach((up) => {
+      if (up.permission?.action) {
+        if (up.isAllowed) {
+          activePermissions.add(up.permission.action);
+        } else {
+          activePermissions.delete(up.permission.action);
+        }
+      }
+    });
+
+    const permissionsList = Array.from(activePermissions);
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.employee?.role?.name || 'SALES_AGENT',
+      permissions: permissionsList,
+    };
+
     return {
       token: this.jwtService.sign(payload),
       user: {
+        id: user.id,
         email: user.email,
         name: user.employee
           ? `${user.employee.firstName} ${user.employee.lastName}`
           : 'مدير النظام',
         role: user.employee?.role?.name || 'SALES_AGENT',
+        permissions: permissionsList,
       },
     };
   }

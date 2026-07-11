@@ -15,10 +15,16 @@ async function main() {
     { name: "SALES_MANAGER", description: "مدير المبيعات / Sales Manager" },
     { name: "SALES_AGENT", description: "مندوب مبيعات / Sales Agent" },
     { name: "PURCHASE_MANAGER", description: "مدير المشتريات / Purchase Manager" },
+    { name: "PURCHASING_OFFICER", description: "موظف المشتريات / Purchasing Officer" },
     { name: "INVENTORY_MANAGER", description: "مدير المستودعات / Inventory Manager" },
+    { name: "WAREHOUSE_EMPLOYEE", description: "موظف مستودع / Warehouse Employee" },
+    { name: "ACCOUNTING_MANAGER", description: "مدير الحسابات / Accounting Manager" },
     { name: "ACCOUNTANT", description: "محاسب / Accountant" },
     { name: "CASHIER", description: "أمين صندوق مبيعات / Cashier" },
+    { name: "CUSTOMER_SERVICE", description: "خدمة العملاء / Customer Service" },
+    { name: "MARKETING", description: "التسويق / Marketing" },
     { name: "EMPLOYEE", description: "موظف عام / Employee" },
+    { name: "AUDITOR", description: "مدقق حسابات / Auditor" },
   ];
 
   const roleEntities: Record<string, any> = {};
@@ -127,30 +133,33 @@ async function main() {
     console.log(`Mapped ${actions.length} permissions to role: ${roleName}`);
   };
 
-  // 1. SUPER_ADMIN gets all permissions
+  // Map permissions to roles
   const allActions = permissions.map(p => p.action);
+
+  // 1. SUPER_ADMIN gets all
   await mapPermissionsToRole("SUPER_ADMIN", allActions);
 
-  // 2. ADMIN gets everything except system user management settings (users:manage)
+  // 2. ADMIN gets everything except system user overrides (users:manage)
   const adminActions = allActions.filter(act => act !== "users:manage");
   await mapPermissionsToRole("ADMIN", adminActions);
 
-  // 3. HR_MANAGER gets employees, attendance, leaves, payroll
+  // 3. HR_MANAGER
   await mapPermissionsToRole("HR_MANAGER", [
     "hr:view", "hr:create", "hr:edit", "hr:delete", "hr:documents",
     "attendance:view", "attendance:manage",
     "leave:view", "leave:manage",
-    "payroll:view", "payroll:manage"
+    "payroll:view", "payroll:manage",
+    "reports:view"
   ]);
 
-  // 4. HR_EMPLOYEE gets employees, attendance, leaves
+  // 4. HR_EMPLOYEE
   await mapPermissionsToRole("HR_EMPLOYEE", [
     "hr:view", "hr:create", "hr:edit", "hr:documents",
     "attendance:view", "attendance:manage",
     "leave:view", "leave:manage"
   ]);
 
-  // 5. SALES_MANAGER gets CRM, Quotations, Sales Orders, POS, Customers
+  // 5. SALES_MANAGER
   await mapPermissionsToRole("SALES_MANAGER", [
     "crm:view", "crm:create", "crm:edit", "crm:delete", "crm:assign", "crm:convert",
     "quotations:view", "quotations:create", "quotations:edit", "quotations:delete", "quotations:approve", "quotations:print",
@@ -159,41 +168,82 @@ async function main() {
     "reports:view"
   ]);
 
-  // 6. SALES_AGENT gets CRM, Quotations, POS
+  // 6. SALES_AGENT
   await mapPermissionsToRole("SALES_AGENT", [
     "crm:view", "crm:create", "crm:edit",
     "quotations:view", "quotations:create", "quotations:edit",
+    "sales_orders:view",
     "sales:checkout"
   ]);
 
-  // 7. PURCHASE_MANAGER gets suppliers, purchase orders, receiving
+  // 7. PURCHASE_MANAGER
   await mapPermissionsToRole("PURCHASE_MANAGER", [
+    "purchasing:view", "purchasing:manage",
+    "products:view",
+    "reports:view"
+  ]);
+
+  // 8. PURCHASING_OFFICER
+  await mapPermissionsToRole("PURCHASING_OFFICER", [
     "purchasing:view", "purchasing:manage",
     "products:view"
   ]);
 
-  // 8. INVENTORY_MANAGER gets warehouses, products, stock transfers/adjustments
+  // 9. INVENTORY_MANAGER
   await mapPermissionsToRole("INVENTORY_MANAGER", [
     "products:view", "products:create", "products:edit", "products:delete",
-    "inventory:view", "inventory:manage"
+    "inventory:view", "inventory:manage",
+    "reports:view"
   ]);
 
-  // 9. ACCOUNTANT gets accounting, journal entries, reports, expenses
-  await mapPermissionsToRole("ACCOUNTANT", [
+  // 10. WAREHOUSE_EMPLOYEE
+  await mapPermissionsToRole("WAREHOUSE_EMPLOYEE", [
+    "inventory:view", "inventory:manage",
+    "products:view"
+  ]);
+
+  // 11. ACCOUNTING_MANAGER
+  await mapPermissionsToRole("ACCOUNTING_MANAGER", [
     "accounting:view", "accounting:manage", "accounting:post",
     "reports:view",
     "payroll:view"
   ]);
 
-  // 10. CASHIER gets POS and payments
-  await mapPermissionsToRole("CASHIER", [
-    "sales:checkout"
+  // 12. ACCOUNTANT
+  await mapPermissionsToRole("ACCOUNTANT", [
+    "accounting:view", "accounting:manage",
+    "payroll:view"
   ]);
 
-  // 11. EMPLOYEE gets minimal view access
+  // 13. CASHIER
+  await mapPermissionsToRole("CASHIER", [
+    "sales:checkout", "sales:view"
+  ]);
+
+  // 14. CUSTOMER_SERVICE
+  await mapPermissionsToRole("CUSTOMER_SERVICE", [
+    "crm:view", "crm:edit"
+  ]);
+
+  // 15. MARKETING
+  await mapPermissionsToRole("MARKETING", [
+    "crm:view", "crm:create"
+  ]);
+
+  // 16. EMPLOYEE
   await mapPermissionsToRole("EMPLOYEE", [
     "attendance:view",
-    "leave:view"
+    "leave:view",
+    "payroll:view"
+  ]);
+
+  // 17. AUDITOR
+  await mapPermissionsToRole("AUDITOR", [
+    "reports:view",
+    "accounting:view",
+    "sales:view",
+    "purchasing:view",
+    "inventory:view"
   ]);
 
   // 3. Create Default Admin User & Employee if not exists

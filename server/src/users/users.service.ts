@@ -21,7 +21,6 @@ export class UsersService {
       throw new BadRequestException('البريد الإلكتروني واسم المستخدم وكلمة المرور مطلوبة.');
     }
 
-    // Check duplicate email
     const existingEmail = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
@@ -29,7 +28,6 @@ export class UsersService {
       throw new BadRequestException('البريد الإلكتروني مسجل بالفعل.');
     }
 
-    // Check duplicate username
     const existingUsername = await this.prisma.user.findUnique({
       where: { username: data.username },
     });
@@ -49,15 +47,12 @@ export class UsersService {
         },
       });
 
-      // Handle Employee Link
       if (data.employeeId) {
-        // Unlink previous users from this employee if any
         await tx.employee.update({
           where: { id: data.employeeId },
           data: { userId: user.id },
         });
 
-        // Set Role on Employee if provided
         if (data.roleId) {
           await tx.employee.update({
             where: { id: data.employeeId },
@@ -66,7 +61,6 @@ export class UsersService {
         }
       }
 
-      // Log action
       await tx.auditLog.create({
         data: {
           action: 'USER_CREATED',
@@ -124,7 +118,6 @@ export class UsersService {
   ) {
     const user = await this.findOne(id);
 
-    // Check duplicate email
     if (data.email !== user.email) {
       const existingEmail = await this.prisma.user.findUnique({
         where: { email: data.email },
@@ -134,7 +127,6 @@ export class UsersService {
       }
     }
 
-    // Check duplicate username
     if (data.username !== user.username) {
       const existingUsername = await this.prisma.user.findUnique({
         where: { username: data.username },
@@ -153,7 +145,6 @@ export class UsersService {
         },
       });
 
-      // If user had a previously linked employee, unlink them first
       if (user.employee && user.employee.id !== data.employeeId) {
         await tx.employee.update({
           where: { id: user.employee.id },
@@ -161,14 +152,12 @@ export class UsersService {
         });
       }
 
-      // Link to new employee
       if (data.employeeId) {
         await tx.employee.update({
           where: { id: data.employeeId },
           data: { userId: id },
         });
 
-        // Set Role on Employee
         if (data.roleId) {
           await tx.employee.update({
             where: { id: data.employeeId },
@@ -240,7 +229,7 @@ export class UsersService {
   }
 
   // ==========================================
-  // CHANGE PASSWORD (BY USER THEMSELVES)
+  // CHANGE PASSWORD
   // ==========================================
   async changePassword(
     id: string,
@@ -275,13 +264,12 @@ export class UsersService {
   }
 
   // ==========================================
-  // REMOVE USER (SOFT DELETE)
+  // REMOVE USER
   // ==========================================
   async remove(id: string, currentUserId?: string) {
     const user = await this.findOne(id);
 
     return this.prisma.$transaction(async (tx) => {
-      // Unlink employee to release unique constraint
       if (user.employee) {
         await tx.employee.update({
           where: { id: user.employee.id },
@@ -305,5 +293,282 @@ export class UsersService {
 
       return updated;
     });
+  }
+
+  // ==========================================
+  // ROLES MANAGEMENT
+  // ==========================================
+  async getRoles() {
+    return this.prisma.role.findMany({
+      include: {
+        permissions: {
+          include: { permission: true },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  async createRole(data: { name: string; description?: string; permissionIds?: string[]; currentUserId?: string }) {
+    const existing = await this.prisma.role.findUnique({ where: { name: data.name } });
+    if (existing) throw new BadRequestException('اسم الدور مسجل بالفعل.');
+
+    return this.prisma.$transaction(async (tx) => {
+      const role = await tx.role.create({
+        data: {
+          name: data.name,
+          description: data.description,
+        },
+      });
+
+      if (data.permissionIds) {
+        for (const pId of data.permissionIds) {
+          await tx.rolePermission.create({
+            data: {
+              roleId: role.id,
+              permissionId: pId,
+            },
+          });
+        }
+      }
+
+      await tx.auditLog.create({
+        data: {
+          action: 'ROLE_CREATED',
+          entityName: 'Role',
+          entityId: role.id,
+          userId: data.currentUserId || null,
+          newValues: { name: role.name } as any,
+        },
+      });
+
+      return role;
+    });
+  }
+
+  async updateRole(id: string, data: { name: string; description?: string; permissionIds?: string[]; currentUserId?: string }) {
+    const role = await this.prisma.role.findUnique({ where: { id } });
+    if (!role) throw new NotFoundException('الدور غير موجود.');
+
+    if (data.name !== role.name) {
+      const existing = await this.prisma.role.findUnique({ where: { name: data.name } });
+      if (existing) throw new BadRequestException('اسم الدور مسجل بالفعل لدور آخر.');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.role.update({
+        where: { id },
+        data: {
+          name: data.name,
+          description: data.description,
+        },
+      });
+
+      await tx.rolePermission.deleteMany({ where: { roleId: id } });
+
+      if (data.permissionIds) {
+        for (const pId of data.permissionIds) {
+          await tx.rolePermission.create({
+            data: {
+              roleId: id,
+              permissionId: pId,
+            },
+          });
+        }
+      }
+
+      await tx.auditLog.create({
+        data: {
+          action: 'ROLE_UPDATED',
+          entityName: 'Role',
+          entityId: id,
+          userId: data.currentUserId || null,
+          newValues: { name: data.name } as any,
+        },
+      });
+
+      return updated;
+    });
+  }
+
+  async deleteRole(id: string, currentUserId?: string) {
+    const role = await this.prisma.role.findUnique({ where: { id } });
+    if (!role) throw new NotFoundException('الدور غير موجود.');
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.rolePermission.deleteMany({ where: { roleId: id } });
+      const deleted = await tx.role.delete({ where: { id } });
+
+      await tx.auditLog.create({
+        data: {
+          action: 'ROLE_DELETED',
+          entityName: 'Role',
+          entityId: id,
+          userId: currentUserId || null,
+        },
+      });
+
+      return deleted;
+    });
+  }
+
+  // ==========================================
+  // PERMISSIONS & MATRIX
+  // ==========================================
+  async getPermissions() {
+    return this.prisma.permission.findMany({
+      orderBy: { action: 'asc' },
+    });
+  }
+
+  async updateMatrix(data: { matrix: { roleId: string; permissionId: string; granted: boolean }[]; currentUserId?: string }) {
+    return this.prisma.$transaction(async (tx) => {
+      for (const item of data.matrix) {
+        if (item.granted) {
+          await tx.rolePermission.upsert({
+            where: {
+              roleId_permissionId: {
+                roleId: item.roleId,
+                permissionId: item.permissionId,
+              },
+            },
+            update: {},
+            create: {
+              roleId: item.roleId,
+              permissionId: item.permissionId,
+            },
+          });
+        } else {
+          await tx.rolePermission.deleteMany({
+            where: {
+              roleId: item.roleId,
+              permissionId: item.permissionId,
+            },
+          });
+        }
+      }
+
+      await tx.auditLog.create({
+        data: {
+          action: 'PERMISSION_MATRIX_UPDATED',
+          entityName: 'RolePermission',
+          entityId: 'MATRIX',
+          userId: data.currentUserId || null,
+        },
+      });
+
+      return { success: true };
+    });
+  }
+
+  // ==========================================
+  // USER PERMISSION OVERRIDES
+  // ==========================================
+  async getUserPermissions(userId: string) {
+    const user = await this.findOne(userId);
+    const allPermissions = await this.getPermissions();
+
+    const rolePerms = await this.prisma.rolePermission.findMany({
+      where: { roleId: user.employee?.roleId || '' },
+    });
+    const inheritedIds = new Set(rolePerms.map((rp) => rp.permissionId));
+
+    const overrides = await this.prisma.userPermission.findMany({
+      where: { userId },
+    });
+    const overrideMap = new Map(overrides.map((o) => [o.permissionId, o.isAllowed]));
+
+    return allPermissions.map((p) => {
+      const isInherited = inheritedIds.has(p.id);
+      const userOverride = overrideMap.get(p.id);
+
+      let overrideStatus = 'INHERIT';
+      if (userOverride !== undefined) {
+        overrideStatus = userOverride ? 'ALLOW' : 'DENY';
+      }
+
+      let active = isInherited;
+      if (overrideStatus === 'ALLOW') active = true;
+      if (overrideStatus === 'DENY') active = false;
+
+      return {
+        id: p.id,
+        action: p.action,
+        description: p.description,
+        inherited: isInherited,
+        overrideStatus,
+        active,
+      };
+    });
+  }
+
+  async updateUserPermissions(userId: string, data: { overrides: { permissionId: string; status: 'ALLOW' | 'DENY' | 'INHERIT' }[]; currentUserId?: string }) {
+    await this.findOne(userId);
+
+    return this.prisma.$transaction(async (tx) => {
+      for (const item of data.overrides) {
+        await tx.userPermission.deleteMany({
+          where: {
+            userId,
+            permissionId: item.permissionId,
+          },
+        });
+
+        if (item.status === 'ALLOW') {
+          await tx.userPermission.create({
+            data: {
+              userId,
+              permissionId: item.permissionId,
+              isAllowed: true,
+            },
+          });
+        } else if (item.status === 'DENY') {
+          await tx.userPermission.create({
+            data: {
+              userId,
+              permissionId: item.permissionId,
+              isAllowed: false,
+            },
+          });
+        }
+      }
+
+      await tx.auditLog.create({
+        data: {
+          action: 'USER_OVERRIDES_UPDATED',
+          entityName: 'UserPermission',
+          entityId: userId,
+          userId: data.currentUserId || null,
+        },
+      });
+
+      return { success: true };
+    });
+  }
+
+  // ==========================================
+  // AUDIT LOGS & SESSION METRICS
+  // ==========================================
+  async getAuditLogs() {
+    return this.prisma.auditLog.findMany({
+      include: {
+        user: {
+          include: { employee: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+    });
+  }
+
+  async getSessionMetrics() {
+    // Return mock session analytics for Security Center reviews
+    const activeSessions = [
+      { id: "SESS-1", ip: "192.168.1.55", device: "Chrome / Windows 11", email: "admin@system.com", lastActive: new Date().toISOString() }
+    ];
+    const failedLogins = [
+      { id: "FL-1", ip: "197.33.2.14", email: "invalid@system.com", attemptTime: new Date(Date.now() - 3600000).toISOString(), reason: "Incorrect credentials" }
+    ];
+    return { activeSessions, failedLogins };
   }
 }

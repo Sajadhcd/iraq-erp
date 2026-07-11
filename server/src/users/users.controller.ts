@@ -9,6 +9,86 @@ import { Roles } from '../auth/roles.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  // ==========================================
+  // AUDIT LOGS & SESSION METRICS
+  // ==========================================
+  @Get('audit-logs')
+  @Roles('SUPER_ADMIN')
+  async getAuditLogs() {
+    return this.usersService.getAuditLogs();
+  }
+
+  @Get('session-metrics')
+  @Roles('SUPER_ADMIN')
+  async getSessionMetrics() {
+    return this.usersService.getSessionMetrics();
+  }
+
+  // ==========================================
+  // ROLES MANAGEMENT
+  // ==========================================
+  @Get('roles')
+  @Roles('SUPER_ADMIN')
+  async getRoles() {
+    return this.usersService.getRoles();
+  }
+
+  @Post('roles')
+  @Roles('SUPER_ADMIN')
+  async createRole(@Body() data: any, @Req() req: any) {
+    const currentUserId = req.user?.userId;
+    return this.usersService.createRole({ ...data, currentUserId });
+  }
+
+  @Put('roles/:id')
+  @Roles('SUPER_ADMIN')
+  async updateRole(@Param('id') id: string, @Body() data: any, @Req() req: any) {
+    const currentUserId = req.user?.userId;
+    return this.usersService.updateRole(id, { ...data, currentUserId });
+  }
+
+  @Delete('roles/:id')
+  @Roles('SUPER_ADMIN')
+  async deleteRole(@Param('id') id: string, @Req() req: any) {
+    const currentUserId = req.user?.userId;
+    return this.usersService.deleteRole(id, currentUserId);
+  }
+
+  // ==========================================
+  // PERMISSIONS & MATRIX
+  // ==========================================
+  @Get('permissions')
+  @Roles('SUPER_ADMIN')
+  async getPermissions() {
+    return this.usersService.getPermissions();
+  }
+
+  @Put('matrix')
+  @Roles('SUPER_ADMIN')
+  async updateMatrix(@Body() data: any, @Req() req: any) {
+    const currentUserId = req.user?.userId;
+    return this.usersService.updateMatrix({ ...data, currentUserId });
+  }
+
+  // ==========================================
+  // USER OVERRIDES
+  // ==========================================
+  @Get(':id/permissions')
+  @Roles('SUPER_ADMIN')
+  async getUserPermissions(@Param('id') id: string) {
+    return this.usersService.getUserPermissions(id);
+  }
+
+  @Put(':id/permissions')
+  @Roles('SUPER_ADMIN')
+  async updateUserPermissions(@Param('id') id: string, @Body() data: any, @Req() req: any) {
+    const currentUserId = req.user?.userId;
+    return this.usersService.updateUserPermissions(id, { ...data, currentUserId });
+  }
+
+  // ==========================================
+  // BASIC USER CRUD & PASSWORDS
+  // ==========================================
   @Post()
   @Roles('SUPER_ADMIN')
   async create(

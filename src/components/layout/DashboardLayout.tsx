@@ -62,44 +62,28 @@ const sidebarItems: SidebarItem[] = [
   { key: "settings", name: "الإعدادات العامة", href: "/settings", icon: SettingsIcon },
 ];
 
-const ROLE_PAGE_ACCESS: Record<string, string[]> = {
-  SUPER_ADMIN: [
-    "dashboard", "pos", "products", "categories", "sales", "inventory", "purchases",
-    "expenses", "accounting", "crm", "quotations", "sales-orders", "customers", "suppliers",
-    "reports", "hrms", "attendance", "leave", "payroll", "employees", "users", "settings"
-  ],
-  ADMIN: [
-    "dashboard", "pos", "products", "categories", "sales", "inventory", "purchases",
-    "expenses", "accounting", "crm", "quotations", "sales-orders", "customers", "suppliers",
-    "reports", "hrms", "attendance", "leave", "payroll", "employees"
-  ],
-  HR_MANAGER: [
-    "dashboard", "hrms", "attendance", "leave", "payroll", "employees"
-  ],
-  HR_EMPLOYEE: [
-    "dashboard", "hrms", "attendance", "leave", "employees"
-  ],
-  SALES_MANAGER: [
-    "dashboard", "crm", "quotations", "sales-orders", "pos", "sales", "customers", "reports"
-  ],
-  SALES_AGENT: [
-    "dashboard", "crm", "quotations", "pos"
-  ],
-  PURCHASE_MANAGER: [
-    "dashboard", "purchases", "suppliers", "products"
-  ],
-  INVENTORY_MANAGER: [
-    "dashboard", "products", "categories", "inventory"
-  ],
-  ACCOUNTANT: [
-    "dashboard", "accounting", "expenses", "reports", "payroll"
-  ],
-  CASHIER: [
-    "dashboard", "pos"
-  ],
-  EMPLOYEE: [
-    "dashboard", "attendance", "leave", "payroll"
-  ],
+const SIDEBAR_PERMISSIONS: Record<string, string> = {
+  dashboard: "dashboard:view",
+  pos: "sales:checkout",
+  products: "products:view",
+  categories: "products:view",
+  sales: "sales:view",
+  "sales-orders": "sales_orders:view",
+  customers: "crm:view",
+  suppliers: "purchasing:view",
+  purchases: "purchasing:view",
+  inventory: "inventory:view",
+  expenses: "accounting:view",
+  accounting: "accounting:view",
+  crm: "crm:view",
+  reports: "reports:view",
+  hrms: "hr:view",
+  attendance: "attendance:view",
+  leave: "leave:view",
+  payroll: "payroll:view",
+  employees: "hr:view",
+  users: "users:manage",
+  settings: "settings:manage",
 };
 
 export default function DashboardLayout({
@@ -110,7 +94,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<{ email: string; name: string; role: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string; email: string; name: string; role: string; permissions?: string[] } | null>(null);
   const { t, i18n } = useTranslation(["common"]);
 
   useEffect(() => {
@@ -137,6 +121,7 @@ export default function DashboardLayout({
 
   const handleLogout = () => {
     localStorage.removeItem("sims_session");
+    localStorage.removeItem("sims_token");
     router.push("/login");
   };
 
@@ -149,14 +134,21 @@ export default function DashboardLayout({
   }
 
   const isRtl = i18n.language === "ar";
-  const userAllowedKeys = ROLE_PAGE_ACCESS[currentUser.role] || [];
+  const userPermissions = currentUser.permissions || [];
+
+  const hasAccess = (key: string) => {
+    if (currentUser.role === "SUPER_ADMIN") return true;
+    const requiredPerm = SIDEBAR_PERMISSIONS[key];
+    if (!requiredPerm) return true;
+    return userPermissions.includes(requiredPerm);
+  };
 
   // Match current pathname to a sidebar key
   const matchedItem = sidebarItems.find(item => pathname === item.href) ||
                       sidebarItems.find(item => item.href !== "/dashboard" && pathname.startsWith(item.href));
 
   // Determine if authorized
-  const isAuthorized = !matchedItem || userAllowedKeys.includes(matchedItem.key);
+  const isAuthorized = !matchedItem || hasAccess(matchedItem.key);
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans" dir={isRtl ? "rtl" : "ltr"}>
@@ -169,7 +161,7 @@ export default function DashboardLayout({
 
         <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
           {sidebarItems
-            .filter(item => userAllowedKeys.includes(item.key))
+            .filter(item => hasAccess(item.key))
             .map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
@@ -232,7 +224,7 @@ export default function DashboardLayout({
             </div>
             <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
               {sidebarItems
-                .filter(item => userAllowedKeys.includes(item.key))
+                .filter(item => hasAccess(item.key))
                 .map((item) => {
                   const isActive = pathname === item.href;
                   const Icon = item.icon;
