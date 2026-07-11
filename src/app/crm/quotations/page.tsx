@@ -609,8 +609,8 @@ export default function QuotationsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-150">
-                  {quotations.map((quote) => {
-                    const totalValue = quote.items.reduce((sum, item) => sum + Number(item.total), 0);
+                  {(Array.isArray(quotations) ? quotations : []).map((quote) => {
+                    const totalValue = (Array.isArray(quote?.items) ? quote.items : []).reduce((sum, item) => sum + Number(item?.total || 0), 0);
                     return (
                       <tr 
                         key={quote.id} 
@@ -620,17 +620,17 @@ export default function QuotationsPage() {
                         }}
                         className="hover:bg-slate-50/50 cursor-pointer transition"
                       >
-                        <td className="px-4 py-3 font-mono text-slate-500 text-xs">{quote.quotationNumber}</td>
-                        <td className="px-4 py-3 font-bold text-slate-800">{quote.customer.name}</td>
-                        <td className="px-4 py-3 text-xs">{new Date(quote.issueDate).toLocaleDateString()}</td>
-                        <td className="px-4 py-3 text-xs">{new Date(quote.expiryDate).toLocaleDateString()}</td>
+                        <td className="px-4 py-3 font-mono text-slate-500 text-xs">{quote?.quotationNumber || "—"}</td>
+                        <td className="px-4 py-3 font-bold text-slate-800">{quote?.customer?.name || "—"}</td>
+                        <td className="px-4 py-3 text-xs">{quote?.issueDate ? new Date(quote.issueDate).toLocaleDateString() : "—"}</td>
+                        <td className="px-4 py-3 text-xs">{quote?.expiryDate ? new Date(quote.expiryDate).toLocaleDateString() : "—"}</td>
                         <td className="px-4 py-3 font-mono font-bold text-slate-700">{formatPrice(totalValue)}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadgeClass(quote.status)}`}>
-                            {quote.status}
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadgeClass(quote?.status || "")}`}>
+                            {quote?.status || "—"}
                           </span>
                         </td>
-                        <td className="px-4 py-3 font-mono text-xs">v{quote.version}</td>
+                        <td className="px-4 py-3 font-mono text-xs">v{quote?.version || 1}</td>
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                           <div className="flex gap-2 justify-center">
                             <button
@@ -729,7 +729,6 @@ export default function QuotationsPage() {
                   </div>
                 )}
 
-                {/* Rejection Info */}
                 {detailedQuote.status === "REJECTED" && detailedQuote.rejectionComment && (
                   <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 text-xs space-y-1">
                     <p className="font-bold text-rose-700">{t("lblRejectionComment")}:</p>
@@ -745,23 +744,23 @@ export default function QuotationsPage() {
                   <button
                     onClick={() => {
                       setForm({
-                        customerId: detailedQuote.customerId,
-                        leadId: detailedQuote.leadId || "",
-                        issueDate: new Date(detailedQuote.issueDate).toISOString().split("T")[0],
-                        expiryDate: new Date(detailedQuote.expiryDate).toISOString().split("T")[0],
-                        currency: detailedQuote.currency,
-                        exchangeRate: detailedQuote.exchangeRate.toString(),
-                        paymentTerms: detailedQuote.paymentTerms || "",
-                        deliveryTerms: detailedQuote.deliveryTerms || "",
-                        notes: detailedQuote.notes || "",
-                        internalNotes: detailedQuote.internalNotes || "",
+                        customerId: detailedQuote?.customerId || "",
+                        leadId: detailedQuote?.leadId || "",
+                        issueDate: detailedQuote?.issueDate ? new Date(detailedQuote.issueDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+                        expiryDate: detailedQuote?.expiryDate ? new Date(detailedQuote.expiryDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+                        currency: detailedQuote?.currency || "IQD",
+                        exchangeRate: detailedQuote?.exchangeRate ? detailedQuote.exchangeRate.toString() : "1.0",
+                        paymentTerms: detailedQuote?.paymentTerms || "",
+                        deliveryTerms: detailedQuote?.deliveryTerms || "",
+                        notes: detailedQuote?.notes || "",
+                        internalNotes: detailedQuote?.internalNotes || "",
                       });
-                      setFormItems(detailedQuote.items.map(i => ({
+                      setFormItems((Array.isArray(detailedQuote?.items) ? detailedQuote.items : []).map(i => ({
                         productId: i.productId,
-                        quantity: Number(i.quantity),
-                        unitPrice: Number(i.unitPrice),
-                        discountPct: Number(i.discountPct),
-                        taxPct: Number(i.taxPct),
+                        quantity: Number(i.quantity || 1),
+                        unitPrice: Number(i.unitPrice || 0),
+                        discountPct: Number(i.discountPct || 0),
+                        taxPct: Number(i.taxPct || 15),
                       })));
                       setCreateModalOpen(true);
                     }}
