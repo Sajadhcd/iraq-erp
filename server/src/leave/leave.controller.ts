@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
 import { LeaveService } from './leave.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { Permissions } from '../auth/permissions.decorator';
 
 @Controller('leave')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class LeaveController {
   constructor(private readonly service: LeaveService) {}
 
@@ -13,7 +13,7 @@ export class LeaveController {
   // DASHBOARD
   // ==========================================
   @Get('dashboard')
-  @Roles('SUPER_ADMIN')
+  @Permissions('leave:view')
   async getDashboard() {
     return this.service.getLeaveDashboard();
   }
@@ -22,25 +22,25 @@ export class LeaveController {
   // LEAVE TYPES CRUD
   // ==========================================
   @Get('types')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT', 'ACCOUNTANT', 'INVENTORY_MANAGER')
+  @Permissions('leave:view')
   async getLeaveTypes() {
     return this.service.getLeaveTypes();
   }
 
   @Post('types')
-  @Roles('SUPER_ADMIN')
+  @Permissions('leave:manage')
   async createLeaveType(@Body() dto: any) {
     return this.service.createLeaveType(dto);
   }
 
   @Put('types/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('leave:manage')
   async updateLeaveType(@Param('id') id: string, @Body() dto: any) {
     return this.service.updateLeaveType(id, dto);
   }
 
   @Delete('types/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('leave:manage')
   async deleteLeaveType(@Param('id') id: string) {
     return this.service.deleteLeaveType(id);
   }
@@ -49,7 +49,7 @@ export class LeaveController {
   // LEAVE BALANCES
   // ==========================================
   @Get('balances/:employeeId')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT', 'ACCOUNTANT', 'INVENTORY_MANAGER')
+  @Permissions('leave:view')
   async getBalances(@Param('employeeId') employeeId: string) {
     return this.service.getAllLeaveBalances(employeeId);
   }
@@ -58,7 +58,7 @@ export class LeaveController {
   // LEAVE REQUESTS CRUD & WORKFLOWS
   // ==========================================
   @Get()
-  @Roles('SUPER_ADMIN', 'SALES_AGENT', 'ACCOUNTANT', 'INVENTORY_MANAGER')
+  @Permissions('leave:view')
   async getLeaveRequests(
     @Query('employeeId') employeeId?: string,
     @Query('leaveTypeId') leaveTypeId?: string,
@@ -76,34 +76,34 @@ export class LeaveController {
   }
 
   @Get(':id')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT', 'ACCOUNTANT', 'INVENTORY_MANAGER')
+  @Permissions('leave:view')
   async getLeaveRequestById(@Param('id') id: string) {
     return this.service.getLeaveRequestById(id);
   }
 
   @Post()
-  @Roles('SUPER_ADMIN', 'SALES_AGENT', 'ACCOUNTANT', 'INVENTORY_MANAGER')
+  @Permissions('leave:view')
   async createLeaveRequest(@Body() dto: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.createLeaveRequest(dto, currentUserId);
   }
 
   @Put(':id')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT', 'ACCOUNTANT', 'INVENTORY_MANAGER')
+  @Permissions('leave:view')
   async updateLeaveRequest(@Param('id') id: string, @Body() dto: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.updateLeaveRequest(id, dto, currentUserId);
   }
 
   @Post(':id/submit')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT', 'ACCOUNTANT', 'INVENTORY_MANAGER')
+  @Permissions('leave:view')
   async submitLeaveRequest(@Param('id') id: string, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.submitLeaveRequest(id, currentUserId);
   }
 
   @Post(':id/approve')
-  @Roles('SUPER_ADMIN')
+  @Permissions('leave:manage')
   async approveLeaveRequest(@Param('id') id: string, @Req() req: any) {
     const currentUserId = req.user?.userId;
     const approverName = req.user?.username || 'Super Admin';
@@ -111,14 +111,14 @@ export class LeaveController {
   }
 
   @Post(':id/reject')
-  @Roles('SUPER_ADMIN')
+  @Permissions('leave:manage')
   async rejectLeaveRequest(@Param('id') id: string, @Body('reason') reason: string, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.rejectLeaveRequest(id, reason || 'Rejected by Admin', currentUserId);
   }
 
   @Post(':id/cancel')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT', 'ACCOUNTANT', 'INVENTORY_MANAGER')
+  @Permissions('leave:view')
   async cancelLeaveRequest(@Param('id') id: string, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.cancelLeaveRequest(id, currentUserId);

@@ -55,6 +55,8 @@ async function main() {
   // but delete existing users and employees linked to them so we can re-create clean.
   await prisma.userPermission.deleteMany({});
   await prisma.employee.deleteMany({});
+  await prisma.jobPosition.deleteMany({});
+  await prisma.department.deleteMany({});
   await prisma.user.deleteMany({});
 
   console.log("Existing data tables cleaned.");

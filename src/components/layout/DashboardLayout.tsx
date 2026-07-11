@@ -81,7 +81,7 @@ const SIDEBAR_PERMISSIONS: Record<string, string> = {
   attendance: "attendance:view",
   leave: "leave:view",
   payroll: "payroll:view",
-  employees: "hr:view",
+  employees: "employees:view",
   users: "users:manage",
   settings: "settings:manage",
 };

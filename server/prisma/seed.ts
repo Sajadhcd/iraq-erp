@@ -75,6 +75,7 @@ async function main() {
     { action: "sales_orders:manage", description: "إدارة وتأكيد أوامر البيع" },
     // HRMS
     { action: "hr:view", description: "عرض الموظفين والأقسام والوظائف" },
+    { action: "employees:view", description: "عرض سجلات الموظفين" },
     { action: "hr:create", description: "إنشاء الموظفين والهيكل الإداري" },
     { action: "hr:edit", description: "تعديل بيانات الموظفين والوظائف" },
     { action: "hr:delete", description: "حذف الموظفين أو إزالتهم من الخدمة" },
@@ -145,7 +146,7 @@ async function main() {
 
   // 3. HR_MANAGER
   await mapPermissionsToRole("HR_MANAGER", [
-    "hr:view", "hr:create", "hr:edit", "hr:delete", "hr:documents",
+    "hr:view", "employees:view", "hr:create", "hr:edit", "hr:delete", "hr:documents",
     "attendance:view", "attendance:manage",
     "leave:view", "leave:manage",
     "payroll:view", "payroll:manage",
@@ -154,7 +155,7 @@ async function main() {
 
   // 4. HR_EMPLOYEE
   await mapPermissionsToRole("HR_EMPLOYEE", [
-    "hr:view", "hr:create", "hr:edit", "hr:documents",
+    "hr:view", "employees:view", "hr:create", "hr:edit", "hr:documents",
     "attendance:view", "attendance:manage",
     "leave:view", "leave:manage"
   ]);
@@ -206,13 +207,13 @@ async function main() {
   await mapPermissionsToRole("ACCOUNTING_MANAGER", [
     "accounting:view", "accounting:manage", "accounting:post",
     "reports:view",
-    "payroll:view"
+    "payroll:view", "employees:view"
   ]);
 
   // 12. ACCOUNTANT
   await mapPermissionsToRole("ACCOUNTANT", [
     "accounting:view", "accounting:manage",
-    "payroll:view"
+    "payroll:view", "employees:view"
   ]);
 
   // 13. CASHIER

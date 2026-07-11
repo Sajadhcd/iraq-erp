@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
 import { HrmsService } from './hrms.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { Permissions } from '../auth/permissions.decorator';
 
 @Controller('hrms')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class HrmsController {
   constructor(private readonly service: HrmsService) {}
 
@@ -13,7 +13,7 @@ export class HrmsController {
   // DASHBOARD
   // ==========================================
   @Get('dashboard')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:view')
   async getDashboard() {
     return this.service.getHrmsDashboard();
   }
@@ -22,26 +22,26 @@ export class HrmsController {
   // DEPARTMENTS
   // ==========================================
   @Get('departments')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:view')
   async getDepartments() {
     return this.service.getDepartments();
   }
 
   @Post('departments')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:create')
   async createDepartment(@Body() dto: any) {
     return this.service.createDepartment(dto);
   }
 
   @Put('departments/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:edit')
   async updateDepartment(@Param('id') id: string, @Body() dto: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.updateDepartment(id, dto, currentUserId);
   }
 
   @Delete('departments/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:delete')
   async deleteDepartment(@Param('id') id: string) {
     return this.service.deleteDepartment(id);
   }
@@ -50,26 +50,26 @@ export class HrmsController {
   // JOB POSITIONS
   // ==========================================
   @Get('positions')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:view')
   async getPositions(@Query('departmentId') departmentId?: string) {
     return this.service.getPositions({ departmentId });
   }
 
   @Post('positions')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:create')
   async createPosition(@Body() dto: any) {
     return this.service.createPosition(dto);
   }
 
   @Put('positions/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:edit')
   async updatePosition(@Param('id') id: string, @Body() dto: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.updatePosition(id, dto, currentUserId);
   }
 
   @Delete('positions/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:delete')
   async deletePosition(@Param('id') id: string) {
     return this.service.deletePosition(id);
   }
@@ -78,7 +78,7 @@ export class HrmsController {
   // EMPLOYEES
   // ==========================================
   @Get('employees')
-  @Roles('SUPER_ADMIN')
+  @Permissions('employees:view')
   async getEmployees(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -100,27 +100,27 @@ export class HrmsController {
   }
 
   @Get('employees/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('employees:view')
   async getEmployeeDetails(@Param('id') id: string) {
     return this.service.getEmployeeDetails(id);
   }
 
   @Post('employees')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:create')
   async createEmployee(@Body() dto: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.createEmployee(dto, currentUserId);
   }
 
   @Put('employees/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:edit')
   async updateEmployee(@Param('id') id: string, @Body() dto: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.updateEmployee(id, dto, currentUserId);
   }
 
   @Delete('employees/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:delete')
   async deleteEmployee(@Param('id') id: string, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.deleteEmployee(id, currentUserId);
@@ -130,13 +130,13 @@ export class HrmsController {
   // EMPLOYEE DOCUMENTS
   // ==========================================
   @Post('employees/:id/documents')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:documents')
   async uploadDocument(@Param('id') id: string, @Body() dto: any) {
     return this.service.uploadDocument(id, dto);
   }
 
   @Delete('documents/:docId')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:documents')
   async deleteDocument(@Param('docId') docId: string) {
     return this.service.deleteDocument(docId);
   }
