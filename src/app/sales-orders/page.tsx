@@ -120,11 +120,20 @@ export default function SalesOrdersPage() {
     items: [] as any[],
   });
 
-  const [deliveryForm, setDeliveryForm] = useState({
+  const [deliveryForm, setDeliveryForm] = useState<{
+    deliveryDate: string;
+    driver?: string;
+    receiver?: string;
+    status?: string;
+    notes?: string;
+    items: any[];
+  }>({
     deliveryDate: new Date().toISOString().split("T")[0],
     driver: "",
     receiver: "",
-    items: [] as any[],
+    status: "DELIVERED",
+    notes: "",
+    items: [],
   });
 
   const [invoiceForm, setInvoiceForm] = useState({
@@ -486,9 +495,9 @@ export default function SalesOrdersPage() {
                             selectedOrder?.id === o.id ? "bg-slate-50/70 font-semibold" : ""
                           }`}
                         >
-                          <td className="py-3.5 px-4 font-mono font-bold text-blue-600">{o.salesOrderNumber}</td>
-                          <td className="py-3.5 px-4">{o.customer?.name}</td>
-                          <td className="py-3.5 px-4 text-slate-500">{o.warehouse?.name}</td>
+                          <td className="py-3.5 px-4 font-mono font-bold text-blue-600">{o.salesOrderNumber || "—"}</td>
+                          <td className="py-3.5 px-4">{o.customer?.name || "—"}</td>
+                          <td className="py-3.5 px-4 text-slate-500">{o.warehouse?.name || "—"}</td>
                           <td className="py-3.5 px-4 text-center">
                             <span
                               className={`px-2 py-1 rounded-md text-[10px] font-bold ${
@@ -509,7 +518,9 @@ export default function SalesOrdersPage() {
                                               : "bg-red-50 text-red-600"
                               }`}
                             >
-                              {t(`status${o.status.charAt(0) + o.status.slice(1).toLowerCase().replace(/_([a-z])/g, (g) => g[1].toUpperCase())}`)}
+                              {o.status
+                                ? t(`status${o.status.charAt(0) + o.status.slice(1).toLowerCase().replace(/_([a-z])/g, (g) => g[1].toUpperCase())}`)
+                                : "—"}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 text-left font-mono font-bold">
@@ -586,7 +597,7 @@ export default function SalesOrdersPage() {
                     <div>
                       <span className="block font-bold text-slate-400 uppercase text-[9px] tracking-wider">{t("colOrderDate")}</span>
                       <span className="font-semibold text-slate-700 mt-1 block">
-                        {new Date(selectedOrder.orderDate).toLocaleDateString()}
+                        {selectedOrder?.orderDate ? new Date(selectedOrder.orderDate).toLocaleDateString() : "—"}
                       </span>
                     </div>
                   </div>
@@ -596,7 +607,7 @@ export default function SalesOrdersPage() {
                     <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">{isRtl ? "إجراءات المسار" : "Workflow Actions"}</h4>
                     
                     <div className="grid grid-cols-2 gap-2">
-                      {selectedOrder.status === "DRAFT" && (
+                      {selectedOrder?.status === "DRAFT" && (
                         <button
                           onClick={() => handleConfirmOrder(selectedOrder.id)}
                           className="col-span-2 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm"
@@ -605,7 +616,7 @@ export default function SalesOrdersPage() {
                         </button>
                       )}
 
-                      {["CONFIRMED", "PROCESSING", "READY_FOR_DELIVERY", "PARTIALLY_DELIVERED"].includes(selectedOrder.status) && (
+                      {["CONFIRMED", "PROCESSING", "READY_FOR_DELIVERY", "PARTIALLY_DELIVERED"].includes(selectedOrder?.status || "") && (
                         <button
                           onClick={() => {
                             // Populate delivery draft form matching remaining quantities
@@ -616,6 +627,8 @@ export default function SalesOrdersPage() {
                               deliveryDate: new Date().toISOString().split("T")[0],
                               driver: "",
                               receiver: "",
+                              status: "DELIVERED",
+                              notes: "",
                               items,
                             });
                             setDeliveryModalOpen(true);
@@ -627,7 +640,7 @@ export default function SalesOrdersPage() {
                         </button>
                       )}
 
-                      {["PARTIALLY_DELIVERED", "DELIVERED"].includes(selectedOrder.status) && (
+                      {["PARTIALLY_DELIVERED", "DELIVERED"].includes(selectedOrder?.status || "") && (
                         <button
                           onClick={() => {
                             // Verify there are delivered quantities not yet invoiced
@@ -648,7 +661,7 @@ export default function SalesOrdersPage() {
                         </button>
                       )}
 
-                      {!["DELIVERED", "CLOSED", "CANCELLED"].includes(selectedOrder.status) && (
+                      {!["DELIVERED", "CLOSED", "CANCELLED"].includes(selectedOrder?.status || "") && (
                         <button
                           onClick={() => handleCancelOrder(selectedOrder.id)}
                           className="py-2 px-3 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-bold transition border border-red-200 flex items-center justify-center gap-1.5"
