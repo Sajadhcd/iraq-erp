@@ -327,14 +327,15 @@ export default function AccountingPage() {
   const isJournalBalanced = Math.abs(totalDebits - totalCredits) < 0.001;
 
   // Filter accounts by type
-  const cashAccounts = accounts.filter(acc => acc.isCashOrBank && acc.cashBankType === "CASH" && acc.isActive);
-  const bankAccounts = accounts.filter(acc => acc.isCashOrBank && acc.cashBankType === "BANK" && acc.isActive);
-  const cashBankOptions = accounts.filter(acc => acc.isCashOrBank && acc.isActive);
-  const generalAccounts = accounts.filter(acc => acc.isActive);
+  const safeAccounts = Array.isArray(accounts) ? accounts : [];
+  const cashAccounts = safeAccounts.filter(acc => acc?.isCashOrBank && acc?.cashBankType === "CASH" && acc?.isActive);
+  const bankAccounts = safeAccounts.filter(acc => acc?.isCashOrBank && acc?.cashBankType === "BANK" && acc?.isActive);
+  const cashBankOptions = safeAccounts.filter(acc => acc?.isCashOrBank && acc?.isActive);
+  const generalAccounts = safeAccounts.filter(acc => acc?.isActive);
 
   // Group accounts by parent code or build nested tree list
-  const rootLevelAccounts = accounts.filter(acc => acc.parentId === null);
-  const getSubAccounts = (parentId: string) => accounts.filter(acc => acc.parentId === parentId);
+  const rootLevelAccounts = safeAccounts.filter(acc => acc?.parentId === null);
+  const getSubAccounts = (parentId: string) => safeAccounts.filter(acc => acc?.parentId === parentId);
 
   return (
     <DashboardLayout>
@@ -535,14 +536,15 @@ export default function AccountingPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-150">
-                  {journals.map((je) => {
-                    const totalDebitSum = je.items.reduce((s, it) => s + parseFloat(it.debit), 0);
+                  {(Array.isArray(journals) ? journals : []).map((je) => {
+                    const itemsArr = Array.isArray(je?.items) ? je.items : [];
+                    const totalDebitSum = itemsArr.reduce((s, it) => s + (parseFloat(String(it?.debit)) || 0), 0);
                     return (
                       <tr key={je.id} className="hover:bg-slate-50 transition">
-                        <td className="px-6 py-4 text-center font-mono font-bold text-slate-800">{je.entryNumber}</td>
-                        <td className="px-6 py-4 text-center">{new Date(je.date).toLocaleDateString(isRtl ? "ar-IQ" : "en-US")}</td>
-                        <td className="px-6 py-4 text-center text-slate-500 font-mono text-xs">{je.reference || "-"}</td>
-                        <td className="px-6 py-4 text-center max-w-[200px] truncate">{je.notes || "-"}</td>
+                        <td className="px-6 py-4 text-center font-mono font-bold text-slate-800">{je?.entryNumber || "—"}</td>
+                        <td className="px-6 py-4 text-center">{je?.date ? new Date(je.date).toLocaleDateString(isRtl ? "ar-IQ" : "en-US") : "—"}</td>
+                        <td className="px-6 py-4 text-center text-slate-500 font-mono text-xs">{je?.reference || "-"}</td>
+                        <td className="px-6 py-4 text-center max-w-[200px] truncate">{je?.notes || "-"}</td>
                         <td className="px-6 py-4 text-center font-bold text-blue-600">{formatCurrency(totalDebitSum)}</td>
                         <td className="px-6 py-4 text-center">
                           <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
@@ -605,20 +607,20 @@ export default function AccountingPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-150">
-                  {vouchers.map((v) => (
+                  {(Array.isArray(vouchers) ? vouchers : []).map((v) => (
                     <tr key={v.id} className="hover:bg-slate-50 transition">
-                      <td className="px-6 py-4 text-center font-mono font-bold text-slate-800">{v.voucherNumber}</td>
+                      <td className="px-6 py-4 text-center font-mono font-bold text-slate-800">{v?.voucherNumber || "—"}</td>
                       <td className="px-6 py-4 text-center">
                         <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
-                          v.type === "RECEIPT" ? "bg-emerald-50 text-emerald-700" :
-                          v.type === "PAYMENT" ? "bg-rose-50 text-rose-700" : "bg-purple-50 text-purple-700"
+                          v?.type === "RECEIPT" ? "bg-emerald-50 text-emerald-700" :
+                          v?.type === "PAYMENT" ? "bg-rose-50 text-rose-700" : "bg-purple-50 text-purple-700"
                         }`}>
-                          {v.type === "RECEIPT" ? t("voucherReceipt") :
-                           v.type === "PAYMENT" ? t("voucherPayment") : t("voucherTransfer")}
+                          {v?.type === "RECEIPT" ? t("voucherReceipt") :
+                           v?.type === "PAYMENT" ? t("voucherPayment") : t("voucherTransfer")}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-center">{new Date(v.date).toLocaleDateString(isRtl ? "ar-IQ" : "en-US")}</td>
-                      <td className="px-6 py-4 text-center font-extrabold text-slate-900">{formatCurrency(v.amount)}</td>
+                      <td className="px-6 py-4 text-center">{v?.date ? new Date(v.date).toLocaleDateString(isRtl ? "ar-IQ" : "en-US") : "—"}</td>
+                      <td className="px-6 py-4 text-center font-extrabold text-slate-900">{formatCurrency(String(v?.amount ?? 0))}</td>
                       <td className="px-6 py-4 text-center text-xs">
                         {v.fromAccount ? (
                           <div className="font-medium text-slate-800">
@@ -1148,19 +1150,19 @@ export default function AccountingPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {viewJournal.items.map((it) => (
+                    {(Array.isArray(viewJournal?.items) ? viewJournal.items : []).map((it) => (
                       <tr key={it.id}>
                         <td className="p-3 text-center text-xs font-semibold">
-                          {it.account.code} - {getAccountName(it.account)}
+                          {it?.account ? `${it.account.code} - ${getAccountName(it.account)}` : "—"}
                         </td>
-                        <td className={`p-3 text-center font-mono font-bold ${parseFloat(it.debit) > 0 ? "text-slate-800" : "text-slate-300"}`}>
-                          {parseFloat(it.debit) > 0 ? formatCurrency(it.debit) : "-"}
+                        <td className={`p-3 text-center font-mono font-bold ${parseFloat(String(it?.debit ?? 0)) > 0 ? "text-slate-800" : "text-slate-300"}`}>
+                          {parseFloat(String(it?.debit ?? 0)) > 0 ? formatCurrency(it.debit) : "-"}
                         </td>
-                        <td className={`p-3 text-center font-mono font-bold ${parseFloat(it.credit) > 0 ? "text-slate-800" : "text-slate-300"}`}>
-                          {parseFloat(it.credit) > 0 ? formatCurrency(it.credit) : "-"}
+                        <td className={`p-3 text-center font-mono font-bold ${parseFloat(String(it?.credit ?? 0)) > 0 ? "text-slate-800" : "text-slate-300"}`}>
+                          {parseFloat(String(it?.credit ?? 0)) > 0 ? formatCurrency(it.credit) : "-"}
                         </td>
                         <td className="p-3 text-center text-xs text-slate-500">
-                          {it.description || "-"}
+                          {it?.description || "-"}
                         </td>
                       </tr>
                     ))}

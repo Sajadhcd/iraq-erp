@@ -113,8 +113,9 @@ export default function ExpensesPage() {
     setTaxAmount(computedTax.toFixed(2));
   };
 
-  const filteredExpenses = expenses.filter(
-    (e) => e.category.includes(searchTerm) || (e.description && e.description.includes(searchTerm)),
+  const term = (searchTerm ?? "").toLowerCase().trim();
+  const filteredExpenses = (Array.isArray(expenses) ? expenses : []).filter(
+    (e) => (e?.category ?? "").toLowerCase().includes(term) || (e?.description ?? "").toLowerCase().includes(term),
   );
 
   const isRtl = i18n.language === "ar";
@@ -177,23 +178,23 @@ export default function ExpensesPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredExpenses.map((e) => (
+                {(Array.isArray(filteredExpenses) ? filteredExpenses : []).map((e) => (
                   <tr key={e.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
                     <td className="py-4 px-5 font-bold text-slate-800 flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-slate-400" />
-                      {e.referenceNumber || t("internalVoucher")}
+                      {e?.referenceNumber || t("internalVoucher")}
                     </td>
                     <td className="py-4 px-5">
                       <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-100">
-                        {e.category}
+                        {e?.category || "—"}
                       </span>
                     </td>
-                    <td className="py-4 px-5 font-black text-rose-600">{formatPrice(e.amount)}</td>
-                    <td className="py-4 px-5 text-slate-500 font-semibold">{formatPrice(e.taxAmount)}</td>
+                    <td className="py-4 px-5 font-black text-rose-600">{formatPrice(String(e?.amount ?? 0))}</td>
+                    <td className="py-4 px-5 text-slate-500 font-semibold">{formatPrice(String(e?.taxAmount ?? 0))}</td>
                     <td className="py-4 px-5 text-slate-500 font-mono text-xs">
-                      {formatDate(e.createdAt)}
+                      {e?.createdAt ? formatDate(e.createdAt) : "—"}
                     </td>
-                    <td className={`py-4 px-5 text-slate-600 max-w-xs truncate ${isRtl ? "text-right" : "text-left"}`}>{e.description || t("noDescription")}</td>
+                    <td className={`py-4 px-5 text-slate-600 max-w-xs truncate ${isRtl ? "text-right" : "text-left"}`}>{e?.description || t("noDescription")}</td>
                   </tr>
                 ))}
               </tbody>
