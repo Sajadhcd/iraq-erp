@@ -148,7 +148,7 @@ export default function CategoriesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {categories.map((c) => (
+                  {(Array.isArray(categories) ? categories : []).map((c) => (
                     <tr key={c.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
                       <td className="py-4 px-5">
                         <div className="flex flex-col">
@@ -208,7 +208,7 @@ export default function CategoriesPage() {
                 <label className="block text-xs font-bold text-slate-600 mb-1.5">{t("parentCategory")}</label>
                 <select className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm" value={parentId} onChange={(e) => setParentId(e.target.value)}>
                   <option value="none">{t("noParent")}</option>
-                  {categories.filter(c => !c.parentId).map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
+                  {(Array.isArray(categories) ? categories : []).filter(c => !c.parentId).map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
                 </select>
               </div>
               <div>
@@ -245,7 +245,7 @@ export default function CategoriesPage() {
                 <label className="block text-xs font-bold text-slate-600 mb-1.5">{t("parentCategory")}</label>
                 <select className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" value={editParentId} onChange={(e) => setEditParentId(e.target.value)}>
                   <option value="none">{t("noParent")}</option>
-                  {categories.filter(c => !c.parentId && c.id !== selectedCategory.id).map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
+                  {(Array.isArray(categories) ? categories : []).filter(c => !c.parentId && c.id !== selectedCategory?.id).map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
                 </select>
               </div>
               <div>

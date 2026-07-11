@@ -116,13 +116,18 @@ export default function ProductsPage() {
   };
 
   const getProductStock = (p: Product) => {
-    return p.inventories.reduce((acc, inv) => acc + parseFloat(inv.quantity as any), 0);
+    if (!p?.inventories || !Array.isArray(p.inventories)) return 0;
+    return p.inventories.reduce((acc, inv) => acc + (parseFloat(String(inv.quantity)) || 0), 0);
   };
 
-  const filteredProducts = products.filter((p) => {
-    const matchesSearch = p.name.includes(searchTerm) || p.sku.toLowerCase().includes(searchTerm.toLowerCase()) || (p.barcode && p.barcode.includes(searchTerm));
+  const term = (searchTerm ?? "").toLowerCase().trim();
+  const filteredProducts = (Array.isArray(products) ? products : []).filter((p) => {
+    const pName = (p?.name ?? "").toLowerCase();
+    const pSku = (p?.sku ?? "").toLowerCase();
+    const pBarcode = (p?.barcode ?? "").toLowerCase();
+    const matchesSearch = pName.includes(term) || pSku.includes(term) || pBarcode.includes(term);
     const allText = i18n.language === "ar" ? "الكل" : "All";
-    const matchesCategory = selectedCategory === "الكل" || selectedCategory === "All" || selectedCategory === allText || p.category.name === selectedCategory;
+    const matchesCategory = selectedCategory === "الكل" || selectedCategory === "All" || selectedCategory === allText || p?.category?.name === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 

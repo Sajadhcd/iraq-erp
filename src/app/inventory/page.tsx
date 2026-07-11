@@ -112,7 +112,7 @@ export default function InventoryPage() {
   };
 
   const getWarehouseStockSum = (wh: WarehouseRecord) => {
-    return wh.inventories ? wh.inventories.reduce((acc, inv) => acc + parseFloat(inv.quantity as any), 0) : 0;
+    return Array.isArray(wh?.inventories) ? wh.inventories.reduce((acc, inv) => acc + (parseFloat(String(inv.quantity)) || 0), 0) : 0;
   };
 
   const isRtl = i18n.language === "ar";
@@ -152,7 +152,7 @@ export default function InventoryPage() {
 
         {/* Warehouse list Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {warehouses.map((wh) => {
+          {(Array.isArray(warehouses) ? warehouses : []).map((wh) => {
             const stockCount = getWarehouseStockSum(wh);
             return (
               <div key={wh.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 hover:shadow-md transition">
