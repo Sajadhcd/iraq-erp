@@ -27,8 +27,11 @@ import {
   FileText,
   ClipboardList,
   Calendar,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import ToastContainer from "../ui/toast";
 
 interface SidebarItem {
   key: string;
@@ -96,6 +99,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; name: string; role: string; permissions?: string[] } | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const { t, i18n } = useTranslation(["common"]);
 
   useEffect(() => {
@@ -110,7 +114,35 @@ export default function DashboardLayout({
         router.push("/login");
       }
     }
+
+    // Load theme
+    const savedTheme = localStorage.getItem("sims_theme") as "light" | "dark";
+    if (savedTheme) {
+      setTheme(savedTheme);
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    } else {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (prefersDark) {
+        setTheme("dark");
+        document.documentElement.classList.add("dark");
+      }
+    }
   }, [router]);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("sims_theme", newTheme);
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
 
   const toggleLanguage = () => {
     const nextLang = i18n.language === "ar" ? "en" : "ar";
@@ -290,6 +322,15 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 text-slate-655 transition border border-slate-200"
+              title={theme === "light" ? "تفعيل الوضع الداكن" : "تفعيل الوضع المضيء"}
+            >
+              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </button>
+
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
@@ -350,6 +391,7 @@ export default function DashboardLayout({
           )}
         </main>
       </div>
+      <ToastContainer />
     </div>
   );
 }

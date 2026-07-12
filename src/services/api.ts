@@ -1,3 +1,5 @@
+import { showToast } from "@/components/ui/toast";
+
 const BASE_URL = "http://localhost:3001/api";
 
 interface RequestOptions extends RequestInit {
@@ -47,7 +49,9 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestOpti
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "حدث خطأ غير متوقع أثناء معالجة الطلب.");
+    const errorMsg = errorData.message || "حدث خطأ غير متوقع أثناء معالجة الطلب.";
+    showToast(errorMsg, "error");
+    throw new Error(errorMsg);
   }
 
   return response.json();

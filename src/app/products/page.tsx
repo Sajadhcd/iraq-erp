@@ -1,18 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import {
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  AlertTriangle,
-  Barcode,
-  Eye,
-  Filter,
-  X,
-} from "lucide-react";
+import DataTable from "@/components/ui/DataTable";
+import { Barcode, Eye, Edit2, Trash2, AlertTriangle } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
 
@@ -242,6 +233,133 @@ export default function ProductsPage() {
     return `${parsed.toLocaleString(locale, { minimumFractionDigits: 2 })} ${currencySymbol}`;
   };
 
+  const tableData = useMemo(() => {
+    return products.map((p) => ({
+      ...p,
+      categoryName: p.category?.name || "",
+    }));
+  }, [products]);
+
+  const columns = [
+    {
+      key: "name",
+      header: t("tableProduct"),
+      sortable: true,
+      render: (p: any) => (
+        <span className="font-semibold text-slate-800 dark:text-slate-100">{p.name}</span>
+      ),
+    },
+    {
+      key: "sku",
+      header: t("tableSku"),
+      sortable: true,
+      render: (p: any) => (
+        <div className="flex flex-col text-slate-650 font-mono text-xs font-semibold">
+          <span>{p.sku}</span>
+          {p.barcode && (
+            <span className="text-[10px] text-slate-400 flex items-center gap-1">
+              <Barcode className="h-3 w-3" />
+              {p.barcode}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "categoryName",
+      header: t("tableCategory"),
+      sortable: true,
+      filterOptions: categories.map((cat: any) => cat.name),
+      render: (p: any) => (
+        <div className="flex flex-col">
+          <span className="text-slate-700 dark:text-slate-200">{p.category?.name}</span>
+          <span className="text-[10px] text-slate-400">{p.brand?.name || t("common:general")}</span>
+        </div>
+      ),
+    },
+    {
+      key: "costPrice",
+      header: t("costPrice"),
+      sortable: true,
+      render: (p: any) => formatPrice(p.costPrice),
+    },
+    {
+      key: "retailPrice",
+      header: t("retailPrice"),
+      sortable: true,
+      render: (p: any) => (
+        <span className="font-bold text-blue-600 dark:text-blue-400">
+          {formatPrice(p.retailPrice)}
+        </span>
+      ),
+    },
+    {
+      key: "stock",
+      header: t("tableStock"),
+      sortable: true,
+      render: (p: any) => {
+        const stock = getProductStock(p);
+        const isLowStock = stock <= parseFloat(p.alertQuantity);
+        return (
+          <div className="flex items-center gap-2">
+            <span className={`font-bold ${isLowStock ? "text-rose-600" : "text-slate-850"}`}>
+              {stock}
+            </span>
+            {isLowStock && (
+              <span className="p-0.5 bg-rose-50 text-rose-600 rounded border border-rose-100" title="Low stock warning!">
+                <AlertTriangle className="h-4 w-4" />
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      key: "isActive",
+      header: t("tableStatus"),
+      sortable: true,
+      render: (p: any) => (
+        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+          p.isActive
+            ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+            : "bg-slate-50 text-slate-650 border border-slate-100"
+        }`}>
+          {p.isActive ? t("statusActive") : t("statusInactive")}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      header: t("common:actions"),
+      sortable: false,
+      render: (p: any) => (
+        <div className="flex items-center gap-1.5 justify-end">
+          <button
+            onClick={() => handleOpenView(p)}
+            className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-650 rounded-lg border border-slate-200 transition"
+            title={t("viewDetails")}
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => handleOpenEdit(p)}
+            className="p-1.5 bg-slate-50 hover:bg-blue-50 text-blue-600 rounded-lg border border-slate-200 hover:border-blue-100 transition"
+            title={t("common:edit")}
+          >
+            <Edit2 className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => handleOpenDelete(p)}
+            className="p-1.5 bg-slate-50 hover:bg-rose-50 text-rose-600 rounded-lg border border-slate-200 hover:border-rose-100 transition"
+            title={t("common:delete")}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <DashboardLayout>
       <div className="space-y-6" dir={isRtl ? "rtl" : "ltr"}>
@@ -251,152 +369,17 @@ export default function ProductsPage() {
             <h1 className="text-2xl font-bold text-slate-800">{t("title")}</h1>
             <p className="text-slate-500 text-sm mt-1">{t("subtitle")}</p>
           </div>
-          <button
-            onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition shadow-md shadow-blue-500/20 self-start"
-          >
-            <Plus className="h-5 w-5" />
-            <span>{t("addProduct")}</span>
-          </button>
         </div>
 
-        {/* Filters and Search */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-80">
-            <input
-              type="text"
-              className={`w-full py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm ${isRtl ? "pr-11 pl-4 text-right" : "pl-11 pr-4 text-left"}`}
-              placeholder={t("searchPlaceholder")}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Search className={`absolute top-2.5 h-5 w-5 text-slate-400 ${isRtl ? "right-4" : "left-4"}`} />
-          </div>
-
-          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-            <Filter className="h-4 w-4 text-slate-400 shrink-0" />
-            <span className="text-xs text-slate-500 shrink-0 font-semibold">{t("filterBy")}</span>
-            <button
-              onClick={() => setSelectedCategory(allLabel)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
-                selectedCategory === allLabel ? "bg-slate-900 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-600"
-              }`}
-            >
-              {allLabel}
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.name)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
-                  selectedCategory === cat.name ? "bg-slate-900 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-600"
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Product Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className={`w-full border-collapse text-sm ${isRtl ? "text-right" : "text-left"}`}>
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 font-bold">
-                  <th className="py-3 px-6">{t("tableProduct")}</th>
-                  <th className="py-3 px-6">{t("tableSku")}</th>
-                  <th className="py-3 px-6">{t("tableCategory")}</th>
-                  <th className="py-3 px-6">{t("costPrice")}</th>
-                  <th className="py-3 px-6">{t("retailPrice")}</th>
-                  <th className="py-3 px-6">{t("tableStock")}</th>
-                  <th className="py-3 px-6">{t("tableStatus")}</th>
-                  <th className={`py-3 px-6 ${isRtl ? "text-left" : "text-right"}`}>{t("common:actions")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProducts.map((p) => {
-                  const stock = getProductStock(p);
-                  const isLowStock = stock <= parseFloat(p.alertQuantity);
-                  return (
-                    <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
-                      <td className="py-4 px-6 font-semibold text-slate-800">
-                        <div className="flex flex-col">
-                          <span>{p.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex flex-col text-slate-600 font-mono text-xs">
-                          <span>{p.sku}</span>
-                          {p.barcode && (
-                            <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <Barcode className="h-3 w-3" />
-                              {p.barcode}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex flex-col">
-                          <span className="text-slate-700">{p.category?.name}</span>
-                          <span className="text-[10px] text-slate-400">{p.brand?.name || t("common:general")}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 font-semibold text-slate-700">{formatPrice(p.costPrice)}</td>
-                      <td className="py-4 px-6 font-bold text-blue-600">{formatPrice(p.retailPrice)}</td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-2">
-                          <span className={`font-bold ${isLowStock ? "text-rose-600" : "text-slate-800"}`}>
-                            {stock}
-                          </span>
-                          {isLowStock && (
-                            <span className="p-0.5 bg-rose-50 text-rose-600 rounded border border-rose-100" title="Low stock warning!">
-                              <AlertTriangle className="h-4 w-4" />
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          p.isActive
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                            : "bg-slate-50 text-slate-600 border border-slate-100"
-                        }`}>
-                          {p.isActive ? t("statusActive") : t("statusInactive")}
-                        </span>
-                      </td>
-                      <td className={`py-4 px-6 ${isRtl ? "text-left" : "text-right"}`}>
-                        <div className="flex items-center gap-1.5 justify-end">
-                          <button
-                            onClick={() => handleOpenView(p)}
-                            className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg border border-slate-200 transition"
-                            title={t("viewDetails")}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => handleOpenEdit(p)}
-                            className="p-1.5 bg-slate-50 hover:bg-blue-50 text-blue-600 rounded-lg border border-slate-200 hover:border-blue-100 transition"
-                            title={t("common:edit")}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => handleOpenDelete(p)}
-                            className="p-1.5 bg-slate-50 hover:bg-rose-50 text-rose-600 rounded-lg border border-slate-200 hover:border-rose-100 transition"
-                            title={t("common:delete")}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {/* Reusable premium DataTable */}
+        <DataTable
+          data={tableData}
+          columns={columns}
+          onAddClick={() => setModalOpen(true)}
+          addLabel={t("addProduct")}
+          searchPlaceholder={t("searchPlaceholder")}
+          emptyLabel={t("common:noData") || "لا توجد سجلات حالياً."}
+        />
       </div>
 
       {/* Add Product Modal */}

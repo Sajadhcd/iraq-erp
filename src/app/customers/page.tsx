@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Search, UserPlus, Phone, Mail, Award, Edit2, Trash2 } from "lucide-react";
+import DataTable from "@/components/ui/DataTable";
+import { UserPlus, Phone, Mail, Award, Edit2, Trash2 } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
 
