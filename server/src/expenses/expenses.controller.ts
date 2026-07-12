@@ -1,16 +1,16 @@
 import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
 import { ExpensesService } from './expenses.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { Permissions } from '../auth/permissions.decorator';
 
 @Controller('expenses')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ExpensesController {
   constructor(private readonly expensesService: ExpensesService) {}
 
   @Post()
-  @Roles('SUPER_ADMIN', 'ACCOUNTANT')
+  @Permissions('accounting:manage')
   async createExpense(
     @Body()
     data: {
@@ -24,6 +24,7 @@ export class ExpensesController {
   }
 
   @Get()
+  @Permissions('accounting:view')
   async getExpenses() {
     return this.expensesService.getExpenses();
   }

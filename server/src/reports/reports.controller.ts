@@ -1,22 +1,22 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { Permissions } from '../auth/permissions.decorator';
 
 @Controller('reports')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Get('financial-summary')
-  @Roles('SUPER_ADMIN', 'ACCOUNTANT')
+  @Permissions('reports:view')
   async getFinancialSummary() {
     return this.reportsService.getFinancialSummary();
   }
 
   @Get('trial-balance')
-  @Roles('SUPER_ADMIN', 'ACCOUNTANT')
+  @Permissions('reports:view')
   async getTrialBalance(
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
@@ -25,7 +25,7 @@ export class ReportsController {
   }
 
   @Get('profit-loss')
-  @Roles('SUPER_ADMIN', 'ACCOUNTANT')
+  @Permissions('reports:view')
   async getProfitLoss(
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
@@ -34,13 +34,13 @@ export class ReportsController {
   }
 
   @Get('balance-sheet')
-  @Roles('SUPER_ADMIN', 'ACCOUNTANT')
+  @Permissions('reports:view')
   async getBalanceSheet(@Query('date') date?: string) {
     return this.reportsService.getBalanceSheet(date);
   }
 
   @Get('customer-statement/:customerId')
-  @Roles('SUPER_ADMIN', 'ACCOUNTANT')
+  @Permissions('reports:view')
   async getCustomerStatement(
     @Param('customerId') customerId: string,
     @Query('startDate') startDate?: string,
@@ -54,7 +54,7 @@ export class ReportsController {
   }
 
   @Get('supplier-statement/:supplierId')
-  @Roles('SUPER_ADMIN', 'ACCOUNTANT')
+  @Permissions('reports:view')
   async getSupplierStatement(
     @Param('supplierId') supplierId: string,
     @Query('startDate') startDate?: string,
@@ -68,7 +68,7 @@ export class ReportsController {
   }
 
   @Get('ledger/:accountId')
-  @Roles('SUPER_ADMIN', 'ACCOUNTANT')
+  @Permissions('reports:view')
   async getAccountLedger(
     @Param('accountId') accountId: string,
     @Query('startDate') startDate?: string,

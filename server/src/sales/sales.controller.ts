@@ -1,17 +1,17 @@
 import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { SalesService } from './sales.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { Permissions } from '../auth/permissions.decorator';
 import { PaymentMethod } from '@prisma/client';
 
 @Controller('sales')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class SalesController {
   constructor(private readonly salesService: SalesService) {}
 
   @Post('checkout')
-  @Roles('SUPER_ADMIN', 'SALES_AGENT')
+  @Permissions('sales:checkout')
   async checkout(
     @Body()
     dto: {
@@ -32,11 +32,13 @@ export class SalesController {
   }
 
   @Get()
+  @Permissions('sales:view')
   async getSales() {
     return this.salesService.getSales();
   }
 
   @Get('invoice/:invoiceNumber')
+  @Permissions('sales:view')
   async getInvoice(@Param('invoiceNumber') invoiceNumber: string) {
     return this.salesService.getInvoiceByNumber(invoiceNumber);
   }

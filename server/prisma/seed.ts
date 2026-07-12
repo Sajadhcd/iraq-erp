@@ -95,6 +95,21 @@ async function main() {
     // Inventory
     { action: "inventory:view", description: "عرض المخزون والمستودعات" },
     { action: "inventory:manage", description: "إدارة المخزون والتسويات" },
+    // Dashboard
+    { action: "dashboard:view", description: "عرض لوحة القيادة والمؤشرات" },
+    // Customers
+    { action: "customers:view", description: "عرض العملاء" },
+    { action: "customers:create", description: "إنشاء العملاء" },
+    { action: "customers:update", description: "تعديل العملاء" },
+    { action: "customers:delete", description: "حذف العملاء" },
+    // Suppliers
+    { action: "suppliers:view", description: "عرض الموردين" },
+    { action: "suppliers:create", description: "إنشاء الموردين" },
+    { action: "suppliers:update", description: "تعديل الموردين" },
+    { action: "suppliers:delete", description: "حذف الموردين" },
+    // Settings
+    { action: "settings:view", description: "عرض إعدادات النظام" },
+    { action: "settings:manage", description: "إدارة إعدادات النظام" },
   ];
 
   const permEntities: Record<string, any> = {};
@@ -150,14 +165,14 @@ async function main() {
     "attendance:view", "attendance:manage",
     "leave:view", "leave:manage",
     "payroll:view", "payroll:manage",
-    "reports:view"
+    "reports:view", "dashboard:view", "settings:view"
   ]);
 
   // 4. HR_EMPLOYEE
   await mapPermissionsToRole("HR_EMPLOYEE", [
     "hr:view", "employees:view", "hr:create", "hr:edit", "hr:documents",
     "attendance:view", "attendance:manage",
-    "leave:view", "leave:manage"
+    "leave:view", "leave:manage", "dashboard:view"
   ]);
 
   // 5. SALES_MANAGER
@@ -166,7 +181,9 @@ async function main() {
     "quotations:view", "quotations:create", "quotations:edit", "quotations:delete", "quotations:approve", "quotations:print",
     "sales_orders:view", "sales_orders:manage",
     "sales:checkout", "sales:view",
-    "reports:view"
+    "reports:view", "dashboard:view", "settings:view",
+    "customers:view", "customers:create", "customers:update", "customers:delete",
+    "suppliers:view"
   ]);
 
   // 6. SALES_AGENT
@@ -174,27 +191,30 @@ async function main() {
     "crm:view", "crm:create", "crm:edit",
     "quotations:view", "quotations:create", "quotations:edit",
     "sales_orders:view",
-    "sales:checkout"
+    "sales:checkout", "dashboard:view",
+    "customers:view", "customers:create", "customers:update"
   ]);
 
   // 7. PURCHASE_MANAGER
   await mapPermissionsToRole("PURCHASE_MANAGER", [
     "purchasing:view", "purchasing:manage",
     "products:view",
-    "reports:view"
+    "reports:view", "dashboard:view",
+    "suppliers:view", "suppliers:create", "suppliers:update", "suppliers:delete"
   ]);
 
   // 8. PURCHASING_OFFICER
   await mapPermissionsToRole("PURCHASING_OFFICER", [
     "purchasing:view", "purchasing:manage",
-    "products:view"
+    "products:view",
+    "suppliers:view", "suppliers:create", "suppliers:update"
   ]);
 
   // 9. INVENTORY_MANAGER
   await mapPermissionsToRole("INVENTORY_MANAGER", [
     "products:view", "products:create", "products:edit", "products:delete",
     "inventory:view", "inventory:manage",
-    "reports:view"
+    "reports:view", "dashboard:view"
   ]);
 
   // 10. WAREHOUSE_EMPLOYEE
@@ -207,42 +227,45 @@ async function main() {
   await mapPermissionsToRole("ACCOUNTING_MANAGER", [
     "accounting:view", "accounting:manage", "accounting:post",
     "reports:view",
-    "payroll:view", "employees:view"
+    "payroll:view", "employees:view", "dashboard:view", "settings:view",
+    "customers:view", "suppliers:view"
   ]);
 
   // 12. ACCOUNTANT
   await mapPermissionsToRole("ACCOUNTANT", [
     "accounting:view", "accounting:manage",
-    "payroll:view", "employees:view"
+    "payroll:view", "employees:view", "dashboard:view", "settings:view",
+    "customers:view", "suppliers:view"
   ]);
 
   // 13. CASHIER
   await mapPermissionsToRole("CASHIER", [
-    "sales:checkout", "sales:view"
+    "sales:checkout", "sales:view", "dashboard:view",
+    "customers:view", "customers:create"
   ]);
 
   // 14. CUSTOMER_SERVICE
   await mapPermissionsToRole("CUSTOMER_SERVICE", [
-    "crm:view", "crm:edit"
+    "crm:view", "crm:edit", "dashboard:view", "customers:view"
   ]);
 
   // 15. MARKETING
   await mapPermissionsToRole("MARKETING", [
-    "crm:view", "crm:create"
+    "crm:view", "crm:create", "dashboard:view"
   ]);
 
   // 16. EMPLOYEE
   await mapPermissionsToRole("EMPLOYEE", [
     "attendance:view",
     "leave:view",
-    "payroll:view"
+    "payroll:view", "dashboard:view"
   ]);
 
   // 17. AUDITOR
   await mapPermissionsToRole("AUDITOR", [
     "reports:view",
     "accounting:view",
-    "sales:view",
+    "sales:view", "dashboard:view", "customers:view", "suppliers:view", "settings:view",
     "purchasing:view",
     "inventory:view"
   ]);

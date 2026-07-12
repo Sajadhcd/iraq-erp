@@ -21,7 +21,7 @@ async function testEndpoint() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: tc.username,
-          password: "123456",
+          password: tc.username === "admin" ? "admin123" : "123456",
         }),
       });
 

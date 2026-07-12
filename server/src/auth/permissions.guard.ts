@@ -53,6 +53,11 @@ export class PermissionsGuard implements CanActivate {
     if (userRoleName === 'SUPER_ADMIN') {
       return true;
     }
+    if (userRoleName === 'ADMIN') {
+      if (!requiredPermissions.includes('users:manage')) {
+        return true;
+      }
+    }
 
     // Compile active permissions
     const activePermissions = new Set<string>();

@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { Permissions } from '../auth/permissions.decorator';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -13,13 +13,13 @@ export class UsersController {
   // AUDIT LOGS & SESSION METRICS
   // ==========================================
   @Get('audit-logs')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async getAuditLogs() {
     return this.usersService.getAuditLogs();
   }
 
   @Get('session-metrics')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async getSessionMetrics() {
     return this.usersService.getSessionMetrics();
   }
@@ -28,27 +28,27 @@ export class UsersController {
   // ROLES MANAGEMENT
   // ==========================================
   @Get('roles')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async getRoles() {
     return this.usersService.getRoles();
   }
 
   @Post('roles')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async createRole(@Body() data: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.usersService.createRole({ ...data, currentUserId });
   }
 
   @Put('roles/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async updateRole(@Param('id') id: string, @Body() data: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.usersService.updateRole(id, { ...data, currentUserId });
   }
 
   @Delete('roles/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async deleteRole(@Param('id') id: string, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.usersService.deleteRole(id, currentUserId);
@@ -58,13 +58,13 @@ export class UsersController {
   // PERMISSIONS & MATRIX
   // ==========================================
   @Get('permissions')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async getPermissions() {
     return this.usersService.getPermissions();
   }
 
   @Put('matrix')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async updateMatrix(@Body() data: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.usersService.updateMatrix({ ...data, currentUserId });
@@ -74,13 +74,13 @@ export class UsersController {
   // USER OVERRIDES
   // ==========================================
   @Get(':id/permissions')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async getUserPermissions(@Param('id') id: string) {
     return this.usersService.getUserPermissions(id);
   }
 
   @Put(':id/permissions')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async updateUserPermissions(@Param('id') id: string, @Body() data: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.usersService.updateUserPermissions(id, { ...data, currentUserId });
@@ -90,7 +90,7 @@ export class UsersController {
   // BASIC USER CRUD & PASSWORDS
   // ==========================================
   @Post()
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async create(
     @Body()
     data: {
@@ -107,19 +107,19 @@ export class UsersController {
   }
 
   @Get()
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
   @Put(':id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async update(
     @Param('id') id: string,
     @Body()
@@ -136,14 +136,14 @@ export class UsersController {
   }
 
   @Put(':id/toggle')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async toggleActive(@Param('id') id: string, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.usersService.toggleActive(id, currentUserId);
   }
 
   @Post(':id/reset-password')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async resetPassword(
     @Param('id') id: string,
     @Body('password') passwordHash: string,
@@ -163,7 +163,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('users:manage')
   async remove(@Param('id') id: string, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.usersService.remove(id, currentUserId);

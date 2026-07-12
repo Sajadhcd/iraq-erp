@@ -10,16 +10,16 @@ import {
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { Permissions } from '../auth/permissions.decorator';
 
 @Controller('employees')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Post()
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:create')
   async create(
     @Body()
     data: {
@@ -34,22 +34,25 @@ export class EmployeesController {
   }
 
   @Get()
+  @Permissions('employees:view')
   async findAll() {
     return this.employeesService.findAll();
   }
 
   @Get('roles')
+  @Permissions('employees:view')
   async getRoles() {
     return this.employeesService.getRoles();
   }
 
   @Get(':id')
+  @Permissions('employees:view')
   async findOne(@Param('id') id: string) {
     return this.employeesService.findOne(id);
   }
 
   @Put(':id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:edit')
   async update(
     @Param('id') id: string,
     @Body()
@@ -65,7 +68,7 @@ export class EmployeesController {
   }
 
   @Delete(':id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('hr:delete')
   async remove(@Param('id') id: string) {
     return this.employeesService.remove(id);
   }

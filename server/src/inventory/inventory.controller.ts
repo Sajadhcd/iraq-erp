@@ -11,16 +11,16 @@ import {
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { Permissions } from '../auth/permissions.decorator';
 
 @Controller('inventory')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Post('categories')
-  @Roles('SUPER_ADMIN', 'INVENTORY_MANAGER')
+  @Permissions('products:create')
   async createCategory(
     @Body()
     data: {
@@ -34,18 +34,19 @@ export class InventoryController {
   }
 
   @Get('categories')
+  @Permissions('products:view')
   async getCategories() {
     return this.inventoryService.getCategories();
   }
 
   @Delete('categories/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('products:delete')
   async removeCategory(@Param('id') id: string) {
     return this.inventoryService.removeCategory(id);
   }
 
   @Post('products')
-  @Roles('SUPER_ADMIN', 'INVENTORY_MANAGER')
+  @Permissions('products:create')
   async createProduct(
     @Body()
     data: {
@@ -66,17 +67,19 @@ export class InventoryController {
   }
 
   @Get('products')
+  @Permissions('products:view')
   async getProducts() {
     return this.inventoryService.getProducts();
   }
 
   @Get('products/:id')
+  @Permissions('products:view')
   async getProductById(@Param('id') id: string) {
     return this.inventoryService.getProductById(id);
   }
 
   @Put('products/:id')
-  @Roles('SUPER_ADMIN', 'INVENTORY_MANAGER')
+  @Permissions('products:edit')
   async updateProduct(
     @Param('id') id: string,
     @Body()
@@ -96,13 +99,13 @@ export class InventoryController {
   }
 
   @Delete('products/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('products:delete')
   async removeProduct(@Param('id') id: string) {
     return this.inventoryService.removeProduct(id);
   }
 
   @Post('warehouses')
-  @Roles('SUPER_ADMIN')
+  @Permissions('inventory:manage')
   async createWarehouse(
     @Body() data: { name: string; code: string; location?: string },
   ) {
@@ -110,18 +113,19 @@ export class InventoryController {
   }
 
   @Get('warehouses')
+  @Permissions('inventory:view')
   async getWarehouses() {
     return this.inventoryService.getWarehouses();
   }
 
   @Delete('warehouses/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('inventory:manage')
   async removeWarehouse(@Param('id') id: string) {
     return this.inventoryService.removeWarehouse(id);
   }
 
   @Post('transfer')
-  @Roles('SUPER_ADMIN', 'INVENTORY_MANAGER')
+  @Permissions('inventory:manage')
   async transferStock(
     @Body()
     data: {
@@ -136,7 +140,7 @@ export class InventoryController {
   }
 
   @Post('adjust')
-  @Roles('SUPER_ADMIN', 'INVENTORY_MANAGER')
+  @Permissions('inventory:manage')
   async adjustStock(
     @Body()
     data: {

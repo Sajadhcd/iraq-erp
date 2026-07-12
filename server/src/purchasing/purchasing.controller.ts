@@ -10,16 +10,16 @@ import {
 } from '@nestjs/common';
 import { PurchasingService } from './purchasing.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { Permissions } from '../auth/permissions.decorator';
 
 @Controller('purchasing')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class PurchasingController {
   constructor(private readonly purchasingService: PurchasingService) {}
 
   @Post('suppliers')
-  @Roles('SUPER_ADMIN', 'INVENTORY_MANAGER', 'PURCHASING_AGENT')
+  @Permissions('purchasing:manage')
   async createSupplier(
     @Body()
     data: {
@@ -35,24 +35,25 @@ export class PurchasingController {
   }
 
   @Get('suppliers')
+  @Permissions('purchasing:view')
   async getSuppliers() {
     return this.purchasingService.getSuppliers();
   }
 
   @Put('suppliers/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('purchasing:manage')
   async updateSupplier(@Param('id') id: string, @Body() data: any) {
     return this.purchasingService.updateSupplier(id, data);
   }
 
   @Delete('suppliers/:id')
-  @Roles('SUPER_ADMIN')
+  @Permissions('purchasing:manage')
   async removeSupplier(@Param('id') id: string) {
     return this.purchasingService.removeSupplier(id);
   }
 
   @Post()
-  @Roles('SUPER_ADMIN', 'PURCHASING_AGENT')
+  @Permissions('purchasing:manage')
   async createPurchase(
     @Body()
     dto: {
@@ -71,12 +72,13 @@ export class PurchasingController {
   }
 
   @Post(':id/receive')
-  @Roles('SUPER_ADMIN', 'INVENTORY_MANAGER')
+  @Permissions('purchasing:manage')
   async receivePurchase(@Param('id') id: string) {
     return this.purchasingService.receivePurchase(id);
   }
 
   @Get()
+  @Permissions('purchasing:view')
   async getPurchases() {
     return this.purchasingService.getPurchases();
   }

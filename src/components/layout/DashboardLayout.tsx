@@ -69,13 +69,14 @@ const SIDEBAR_PERMISSIONS: Record<string, string> = {
   categories: "products:view",
   sales: "sales:view",
   "sales-orders": "sales_orders:view",
-  customers: "crm:view",
-  suppliers: "purchasing:view",
+  customers: "customers:view",
+  suppliers: "suppliers:view",
   purchases: "purchasing:view",
   inventory: "inventory:view",
   expenses: "accounting:view",
   accounting: "accounting:view",
   crm: "crm:view",
+  quotations: "quotations:view",
   reports: "reports:view",
   hrms: "hr:view",
   attendance: "attendance:view",
@@ -83,7 +84,7 @@ const SIDEBAR_PERMISSIONS: Record<string, string> = {
   payroll: "payroll:view",
   employees: "employees:view",
   users: "users:manage",
-  settings: "settings:manage",
+  settings: "settings:view",
 };
 
 export default function DashboardLayout({
