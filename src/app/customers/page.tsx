@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import DataTable from "@/components/ui/DataTable";
-import { UserPlus, Phone, Mail, Award, Edit2, Trash2 } from "lucide-react";
+import { UserPlus, Phone, Mail, Award, Edit2, Trash2, Search } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
 

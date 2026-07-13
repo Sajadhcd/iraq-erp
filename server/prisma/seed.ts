@@ -241,7 +241,8 @@ async function main() {
   // 13. CASHIER
   await mapPermissionsToRole("CASHIER", [
     "sales:checkout", "sales:view", "dashboard:view",
-    "customers:view", "customers:create"
+    "customers:view", "customers:create",
+    "products:view", "settings:view"
   ]);
 
   // 14. CUSTOMER_SERVICE
@@ -272,7 +273,7 @@ async function main() {
 
   // 3. Create Default Admin User & Employee if not exists
   const adminEmail = "admin@system.com";
-  const passwordHash = await bcrypt.hash("admin123", 10);
+  const passwordHash = await bcrypt.hash("123456", 10);
 
   const adminUser = await prisma.user.upsert({
     where: { email: adminEmail },
@@ -296,7 +297,7 @@ async function main() {
       roleId: superAdminRole.id,
     },
   });
-  console.log(`Default Admin Account: ${adminEmail} / admin123`);
+  console.log(`Default Admin Account: ${adminEmail} / 123456`);
 
   // 4. Create Default Warehouse
   const defaultWarehouse = await prisma.warehouse.upsert({

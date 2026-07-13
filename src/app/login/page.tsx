@@ -9,8 +9,8 @@ import { useTranslation } from "react-i18next";
 export default function LoginPage() {
   const router = useRouter();
   const { t, i18n } = useTranslation(["authentication", "common"]);
-  const [email, setEmail] = useState("admin@system.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -126,10 +126,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-100 text-[10px] text-center text-slate-400">
-          <p className="font-semibold text-slate-500 mb-1">Default Account Credentials:</p>
-          <p>admin@system.com / admin123</p>
-        </div>
+
       </div>
     </div>
   );
