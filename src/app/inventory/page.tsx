@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Warehouse, Plus, ArrowLeftRight } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 interface WarehouseRecord {
   id: string;
@@ -82,7 +83,7 @@ export default function InventoryPage() {
       setCode("");
       setLocation("");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 
@@ -107,7 +108,7 @@ export default function InventoryPage() {
 
       setQuantity("");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 

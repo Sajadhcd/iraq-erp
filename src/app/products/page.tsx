@@ -6,6 +6,7 @@ import DataTable from "@/components/ui/DataTable";
 import { Barcode, Eye, Edit2, Trash2, AlertTriangle } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 interface Product {
   id: string;
@@ -156,7 +157,7 @@ export default function ProductsPage() {
       setRetailPrice("");
       setStock("");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 
@@ -195,7 +196,7 @@ export default function ProductsPage() {
       setSelectedProduct(null);
       fetchProducts();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 
@@ -215,7 +216,7 @@ export default function ProductsPage() {
       setSelectedProduct(null);
       fetchProducts();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 

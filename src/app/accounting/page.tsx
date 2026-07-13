@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
 import { FolderTree, BookOpen, Receipt, Plus, CheckCircle, AlertTriangle, Play, X, User } from "lucide-react";
+import { showToast } from "@/components/ui/toast";
 
 interface AccountRecord {
   id: string;
@@ -137,7 +138,7 @@ export default function AccountingPage() {
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accCode || !accNameEn || !accNameAr || !accType) {
-      alert(t("validationRequired"));
+      showToast(t("validationRequired"), 'error');
       return;
     }
 
@@ -155,7 +156,7 @@ export default function AccountingPage() {
           openingBalance: parseFloat(accOpeningBalance) || 0
         })
       });
-      alert(t("toastAccountCreated"));
+      showToast(t("toastAccountCreated"), 'success');
       setAccountModalOpen(false);
       fetchAccounts();
       // Reset
@@ -166,17 +167,17 @@ export default function AccountingPage() {
       setAccIsCashBank(false);
       setAccOpeningBalance("0");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 
   const handleCreateJournal = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Filter out blank lines
     const activeLines = jeLines.filter(line => line.accountId !== "");
     if (activeLines.length < 2) {
-      alert(t("validationMinLines"));
+      showToast(t("validationMinLines"), 'error');
       return;
     }
 
@@ -188,7 +189,7 @@ export default function AccountingPage() {
     }
 
     if (Math.abs(sumDebit - sumCredit) > 0.001) {
-      alert(t("validationUnbalanced"));
+      showToast(t("validationUnbalanced"), 'error');
       return;
     }
 
@@ -203,7 +204,7 @@ export default function AccountingPage() {
           items: activeLines
         })
       });
-      alert(t("toastJournalCreated"));
+      showToast(t("toastJournalCreated"), 'success');
       setJournalModalOpen(false);
       fetchJournals();
       fetchAccounts(); // Balances updated if POSTED
@@ -215,7 +216,7 @@ export default function AccountingPage() {
         { accountId: "", debit: 0, credit: 0, description: "" }
       ]);
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 
@@ -223,7 +224,7 @@ export default function AccountingPage() {
     e.preventDefault();
     const amount = parseFloat(vAmount);
     if (!amount || amount <= 0) {
-      alert(t("validationPositive"));
+      showToast(t("validationPositive"), 'error');
       return;
     }
 
@@ -239,7 +240,7 @@ export default function AccountingPage() {
           notes: vNotes
         })
       });
-      alert(t("toastVoucherCreated"));
+      showToast(t("toastVoucherCreated"), 'success');
       setVoucherModalOpen(false);
       fetchVouchers();
       fetchJournals();
@@ -251,7 +252,7 @@ export default function AccountingPage() {
       setVReference("");
       setVNotes("");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 
@@ -260,11 +261,11 @@ export default function AccountingPage() {
       await apiRequest(`/accounting/journals/${id}/post`, {
         method: "POST"
       });
-      alert(t("toastJournalPosted"));
+      showToast(t("toastJournalPosted"), 'success');
       fetchJournals();
       fetchAccounts();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 
@@ -276,7 +277,7 @@ export default function AccountingPage() {
       });
       fetchAccounts();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 

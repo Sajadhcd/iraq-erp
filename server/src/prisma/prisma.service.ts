@@ -11,9 +11,7 @@ export class PrismaService
       await this.$connect();
       console.log('[Prisma] Connected to database successfully.');
     } catch (e) {
-      console.warn(
-        '[Prisma] Warning: Could not connect to database. Running in disconnected mode.',
-      );
+      throw new Error(`[Prisma] Could not connect to database: ${e.message}`);
     }
   }
 

@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Search, Plus, ShoppingBag, CheckCircle2 } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 interface PurchaseItem {
   product: { name: string };
@@ -121,7 +122,7 @@ export default function PurchasesPage() {
       setQuantity("");
       setUnitPrice("");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 
@@ -132,7 +133,7 @@ export default function PurchasesPage() {
       });
       fetchPurchases();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 

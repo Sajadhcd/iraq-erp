@@ -9,6 +9,7 @@ import {
   AlertCircle, Clock, ArrowRight, Printer, Share2, Clipboard,
   TrendingUp, RefreshCw, X, ChevronRight, DollarSign, Eye, Play
 } from "lucide-react";
+import { showToast } from '@/components/ui/toast';
 
 interface QuotationItem {
   id: string;
@@ -221,7 +222,7 @@ export default function QuotationsPage() {
   const handleSaveQuotation = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formItems.some(i => !i.productId)) {
-      alert(isRtl ? "الرجاء تحديد منتج لكل السطور." : "Please select a product for all rows.");
+      showToast(isRtl ? "الرجاء تحديد منتج لكل السطور." : "Please select a product for all rows.", 'warning');
       return;
     }
 
@@ -259,14 +260,14 @@ export default function QuotationsPage() {
       if (selectedQuoteId) {
         fetchDetailedQuotation(selectedQuoteId);
       }
-      alert(t("successQuoteCreated"));
+      showToast(t("successQuoteCreated"), 'success');
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      showToast(`Error: ${err.message}`, 'error');
     }
   };
 
   const handleDeleteQuotation = async (id: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من رغبتك في حذف عرض السعر هذا؟" : "Are you sure you want to delete this quotation?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من رغبتك في حذف عرض السعر هذا؟" : "Are you sure you want to delete this quotation?")) return;
     try {
       await apiRequest(`/quotations/${id}`, { method: "DELETE" });
       setSelectedQuoteId(null);
@@ -275,7 +276,7 @@ export default function QuotationsPage() {
       fetchDashboardStats();
       setActiveTab("quotations");
     } catch (err: any) {
-      alert(`Error deleting quote: ${err.message}`);
+      showToast(`Error deleting quote: ${err.message}`, 'error');
     }
   };
 
@@ -286,9 +287,9 @@ export default function QuotationsPage() {
       fetchDetailedQuotation(id);
       fetchQuotations();
       fetchDashboardStats();
-      alert(t("successSubmitted"));
+      showToast(t("successSubmitted"), 'success');
     } catch (err: any) {
-      alert(`Submit failed: ${err.message}`);
+      showToast(`Submit failed: ${err.message}`, 'error');
     }
   };
 
@@ -298,15 +299,15 @@ export default function QuotationsPage() {
       fetchDetailedQuotation(id);
       fetchQuotations();
       fetchDashboardStats();
-      alert(t("successApproved"));
+      showToast(t("successApproved"), 'success');
     } catch (err: any) {
-      alert(`Approve failed: ${err.message}`);
+      showToast(`Approve failed: ${err.message}`, 'error');
     }
   };
 
   const handleRejectQuotation = async (id: string) => {
     if (!rejectionComment.trim()) {
-      alert(t("lblRejectionRequired"));
+      showToast(t("lblRejectionRequired"), 'warning');
       return;
     }
     try {
@@ -319,9 +320,9 @@ export default function QuotationsPage() {
       fetchDetailedQuotation(id);
       fetchQuotations();
       fetchDashboardStats();
-      alert(t("successRejected"));
+      showToast(t("successRejected"), 'success');
     } catch (err: any) {
-      alert(`Reject failed: ${err.message}`);
+      showToast(`Reject failed: ${err.message}`, 'error');
     }
   };
 
@@ -353,9 +354,9 @@ export default function QuotationsPage() {
       fetchDetailedQuotation(detailedQuote.id);
       fetchQuotations();
       fetchDashboardStats();
-      alert(t("successConvertedInvoice"));
+      showToast(t("successConvertedInvoice"), 'success');
     } catch (err: any) {
-      alert(`Conversion failed: ${err.message}`);
+      showToast(`Conversion failed: ${err.message}`, 'error');
     }
   };
 

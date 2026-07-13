@@ -23,6 +23,7 @@ import {
   X,
   Check,
 } from "lucide-react";
+import { showToast } from '@/components/ui/toast';
 
 export default function PayrollPage() {
   const { t, i18n } = useTranslation(["payroll", "common"]);
@@ -137,7 +138,7 @@ export default function PayrollPage() {
   const handleSaveStructure = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!structForm.employeeId) {
-      alert(isRtl ? "يرجى اختيار الموظف" : "Please select an employee");
+      showToast(isRtl ? "يرجى اختيار الموظف" : "Please select an employee", 'warning');
       return;
     }
     try {
@@ -145,11 +146,11 @@ export default function PayrollPage() {
         method: "POST",
         body: JSON.stringify(structForm),
       });
-      alert(t("successStructureSaved"));
+      showToast(t("successStructureSaved"), 'success');
       setStructModalOpen(false);
       fetchStructures();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -161,11 +162,11 @@ export default function PayrollPage() {
         method: "POST",
         body: JSON.stringify(periodForm),
       });
-      alert(isRtl ? "تم إنشاء الدورة بنجاح." : "Period created successfully.");
+      showToast(isRtl ? "تم إنشاء الدورة بنجاح." : "Period created successfully.", 'success');
       setPeriodModalOpen(false);
       fetchPeriods();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -173,7 +174,7 @@ export default function PayrollPage() {
   const handleRunPayrollSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!runForm.payrollPeriodId) {
-      alert(isRtl ? "يرجى تحديد فترة الرواتب" : "Please select a period");
+      showToast(isRtl ? "يرجى تحديد فترة الرواتب" : "Please select a period", 'warning');
       return;
     }
     try {
@@ -181,11 +182,11 @@ export default function PayrollPage() {
         method: "POST",
         body: JSON.stringify(runForm),
       });
-      alert(t("successRun"));
+      showToast(t("successRun"), 'success');
       setRunModalOpen(false);
       fetchRuns();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -193,23 +194,23 @@ export default function PayrollPage() {
   const handleApproveRun = async (id: string) => {
     try {
       await apiRequest(`/payroll/runs/${id}/approve`, { method: "POST" });
-      alert(t("successApproved"));
+      showToast(t("successApproved"), 'success');
       fetchRuns();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
   // Lock Run
   const handleLockRun = async (id: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من قفل وترحيل هذا المسير نهائياً للدفاتر المالية؟" : "Are you sure you want to permanently lock and post this payroll run to the general ledger?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من قفل وترحيل هذا المسير نهائياً للدفاتر المالية؟" : "Are you sure you want to permanently lock and post this payroll run to the general ledger?")) return;
     try {
       await apiRequest(`/payroll/runs/${id}/lock`, { method: "POST" });
-      alert(t("successLocked"));
+      showToast(t("successLocked"), 'success');
       fetchRuns();
       fetchPayslips();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 

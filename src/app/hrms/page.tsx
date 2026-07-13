@@ -22,6 +22,7 @@ import {
   Upload,
   Calendar,
 } from "lucide-react";
+import { showToast } from '@/components/ui/toast';
 
 export default function HrmsPage() {
   const { t, i18n } = useTranslation(["hrms", "common"]);
@@ -195,20 +196,20 @@ export default function HrmsPage() {
           method: "PUT",
           body: JSON.stringify(empForm),
         });
-        alert(t("successEmployeeUpdated"));
+        showToast(t("successEmployeeUpdated"), 'success');
       } else {
         // Create
         await apiRequest("/hrms/employees", {
           method: "POST",
           body: JSON.stringify(empForm),
         });
-        alert(t("successEmployeeCreated"));
+        showToast(t("successEmployeeCreated"), 'success');
       }
       setEmployeeModalOpen(false);
       fetchEmployees();
       fetchDashboard();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -225,12 +226,12 @@ export default function HrmsPage() {
           method: "POST",
           body: JSON.stringify(deptForm),
         });
-        alert(t("successDeptCreated"));
+        showToast(t("successDeptCreated"), 'success');
       }
       setDeptModalOpen(false);
       fetchSupportData();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -247,12 +248,12 @@ export default function HrmsPage() {
           method: "POST",
           body: JSON.stringify(posForm),
         });
-        alert(t("successPosCreated"));
+        showToast(t("successPosCreated"), 'success');
       }
       setPosModalOpen(false);
       fetchSupportData();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -273,15 +274,15 @@ export default function HrmsPage() {
       fetchEmployeeDetails(selectedEmp.id);
       setDocForm({ fileName: "", fileType: "Passport", fileUrl: "" });
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
   const handleDeleteEmployee = async (id: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من إيقاف الخدمة وحذف هذا الموظف؟" : "Are you sure you want to soft delete this employee?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من إيقاف الخدمة وحذف هذا الموظف؟" : "Are you sure you want to soft delete this employee?")) return;
     try {
       await apiRequest(`/hrms/employees/${id}`, { method: "DELETE" });
-      alert(t("successEmployeeDeleted"));
+      showToast(t("successEmployeeDeleted"), 'success');
       fetchEmployees();
       fetchDashboard();
       if (selectedEmp?.id === id) {
@@ -289,19 +290,19 @@ export default function HrmsPage() {
         setActiveTab("employees");
       }
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
   const handleDeleteDoc = async (docId: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من حذف هذا الملف؟" : "Are you sure you want to delete this document?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من حذف هذا الملف؟" : "Are you sure you want to delete this document?")) return;
     try {
       await apiRequest(`/hrms/documents/${docId}`, { method: "DELETE" });
       if (selectedEmp) {
         fetchEmployeeDetails(selectedEmp.id);
       }
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -709,12 +710,12 @@ export default function HrmsPage() {
                       </button>
                       <button
                         onClick={async () => {
-                          if (!confirm(isRtl ? "هل أنت متأكد من حذف هذا القسم؟" : "Are you sure you want to delete this department?")) return;
+                          if (!window.confirm(isRtl ? "هل أنت متأكد من حذف هذا القسم؟" : "Are you sure you want to delete this department?")) return;
                           try {
                             await apiRequest(`/hrms/departments/${d.id}`, { method: "DELETE" });
                             fetchSupportData();
                           } catch (err: any) {
-                            alert(err.message);
+                            showToast(err.message, 'error');
                           }
                         }}
                         className="p-1 text-slate-400 hover:text-red-650 transition"
@@ -764,12 +765,12 @@ export default function HrmsPage() {
                         </button>
                         <button
                           onClick={async () => {
-                            if (!confirm(isRtl ? "هل أنت متأكد من حذف هذه الوظيفة؟" : "Are you sure you want to delete this position?")) return;
+                            if (!window.confirm(isRtl ? "هل أنت متأكد من حذف هذه الوظيفة؟" : "Are you sure you want to delete this position?")) return;
                             try {
                               await apiRequest(`/hrms/positions/${p.id}`, { method: "DELETE" });
                               fetchSupportData();
                             } catch (err: any) {
-                              alert(err.message);
+                              showToast(err.message, 'error');
                             }
                           }}
                           className="p-1 text-slate-450 hover:text-red-650 transition"

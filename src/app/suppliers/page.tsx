@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Search, Plus, Building2, User, Phone, Mail, MapPin, Edit2, Trash2 } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 interface Supplier {
   id: string;
@@ -77,7 +78,7 @@ export default function SuppliersPage() {
       fetchSuppliers();
       setCompanyName(""); setContactName(""); setPhone(""); setEmail(""); setAddress(""); setTaxNumber("");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 
@@ -112,7 +113,7 @@ export default function SuppliersPage() {
       setSelectedSupplier(null);
       fetchSuppliers();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 
@@ -129,7 +130,7 @@ export default function SuppliersPage() {
       setSelectedSupplier(null);
       fetchSuppliers();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 

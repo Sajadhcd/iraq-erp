@@ -108,6 +108,17 @@ export class AttendanceController {
   }
 
   // ==========================================
+  // GET MONTHLY ATTENDANCE SUMMARY
+  // ==========================================
+  @Get('monthly')
+  @Permissions('attendance:view')
+  async getMonthlyAttendance(@Query('year') year?: string, @Query('month') month?: string) {
+    const y = year ? parseInt(year) : new Date().getFullYear();
+    const m = month ? parseInt(month) : new Date().getMonth() + 1;
+    return this.service.getMonthlyAttendance(y, m);
+  }
+
+  // ==========================================
   // GET ATTENDANCE BY EMPLOYEE
   // ==========================================
   @Get('employee/:employeeId')
@@ -118,16 +129,5 @@ export class AttendanceController {
     @Query('endDate') endDate?: string,
   ) {
     return this.service.getAttendanceByEmployee(employeeId, { startDate, endDate });
-  }
-
-  // ==========================================
-  // GET MONTHLY ATTENDANCE SUMMARY
-  // ==========================================
-  @Get('monthly')
-  @Permissions('attendance:view')
-  async getMonthlyAttendance(@Query('year') year?: string, @Query('month') month?: string) {
-    const y = year ? parseInt(year) : new Date().getFullYear();
-    const m = month ? parseInt(month) : new Date().getMonth() + 1;
-    return this.service.getMonthlyAttendance(y, m);
   }
 }

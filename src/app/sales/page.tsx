@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Search, Receipt, Printer, Eye, FileText } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 interface InvoiceItemDetails {
   product: { name: string };
@@ -86,7 +87,7 @@ export default function SalesPage() {
       const invoiceData = await apiRequest(`/sales/invoice/${invoiceNumber}`);
       setSelectedInvoice(invoiceData);
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 

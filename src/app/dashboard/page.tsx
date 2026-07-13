@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { TrendingUp, Package, ShoppingCart, AlertTriangle, ArrowUpRight, ArrowDownRight, Clock, CalendarRange, UserCheck, ShieldAlert, Award, FileText, MapPin, CheckCircle, RefreshCw } from "lucide-react";
 import { apiRequest } from "@/services/api";
+import { showToast } from '@/components/ui/toast';
 import { useTranslation } from "react-i18next";
 import { usePermissions } from "@/hooks/usePermissions";
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
@@ -69,7 +70,7 @@ export default function Dashboard() {
     try {
       if (userRole === "SUPER_ADMIN" || userRole === "ADMIN" || userRole === "ACCOUNTING_MANAGER" || userRole === "ACCOUNTANT" || userRole === "AUDITOR") {
         // Load Financial summary
-        const report = await apiRequest("/reports/financial-summary").catch(() => ({ revenue: 75000, expenses: 43000, netProfit: 32000 }));
+        const report = await apiRequest("/reports/financial-summary").catch(() => ({ revenue: 0, expenses: 0, netProfit: 0 }));
         setSummary(report);
         const productsList = await apiRequest("/inventory/products").catch(() => []);
         setProductsCount(productsList.length);
@@ -150,7 +151,7 @@ export default function Dashboard() {
       const emps = await apiRequest("/employees").catch(() => []);
       const myEmp = emps.find((e: any) => e.userId === currentUser.id);
       if (!myEmp) {
-        alert(isRtl ? "حساب المستخدم غير مربوط بملف موظف" : "This user account is not linked to any employee record.");
+        showToast(isRtl ? "حساب المستخدم غير مربوط بملف موظف" : "This user account is not linked to any employee record.", 'warning');
         return;
       }
 
@@ -160,18 +161,18 @@ export default function Dashboard() {
           method: "POST",
           body: JSON.stringify({ employeeId: myEmp.id })
         });
-        alert(isRtl ? "تم تسجيل الحضور بنجاح!" : "Checked in successfully!");
+        showToast(isRtl ? "تم تسجيل الحضور بنجاح!" : "Checked in successfully!", 'success');
       } else {
         // Check-out
         await apiRequest("/attendance/check-out", {
           method: "PUT",
           body: JSON.stringify({ employeeId: myEmp.id })
         });
-        alert(isRtl ? "تم تسجيل الانصراف بنجاح!" : "Checked out successfully!");
+        showToast(isRtl ? "تم تسجيل الانصراف بنجاح!" : "Checked out successfully!", 'success');
       }
       loadRoleDashboardData();
     } catch (e: any) {
-      alert(`Error: ${e.message}`);
+      showToast(`Error: ${e.message}`, 'error');
     }
   };
 

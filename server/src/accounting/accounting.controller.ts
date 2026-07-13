@@ -6,7 +6,6 @@ import {
   Body,
   Param,
   UseGuards,
-  Query,
 } from '@nestjs/common';
 import {
   AccountingService,

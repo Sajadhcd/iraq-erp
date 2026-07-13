@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/services/api";
+import { showToast } from "@/components/ui/toast";
 import {
   FileText,
   Warehouse,
@@ -236,7 +237,7 @@ export default function SalesOrdersPage() {
         items: [],
       });
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -253,7 +254,7 @@ export default function SalesOrdersPage() {
       fetchOrders();
       handleSelectOrder(selectedOrder.id);
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -265,7 +266,7 @@ export default function SalesOrdersPage() {
       fetchOrders();
       handleSelectOrder(selectedOrder.id);
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -282,19 +283,19 @@ export default function SalesOrdersPage() {
       fetchOrders();
       handleSelectOrder(selectedOrder.id);
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
   const handleCancelOrder = async (id: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من إلغاء أمر البيع هذا؟" : "Are you sure you want to cancel this order?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من إلغاء أمر البيع هذا؟" : "Are you sure you want to cancel this order?")) return;
     try {
       await apiRequest(`/sales-orders/${id}/cancel`, { method: "PUT" });
       fetchDashboard();
       fetchOrders();
       handleSelectOrder(id);
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -648,7 +649,7 @@ export default function SalesOrdersPage() {
                               (i) => i.deliveredQuantity > i.invoicedQuantity,
                             );
                             if (!hasDeliveredUninvoiced) {
-                              alert(isRtl ? "تمت فوترة جميع البنود التي تم تسليمها بالفعل." : "All delivered items have already been invoiced.");
+                              showToast(isRtl ? "تمت فوترة جميع البنود التي تم تسليمها بالفعل." : "All delivered items have already been invoiced.", 'error');
                               return;
                             }
                             setInvoiceForm({ amountPaid: "0", paymentMethod: "CASH" });

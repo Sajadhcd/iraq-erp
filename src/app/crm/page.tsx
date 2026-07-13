@@ -9,6 +9,7 @@ import {
   TrendingUp, Activity, CheckCircle2, AlertCircle, Clock,
   ArrowRight, Upload, Phone, Mail, MapPin, Building, ShieldAlert, Users
 } from "lucide-react";
+import { showToast } from '@/components/ui/toast';
 
 interface Lead {
   id: string;
@@ -244,12 +245,12 @@ export default function CRMPage() {
         fetchDetailedLead(selectedLeadId);
       }
     } catch (err: any) {
-      alert(`Error saving lead: ${err.message}`);
+      showToast(`Error saving lead: ${err.message}`, 'error');
     }
   };
 
   const handleDeleteLead = async (id: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من رغبتك في حذف هذا العميل المحتمل؟" : "Are you sure you want to delete this lead?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من رغبتك في حذف هذا العميل المحتمل؟" : "Are you sure you want to delete this lead?")) return;
     try {
       await apiRequest(`/crm/leads/${id}`, { method: "DELETE" });
       setSelectedLeadId(null);
@@ -257,7 +258,7 @@ export default function CRMPage() {
       fetchLeads();
       fetchDashboardStats();
     } catch (e: any) {
-      alert(`Deletion failed: ${e.message}`);
+      showToast(`Deletion failed: ${e.message}`, 'error');
     }
   };
 
@@ -293,9 +294,9 @@ export default function CRMPage() {
       fetchLeads();
       fetchOpportunities();
       fetchDashboardStats();
-      alert(t("successLeadConvert"));
+      showToast(t("successLeadConvert"), 'success');
     } catch (err: any) {
-      alert(`Conversion failed: ${err.message}`);
+      showToast(`Conversion failed: ${err.message}`, 'error');
     }
   };
 
@@ -329,7 +330,7 @@ export default function CRMPage() {
       setActivityModalOpen(false);
       fetchDetailedLead(detailedLead.id);
     } catch (err: any) {
-      alert(`Error scheduling activity: ${err.message}`);
+      showToast(`Error scheduling activity: ${err.message}`, 'error');
     }
   };
 
@@ -341,7 +342,7 @@ export default function CRMPage() {
       });
       fetchDetailedLead(detailedLead.id);
     } catch (err: any) {
-      alert(`Error completing activity: ${err.message}`);
+      showToast(`Error completing activity: ${err.message}`, 'error');
     }
   };
 
@@ -355,31 +356,14 @@ export default function CRMPage() {
 
     setUploading(true);
     try {
-      // Create session bearer token
-      const session = localStorage.getItem("sims_session");
-      const headers: Record<string, string> = {};
-      if (session) {
-        const parsed = JSON.parse(session);
-        // Simple auth simulation. For real apiRequest supports token passing:
-        // We will fetch via standard fetch to support FormData multipart
-      }
-      
-      const response = await fetch(`http://localhost:3001/api/crm/leads/${detailedLead.id}/attachments`, {
+      await apiRequest(`/crm/leads/${detailedLead.id}/attachments`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${JSON.parse(localStorage.getItem("sims_session") || "{}").token || ""}`
-        },
         body: formData,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed uploading file.");
-      }
-
       fetchDetailedLead(detailedLead.id);
     } catch (err: any) {
-      alert(`File upload failed: ${err.message}`);
+      showToast(`File upload failed: ${err.message}`, 'error');
     } finally {
       setUploading(false);
     }
@@ -395,7 +379,7 @@ export default function CRMPage() {
       fetchOpportunities();
       fetchDashboardStats();
     } catch (err: any) {
-      alert(`Failed updating stage: ${err.message}`);
+      showToast(`Failed updating stage: ${err.message}`, 'error');
     }
   };
 

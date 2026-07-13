@@ -7,7 +7,6 @@ import {
   UseGuards,
   Delete,
   Param,
-  Query,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';

@@ -6,6 +6,7 @@ import DataTable from "@/components/ui/DataTable";
 import { UserPlus, Phone, Mail, Award, Edit2, Trash2, Search } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 interface Customer {
   id: string;
@@ -97,7 +98,7 @@ export default function CustomersPage() {
       fetchCustomers();
       setName(""); setPhone(""); setEmail(""); setAddress(""); setTaxNumber(""); setCreditLimit("");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 
@@ -132,7 +133,7 @@ export default function CustomersPage() {
       setSelectedCustomer(null);
       fetchCustomers();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 
@@ -149,7 +150,7 @@ export default function CustomersPage() {
       setSelectedCustomer(null);
       fetchCustomers();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 

@@ -154,6 +154,7 @@ export class UsersController {
   }
 
   @Post('change-password')
+  @Permissions('users:manage')
   async changePassword(
     @Body() data: { oldPassword: string; newPassword: string },
     @Req() req: any

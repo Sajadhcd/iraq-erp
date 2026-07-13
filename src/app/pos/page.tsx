@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 interface POSProduct {
   id: string;
@@ -86,7 +87,7 @@ export default function POSPage() {
         name: p.name,
         sku: p.sku,
         barcode: p.barcode || "",
-        retailPrice: parseFloat(p.retailPrice),
+        retailPrice: parseFloat(p.retailPrice || '0'),
         inventories: p.inventories || [],
         category: p.category || { name: "عام" },
       }));
@@ -135,7 +136,7 @@ export default function POSPage() {
     const existing = cart.find((item) => item.product.id === product.id);
     if (existing) {
       if (existing.quantity >= stock) {
-        alert(i18n.language === "ar" ? "لا يمكن إضافة كمية أكبر من المخزون المتاح!" : "Cannot add more than available stock!");
+        showToast(i18n.language === "ar" ? "لا يمكن إضافة كمية أكبر من المخزون المتاح!" : "Cannot add more than available stock!", "warning");
         return;
       }
       setCart(cart.map((item) => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
@@ -151,7 +152,7 @@ export default function POSPage() {
         if (newQty <= 0) return null;
         const stock = getProductStock(item.product);
         if (newQty > stock) {
-          alert(i18n.language === "ar" ? "لا يمكن تجاوز كمية المخزون المتاحة!" : "Cannot exceed available stock!");
+          showToast(i18n.language === "ar" ? "لا يمكن تجاوز كمية المخزون المتاحة!" : "Cannot exceed available stock!", "warning");
           return item;
         }
         return { ...item, quantity: newQty };
@@ -198,7 +199,7 @@ export default function POSPage() {
       setOrderSuccess(true);
       fetchProducts(); // Refresh stocks from DB
     } catch (err: any) {
-      alert(`Checkout failed: ${err.message}`);
+      showToast(`Checkout failed: ${err.message}`, "error");
     }
   };
 

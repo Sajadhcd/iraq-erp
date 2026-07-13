@@ -25,6 +25,7 @@ import {
   Save,
   Check,
 } from "lucide-react";
+import { showToast } from '@/components/ui/toast';
 
 export default function AttendancePage() {
   const { t, i18n } = useTranslation(["attendance", "common"]);
@@ -206,7 +207,7 @@ export default function AttendancePage() {
   const handleCheckIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkInForm.employeeId) {
-      alert(isRtl ? "يرجى تحديد الموظف" : "Please select an employee");
+      showToast(isRtl ? "يرجى تحديد الموظف" : "Please select an employee", 'warning');
       return;
     }
     try {
@@ -218,14 +219,14 @@ export default function AttendancePage() {
           notes: checkInForm.notes,
         }),
       });
-      alert(t("successCheckIn"));
+      showToast(t("successCheckIn"), 'success');
       setCheckInModalOpen(false);
       setCheckInForm({ employeeId: "", checkInTime: new Date().toISOString().substring(0, 16), notes: "" });
       fetchAttendanceData();
       fetchMonthlySummary();
       fetchTodayDashboard();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -233,7 +234,7 @@ export default function AttendancePage() {
   const handleCheckOut = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkOutForm.employeeId) {
-      alert(isRtl ? "يرجى تحديد الموظف" : "Please select an employee");
+      showToast(isRtl ? "يرجى تحديد الموظف" : "Please select an employee", 'warning');
       return;
     }
     try {
@@ -245,14 +246,14 @@ export default function AttendancePage() {
           notes: checkOutForm.notes,
         }),
       });
-      alert(t("successCheckOut"));
+      showToast(t("successCheckOut"), 'success');
       setCheckOutModalOpen(false);
       setCheckOutForm({ employeeId: "", checkOutTime: new Date().toISOString().substring(0, 16), notes: "" });
       fetchAttendanceData();
       fetchMonthlySummary();
       fetchTodayDashboard();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -260,7 +261,7 @@ export default function AttendancePage() {
   const handleSaveManual = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualForm.employeeId || !manualForm.attendanceDate) {
-      alert(isRtl ? "يرجى تعبئة الحقول المطلوبة" : "Please fill required fields");
+      showToast(isRtl ? "يرجى تعبئة الحقول المطلوبة" : "Please fill required fields", 'warning');
       return;
     }
 
@@ -268,7 +269,7 @@ export default function AttendancePage() {
     const checkOutIso = manualForm.checkOut ? new Date(manualForm.checkOut).toISOString() : null;
 
     if (checkInIso && checkOutIso && new Date(checkOutIso).getTime() < new Date(checkInIso).getTime()) {
-      alert(t("errCheckOutBeforeCheckIn"));
+      showToast(t("errCheckOutBeforeCheckIn"), 'error');
       return;
     }
 
@@ -284,7 +285,7 @@ export default function AttendancePage() {
           notes: manualForm.notes,
         }),
       });
-      alert(t("successCreated"));
+      showToast(t("successCreated"), 'success');
       setManualModalOpen(false);
       setManualForm({
         employeeId: "",
@@ -298,7 +299,7 @@ export default function AttendancePage() {
       fetchMonthlySummary();
       fetchTodayDashboard();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -309,7 +310,7 @@ export default function AttendancePage() {
     const checkOutIso = editForm.checkOut ? new Date(editForm.checkOut).toISOString() : null;
 
     if (checkInIso && checkOutIso && new Date(checkOutIso).getTime() < new Date(checkInIso).getTime()) {
-      alert(t("errCheckOutBeforeCheckIn"));
+      showToast(t("errCheckOutBeforeCheckIn"), 'error');
       return;
     }
 
@@ -323,27 +324,27 @@ export default function AttendancePage() {
           notes: editForm.notes,
         }),
       });
-      alert(t("successUpdated"));
+      showToast(t("successUpdated"), 'success');
       setEditModalOpen(false);
       fetchAttendanceData();
       fetchMonthlySummary();
       fetchTodayDashboard();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
   // Delete Record
   const handleDeleteAttendance = async (id: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من حذف هذا السجل بشكل نهائي؟" : "Are you sure you want to permanently delete this record?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من حذف هذا السجل بشكل نهائي؟" : "Are you sure you want to permanently delete this record?")) return;
     try {
       await apiRequest(`/attendance/${id}`, { method: "DELETE" });
-      alert(t("successDeleted"));
+      showToast(t("successDeleted"), 'success');
       fetchAttendanceData();
       fetchMonthlySummary();
       fetchTodayDashboard();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -355,9 +356,9 @@ export default function AttendancePage() {
         method: "POST",
         body: JSON.stringify(policyForm),
       });
-      alert(t("successPolicySaved"));
+      showToast(t("successPolicySaved"), 'success');
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 

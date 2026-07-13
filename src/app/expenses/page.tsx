@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Search, Plus, Calendar } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 interface ExpenseRecord {
   id: string;
@@ -102,7 +103,7 @@ export default function ExpensesPage() {
       setReferenceNumber("");
       setDescription("");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 

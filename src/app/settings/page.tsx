@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Building2, Save } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation(["settings", "common"]);
@@ -71,7 +72,7 @@ export default function SettingsPage() {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      alert(`Error updating settings: ${err.message}`);
+      showToast(`Error updating settings: ${err.message}`, 'error');
     }
   };
 

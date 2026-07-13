@@ -29,6 +29,7 @@ import {
   Activity,
   Layers,
 } from "lucide-react";
+import { showToast } from '@/components/ui/toast';
 
 export default function LeavePage() {
   const { t, i18n } = useTranslation(["leave", "common"]);
@@ -183,7 +184,7 @@ export default function LeavePage() {
   const handleSaveRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!requestForm.employeeId || !requestForm.leaveTypeId || !requestForm.startDate || !requestForm.endDate) {
-      alert(t("errRequiredFields"));
+      showToast(t("errRequiredFields"), 'warning');
       return;
     }
 
@@ -201,7 +202,7 @@ export default function LeavePage() {
           body: JSON.stringify(requestForm),
         });
       }
-      alert(t("successSaved"));
+      showToast(t("successSaved"), 'success');
       setRequestModalOpen(false);
       fetchRequests();
       if (requestForm.employeeId) {
@@ -209,7 +210,7 @@ export default function LeavePage() {
       }
       fetchDashboardData();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -217,11 +218,11 @@ export default function LeavePage() {
   const handleSubmitRequest = async (id: string) => {
     try {
       await apiRequest(`/leave/${id}/submit`, { method: "POST" });
-      alert(t("successSubmitted"));
+      showToast(t("successSubmitted"), 'success');
       fetchRequests();
       fetchDashboardData();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -229,14 +230,14 @@ export default function LeavePage() {
   const handleApproveRequest = async (id: string, empId: string) => {
     try {
       await apiRequest(`/leave/${id}/approve`, { method: "POST" });
-      alert(t("successApproved"));
+      showToast(t("successApproved"), 'success');
       fetchRequests();
       fetchDashboardData();
       if (empId === selectedEmployeeId) {
         fetchBalances(empId);
       }
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -254,28 +255,28 @@ export default function LeavePage() {
         method: "POST",
         body: JSON.stringify({ reason: rejectForm.reason }),
       });
-      alert(t("successRejected"));
+      showToast(t("successRejected"), 'success');
       setRejectModalOpen(false);
       fetchRequests();
       fetchDashboardData();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
   // Cancel Request
   const handleCancelRequest = async (id: string, empId: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من إلغاء هذا الطلب؟" : "Are you sure you want to cancel this request?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من إلغاء هذا الطلب؟" : "Are you sure you want to cancel this request?")) return;
     try {
       await apiRequest(`/leave/${id}/cancel`, { method: "POST" });
-      alert(t("successCancelled"));
+      showToast(t("successCancelled"), 'success');
       fetchRequests();
       fetchDashboardData();
       if (empId === selectedEmployeeId) {
         fetchBalances(empId);
       }
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
@@ -283,7 +284,7 @@ export default function LeavePage() {
   const handleSaveType = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!typeForm.code || !typeForm.nameAr || !typeForm.nameEn) {
-      alert(t("errRequiredFields"));
+      showToast(t("errRequiredFields"), 'warning');
       return;
     }
 
@@ -299,22 +300,22 @@ export default function LeavePage() {
           body: JSON.stringify(typeForm),
         });
       }
-      alert(t("successTypeSaved"));
+      showToast(t("successTypeSaved"), 'success');
       setTypeModalOpen(false);
       fetchLeaveTypes();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 
   // Delete Leave Type
   const handleDeleteType = async (id: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من حذف نوع الإجازة هذا؟" : "Are you sure you want to delete this leave type?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من حذف نوع الإجازة هذا؟" : "Are you sure you want to delete this leave type?")) return;
     try {
       await apiRequest(`/leave/types/${id}`, { method: "DELETE" });
       fetchLeaveTypes();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, 'error');
     }
   };
 

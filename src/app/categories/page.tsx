@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { FolderTree, Plus, Edit2, Trash2, Tag } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 interface CategoryItem {
   id: string;
@@ -67,7 +68,7 @@ export default function CategoriesPage() {
       fetchCategories();
       setName(""); setSlug(""); setDescription(""); setParentId("none");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 
@@ -98,7 +99,7 @@ export default function CategoriesPage() {
       setSelectedCategory(null);
       fetchCategories();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 
@@ -115,7 +116,7 @@ export default function CategoriesPage() {
       setSelectedCategory(null);
       fetchCategories();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, "error");
     }
   };
 

@@ -68,14 +68,21 @@ export class QuotationsController {
     });
   }
 
-  // 4. Get Single Quotation detail
+  // 4. Version History
+  @Get('history/:quotationNumber')
+  @Permissions('quotations:view')
+  async getHistory(@Param('quotationNumber') quotationNumber: string) {
+    return this.quotationsService.getQuotationHistory(quotationNumber);
+  }
+
+  // 5. Get Single Quotation detail
   @Get(':id')
   @Permissions('quotations:view')
   async getQuotation(@Param('id') id: string) {
     return this.quotationsService.getQuotation(id);
   }
 
-  // 5. Update Quotation (generates version clone)
+  // 6. Update Quotation (generates version clone)
   @Put(':id')
   @Permissions('quotations:edit')
   async updateQuotation(
@@ -86,21 +93,21 @@ export class QuotationsController {
     return this.quotationsService.updateQuotation(id, dto, req.user.id);
   }
 
-  // 6. Submit for Approval
+  // 7. Submit for Approval
   @Put(':id/submit')
   @Permissions('quotations:edit')
   async submitForApproval(@Param('id') id: string, @Request() req: any) {
     return this.quotationsService.submitForApproval(id, req.user.id);
   }
 
-  // 6.1 Approve Quotation
+  // 7.1 Approve Quotation
   @Put(':id/approve')
   @Permissions('quotations:approve')
   async approveQuotation(@Param('id') id: string, @Request() req: any) {
     return this.quotationsService.approveQuotation(id, req.user.id);
   }
 
-  // 6.2 Reject Quotation
+  // 7.2 Reject Quotation
   @Put(':id/reject')
   @Permissions('quotations:approve')
   async rejectQuotation(
@@ -111,7 +118,7 @@ export class QuotationsController {
     return this.quotationsService.rejectQuotation(id, comment, req.user.id);
   }
 
-  // 7. Convert to Invoice
+  // 8. Convert to Invoice
   @Post(':id/convert')
   @Permissions('quotations:edit')
   async convertToInvoice(
@@ -126,13 +133,6 @@ export class QuotationsController {
       amountPaid,
       req.user.id,
     );
-  }
-
-  // 8. Version History
-  @Get('history/:quotationNumber')
-  @Permissions('quotations:view')
-  async getHistory(@Param('quotationNumber') quotationNumber: string) {
-    return this.quotationsService.getQuotationHistory(quotationNumber);
   }
 
   // 9. Soft Delete Quotation

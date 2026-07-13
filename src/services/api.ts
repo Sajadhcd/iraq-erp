@@ -21,8 +21,9 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestOpti
     token = localStorage.getItem("sims_token");
   }
 
+  const isFormData = customOptions.body instanceof FormData;
   const defaultHeaders: HeadersInit = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     Accept: "application/json",
   };
 

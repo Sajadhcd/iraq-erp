@@ -82,21 +82,21 @@ export class LeaveController {
   }
 
   @Post()
-  @Permissions('leave:view')
+  @Permissions('leave:manage')
   async createLeaveRequest(@Body() dto: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.createLeaveRequest(dto, currentUserId);
   }
 
   @Put(':id')
-  @Permissions('leave:view')
+  @Permissions('leave:manage')
   async updateLeaveRequest(@Param('id') id: string, @Body() dto: any, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.updateLeaveRequest(id, dto, currentUserId);
   }
 
   @Post(':id/submit')
-  @Permissions('leave:view')
+  @Permissions('leave:manage')
   async submitLeaveRequest(@Param('id') id: string, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.submitLeaveRequest(id, currentUserId);
@@ -118,7 +118,7 @@ export class LeaveController {
   }
 
   @Post(':id/cancel')
-  @Permissions('leave:view')
+  @Permissions('leave:manage')
   async cancelLeaveRequest(@Param('id') id: string, @Req() req: any) {
     const currentUserId = req.user?.userId;
     return this.service.cancelLeaveRequest(id, currentUserId);

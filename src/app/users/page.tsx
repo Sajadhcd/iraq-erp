@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Search, Plus, Mail, ShieldAlert, Key, Edit, Trash2, CheckCircle, RefreshCw, X, User, Shield, CheckSquare, Square, Eye, ShieldCheck, Lock, Activity, Users } from "lucide-react";
 import { apiRequest } from "@/services/api";
 import { useTranslation } from "react-i18next";
+import { showToast } from "@/components/ui/toast";
 
 interface UserRecord {
   id: string;
@@ -213,7 +214,7 @@ export default function UsersPage() {
       setEmployeeId("");
       setRoleId("");
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 
@@ -245,7 +246,7 @@ export default function UsersPage() {
       fetchUsers();
       fetchEmployees();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 
@@ -254,7 +255,7 @@ export default function UsersPage() {
       await apiRequest(`/users/${id}/toggle`, { method: "PUT" });
       fetchUsers();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 
@@ -273,21 +274,21 @@ export default function UsersPage() {
         method: "POST",
         body: JSON.stringify({ password: newPassword }),
       });
-      alert(isRtl ? "تم إعادة تعيين كلمة المرور بنجاح." : "Password reset successfully.");
+      showToast(isRtl ? "تم إعادة تعيين كلمة المرور بنجاح." : "Password reset successfully.", 'success');
       setResetModalOpen(false);
       setSelectedUser(null);
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 
   const handleDeleteUser = async (id: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من حذف حساب هذا المستخدم نهائياً؟" : "Are you sure you want to permanently delete this user account?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من حذف حساب هذا المستخدم نهائياً؟" : "Are you sure you want to permanently delete this user account?")) return;
     try {
       await apiRequest(`/users/${id}`, { method: "DELETE" });
       fetchUsers();
     } catch (err: any) {
-      alert(`${t("common:generalError")}: ${err.message}`);
+      showToast(`${t("common:generalError")}: ${err.message}`, 'error');
     }
   };
 
@@ -299,7 +300,7 @@ export default function UsersPage() {
       setUserOverrides(data || []);
       setOverrideModalOpen(true);
     } catch (e: any) {
-      alert(`Error fetching user permissions: ${e.message}`);
+      showToast(`Error fetching user permissions: ${e.message}`, 'error');
     }
   };
 
@@ -324,11 +325,11 @@ export default function UsersPage() {
           }))
         })
       });
-      alert(isRtl ? "تم حفظ استثناءات الصلاحيات للمستخدم بنجاح." : "User permission overrides saved successfully.");
+      showToast(isRtl ? "تم حفظ استثناءات الصلاحيات للمستخدم بنجاح." : "User permission overrides saved successfully.", 'success');
       setOverrideModalOpen(false);
       setSelectedUser(null);
     } catch (e: any) {
-      alert(`Error: ${e.message}`);
+      showToast(`Error: ${e.message}`, 'error');
     }
   };
 
@@ -377,17 +378,17 @@ export default function UsersPage() {
       setRoleModalOpen(false);
       fetchRoles();
     } catch (e: any) {
-      alert(`Error: ${e.message}`);
+      showToast(`Error: ${e.message}`, 'error');
     }
   };
 
   const handleDeleteRole = async (id: string) => {
-    if (!confirm(isRtl ? "هل أنت متأكد من حذف هذا الدور؟" : "Are you sure you want to delete this role?")) return;
+    if (!window.confirm(isRtl ? "هل أنت متأكد من حذف هذا الدور؟" : "Are you sure you want to delete this role?")) return;
     try {
       await apiRequest(`/users/roles/${id}`, { method: "DELETE" });
       fetchRoles();
     } catch (e: any) {
-      alert(`Error: ${e.message}`);
+      showToast(`Error: ${e.message}`, 'error');
     }
   };
 
@@ -422,10 +423,10 @@ export default function UsersPage() {
         body: JSON.stringify({ matrix: matrixPayload })
       });
 
-      alert(isRtl ? "تم حفظ مصفوفة الصلاحيات بالكامل." : "Role-Permission matrix saved successfully.");
+      showToast(isRtl ? "تم حفظ مصفوفة الصلاحيات بالكامل." : "Role-Permission matrix saved successfully.", 'success');
       fetchRoles();
     } catch (e: any) {
-      alert(`Error saving matrix: ${e.message}`);
+      showToast(`Error saving matrix: ${e.message}`, 'error');
     } finally {
       setMatrixSaving(false);
     }
@@ -843,7 +844,7 @@ export default function UsersPage() {
                   </button>
                 </div>
                 <button
-                  onClick={() => alert(isRtl ? "تم حفظ سياسات كلمات المرور بنجاح." : "Password policies updated successfully.")}
+                  onClick={() => showToast(isRtl ? "تم حفظ سياسات كلمات المرور بنجاح." : "Password policies updated successfully.", 'success')}
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs transition shadow"
                 >
                   {isRtl ? "حفظ سياسة كلمة المرور" : "Save Password Policy"}

@@ -12,7 +12,12 @@ export class ExpensesService {
     warehouseId?: string;
   }) {
     const expenseNumber = `EXP-${Date.now().toString().slice(-8)}`;
-    const taxAmount = data.amount * 0.15; // 15% VAT KSA
+
+    const taxSetting = await this.prisma.setting.findUnique({
+      where: { key: 'TAX_RATE' },
+    });
+    const taxRate = taxSetting?.value ? parseFloat(taxSetting.value) : 0.15;
+    const taxAmount = data.amount * taxRate;
 
     return this.prisma.expense.create({
       data: {

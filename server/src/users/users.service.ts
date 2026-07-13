@@ -562,13 +562,21 @@ export class UsersService {
   }
 
   async getSessionMetrics() {
-    // Return mock session analytics for Security Center reviews
-    const activeSessions = [
-      { id: "SESS-1", ip: "192.168.1.55", device: "Chrome / Windows 11", email: "admin@system.com", lastActive: new Date().toISOString() }
-    ];
-    const failedLogins = [
-      { id: "FL-1", ip: "197.33.2.14", email: "invalid@system.com", attemptTime: new Date(Date.now() - 3600000).toISOString(), reason: "Incorrect credentials" }
-    ];
-    return { activeSessions, failedLogins };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [activeUsers, totalUsers, usersLoggedInToday, totalAuditEntries] = await Promise.all([
+      this.prisma.user.count({ where: { isActive: true, deletedAt: null } }),
+      this.prisma.user.count({ where: { deletedAt: null } }),
+      this.prisma.user.count({ where: { lastLogin: { gte: today }, deletedAt: null } }),
+      this.prisma.auditLog.count(),
+    ]);
+
+    return {
+      activeUsers,
+      totalUsers,
+      usersLoggedInToday,
+      totalAuditEntries,
+    };
   }
 }
