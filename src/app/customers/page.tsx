@@ -64,7 +64,6 @@ export default function CustomersPage() {
         }
       });
     } catch (e) {
-      console.warn("Failed fetching settings in customers page");
     }
   };
 

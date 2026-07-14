@@ -61,7 +61,6 @@ export default function Dashboard() {
         }
       });
     } catch (e) {
-      console.warn("Failed fetching settings");
     }
   };
 
@@ -141,7 +140,6 @@ export default function Dashboard() {
         }
       }
     } catch (err) {
-      console.warn("Failed fetching live dashboard metrics. Using defaults.");
     }
   };
 

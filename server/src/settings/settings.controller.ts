@@ -20,4 +20,52 @@ export class SettingsController {
   async updateMany(@Body() settings: Record<string, string>) {
     return this.settingsService.updateMany(settings);
   }
+
+  @Get('company-profile')
+  @Permissions('settings:view')
+  async getCompanyProfile() {
+    return this.settingsService.getCompanyProfile();
+  }
+
+  @Put('company-profile')
+  @Permissions('settings:manage')
+  async updateCompanyProfile(@Body() data: Record<string, any>) {
+    return this.settingsService.updateCompanyProfile(data);
+  }
+
+  @Get('email')
+  @Permissions('settings:view')
+  async getEmailSettings() {
+    return this.settingsService.getEmailSettings();
+  }
+
+  @Put('email')
+  @Permissions('settings:manage')
+  async updateEmailSettings(@Body() data: Record<string, any>) {
+    return this.settingsService.updateEmailSettings(data);
+  }
+
+  @Get('sms')
+  @Permissions('settings:view')
+  async getSmsSettings() {
+    return this.settingsService.getSmsSettings();
+  }
+
+  @Put('sms')
+  @Permissions('settings:manage')
+  async updateSmsSettings(@Body() data: Record<string, any>) {
+    return this.settingsService.updateSmsSettings(data);
+  }
+
+  @Get('whatsapp')
+  @Permissions('settings:view')
+  async getWhatsAppSettings() {
+    return this.settingsService.getWhatsAppSettings();
+  }
+
+  @Put('whatsapp')
+  @Permissions('settings:manage')
+  async updateWhatsAppSettings(@Body() data: Record<string, any>) {
+    return this.settingsService.updateWhatsAppSettings(data);
+  }
 }

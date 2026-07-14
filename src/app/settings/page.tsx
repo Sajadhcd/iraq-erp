@@ -44,7 +44,6 @@ export default function SettingsPage() {
         if (s.key === "NUMBER_FORMATTING_LOCALE") setNumberLocale(s.value);
       });
     } catch (e) {
-      console.error("Error loading settings from DB API", e);
     }
   };
 

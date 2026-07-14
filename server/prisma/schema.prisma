@@ -4,7 +4,8 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 enum UnitOfMeasure {
@@ -119,20 +120,23 @@ model RolePermission {
 }
 
 model User {
-  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email         String         @unique @db.VarChar(255)
-  username      String?        @unique @db.VarChar(150)
-  passwordHash  String         @map("password_hash") @db.VarChar(255)
-  isActive      Boolean        @default(true) @map("is_active")
-  lastLogin     DateTime?      @map("last_login") @db.Timestamptz
-  deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz
-  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  employee      Employee?
-  notifications Notification[]
-  auditLogs     AuditLog[]
-  journalEntries JournalEntry[]
-  vouchers       Voucher[]
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email               String         @unique @db.VarChar(255)
+  username            String?        @unique @db.VarChar(150)
+  passwordHash        String         @map("password_hash") @db.VarChar(255)
+  isActive            Boolean        @default(true) @map("is_active")
+  lastLogin           DateTime?      @map("last_login") @db.Timestamptz
+  failedLoginAttempts Int            @default(0) @map("failed_login_attempts")
+  lockoutUntil        DateTime?      @map("lockout_until") @db.Timestamptz
+  refreshTokenHash    String?        @map("refresh_token_hash") @db.VarChar(255)
+  deletedAt           DateTime?      @map("deleted_at") @db.Timestamptz
+  createdAt           DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  employee            Employee?
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  journalEntries      JournalEntry[]
+  vouchers            Voucher[]
 
   crmLeads           Lead[]         @relation("LeadSalesperson")
   crmOpportunities   Opportunity[]  @relation("OpportunityUser")
@@ -149,7 +153,70 @@ model User {
   assignedCustomers   Customer[]     @relation("CustomerSalesperson")
 
   @@index([email])
+  @@index([isActive])
   @@map("users")
+}
+
+model CompanyProfile {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String   @db.VarChar(255)
+  nameAr          String?  @map("name_ar") @db.VarChar(255)
+  email           String?  @db.VarChar(255)
+  phone           String?  @db.VarChar(50)
+  address         String?  @db.Text
+  city            String?  @db.VarChar(100)
+  country         String?  @db.VarChar(100)
+  taxNumber       String?  @map("tax_number") @db.VarChar(50)
+  commercialReg   String?  @map("commercial_reg") @db.VarChar(100)
+  logoUrl         String?  @map("logo_url") @db.Text
+  website         String?  @db.VarChar(500)
+  currency        String   @default("IQD") @db.VarChar(10)
+  taxRate         Decimal  @default(0) @map("tax_rate") @db.Decimal(5, 2)
+  fiscalYearStart Int      @default(1) @map("fiscal_year_start")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("company_profiles")
+}
+
+model EmailSetting {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  smtpHost    String   @map("smtp_host") @db.VarChar(255)
+  smtpPort    Int      @default(587) @map("smtp_port")
+  smtpUser    String   @map("smtp_user") @db.VarChar(255)
+  smtpPass    String   @map("smtp_pass") @db.VarChar(255)
+  smtpSecure  Boolean  @default(true) @map("smtp_secure")
+  fromEmail   String   @map("from_email") @db.VarChar(255)
+  fromName    String   @map("from_name") @db.VarChar(255)
+  isActive    Boolean  @default(false) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("email_settings")
+}
+
+model SmsSetting {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider    String   @db.VarChar(100)
+  apiKey      String   @map("api_key") @db.VarChar(500)
+  senderNumber String  @map("sender_number") @db.VarChar(50)
+  isActive    Boolean  @default(false) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("sms_settings")
+}
+
+model WhatsAppSetting {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  phoneNumberId   String   @map("phone_number_id") @db.VarChar(100)
+  accessToken     String   @map("access_token") @db.VarChar(500)
+  businessAccountId String @map("business_account_id") @db.VarChar(100)
+  isActive        Boolean  @default(false) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("whatsapp_settings")
 }
 
 model Employee {
@@ -206,6 +273,11 @@ model Employee {
   salaryStructure      SalaryStructure?
   payrollItems         PayrollItem[]
 
+  @@index([status])
+  @@index([departmentId])
+  @@index([roleId])
+  @@index([userId])
+  @@index([deletedAt])
   @@map("employees")
 }
 
@@ -388,6 +460,9 @@ model Inventory {
   warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
 
   @@unique([productId, warehouseId, batchNumber], name: "uq_product_warehouse_batch")
+  @@index([productId])
+  @@index([warehouseId])
+  @@index([quantity])
   @@map("inventory")
 }
 
@@ -410,6 +485,10 @@ model Customer {
   salesOrders   SalesOrder[]
   salesperson   User?     @relation("CustomerSalesperson", fields: [salespersonId], references: [id], onDelete: SetNull)
 
+  @@index([name])
+  @@index([phone])
+  @@index([email])
+  @@index([deletedAt])
   @@map("customers")
 }
 
@@ -446,6 +525,11 @@ model Purchase {
   purchaseItems  PurchaseItem[]
   payments       Payment[]
 
+  @@index([supplierId])
+  @@index([warehouseId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
   @@map("purchases")
 }
 
@@ -479,6 +563,10 @@ model Expense {
   supplier      Supplier?  @relation(fields: [supplierId], references: [id], onDelete: SetNull)
   warehouse     Warehouse? @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
 
+  @@index([supplierId])
+  @@index([warehouseId])
+  @@index([expenseDate])
+  @@index([category])
   @@map("expenses")
 }
 
@@ -531,6 +619,12 @@ model Sale {
   salesOrderId   String?       @map("sales_order_id") @db.Uuid
   salesOrder     SalesOrder?   @relation("SalesOrderSales", fields: [salesOrderId], references: [id], onDelete: SetNull)
 
+  @@index([customerId])
+  @@index([cashRegisterId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+  @@index([invoiceNumber])
   @@map("sales")
 }
 
@@ -548,6 +642,10 @@ model Invoice {
   sale          Sale          @relation(fields: [saleId], references: [id], onDelete: Restrict)
   invoiceItems  InvoiceItem[]
 
+  @@index([saleId])
+  @@index([status])
+  @@index([invoiceType])
+  @@index([issueDate])
   @@map("invoices")
 }
 
@@ -579,6 +677,10 @@ model Payment {
   sale                 Sale?               @relation(fields: [saleId], references: [id], onDelete: Cascade)
   purchase             Purchase?           @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
 
+  @@index([saleId])
+  @@index([purchaseId])
+  @@index([status])
+  @@index([paymentDate])
   @@map("payments")
 }
 
@@ -592,6 +694,9 @@ model Notification {
   createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
   @@map("notifications")
 }
 
@@ -879,6 +984,8 @@ model Activity {
   createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
+  @@index([type])
+  @@index([status])
   @@map("crm_activities")
 }
 
@@ -1010,6 +1117,12 @@ model SalesOrder {
   deliveryNotes         DeliveryNote[]
   sales                 Sale[]            @relation("SalesOrderSales")
 
+  @@index([customerId])
+  @@index([salespersonId])
+  @@index([warehouseId])
+  @@index([status])
+  @@index([orderDate])
+  @@index([deletedAt])
   @@map("sales_orders")
 }
 
@@ -1241,6 +1354,23 @@ model UserPermission {
   @@map("user_permissions")
 }
 
+model License {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  licenseKey      String   @unique @map("license_key") @db.VarChar(500)
+  companyName     String   @map("company_name") @db.VarChar(255)
+  companyEmail    String   @map("company_email") @db.VarChar(255)
+  licenseType     String   @default("STANDARD") @map("license_type") @db.VarChar(50)
+  maxUsers        Int      @default(10) @map("max_users")
+  maxBranches     Int      @default(1) @map("max_branches")
+  expiresAt       DateTime @map("expires_at") @db.Timestamptz
+  isActive        Boolean  @default(true) @map("is_active")
+  activatedAt     DateTime? @map("activated_at") @db.Timestamptz
+  lastValidated   DateTime? @map("last_validated") @db.Timestamptz
+  fingerprint     String?  @db.VarChar(500)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
-
-
+  @@index([licenseKey])
+  @@index([isActive])
+  @@map("licenses")
+}

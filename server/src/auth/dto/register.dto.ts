@@ -1,26 +1,25 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, Matches } from 'class-validator';
 
 export class RegisterDto {
-  @IsEmail({}, { message: 'البريد الإلكتروني المدخل غير صالح.' })
+  @IsEmail({}, { message: 'البريد الإلكتروني غير صالح.' })
   email!: string;
 
   @IsString()
   @MinLength(6, { message: 'يجب أن لا تقل كلمة المرور عن 6 أحرف.' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+    message: 'يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير ورقم واحد على الأقل.',
+  })
   password!: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'الاسم الأول مطلوب.' })
-  firstName!: string;
+  @MinLength(2, { message: 'يجب أن لا يقل الاسم عن 2 أحرف.' })
+  name!: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'اسم العائلة مطلوب.' })
-  lastName!: string;
+  phone?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'رقم الجوال مطلوب.' })
-  phone!: string;
-
-  @IsString()
-  @IsNotEmpty({ message: 'المسمى الوظيفي مطلوب.' })
-  roleName!: string;
+  role?: string;
 }

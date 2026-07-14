@@ -75,7 +75,6 @@ export default function POSPage() {
         }
       });
     } catch (e) {
-      console.error("Error loading settings in POS page", e);
     }
   };
 

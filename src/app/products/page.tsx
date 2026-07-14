@@ -81,7 +81,6 @@ export default function ProductsPage() {
         }
       });
     } catch (e) {
-      console.warn("Failed fetching settings in products page");
     }
   };
 

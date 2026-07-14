@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -22,15 +22,27 @@ import { HrmsModule } from './hrms/hrms.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { LeaveModule } from './leave/leave.module';
 import { PayrollModule } from './payroll/payroll.module';
+import { HealthModule } from './health/health.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
+import { LicenseModule } from './license/license.module';
 import { PermissionsGuard } from './auth/permissions.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
+import { SecurityHeadersMiddleware } from './common/middleware/security.middleware';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 30,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: parseInt(process.env.THROTTLE_TTL || '60000', 10),
+        limit: parseInt(process.env.THROTTLE_LIMIT || '60', 10),
+      },
+      {
+        ttl: 3600000,
+        limit: 1000,
+      },
+    ]),
     PrismaModule,
     AuthModule,
     InventoryModule,
@@ -50,6 +62,9 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
     AttendanceModule,
     LeaveModule,
     PayrollModule,
+    HealthModule,
+    MonitoringModule,
+    LicenseModule,
   ],
   controllers: [AppController],
   providers: [
@@ -62,6 +77,15 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
       provide: APP_GUARD,
       useClass: PermissionsGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
+    consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
+  }
+}

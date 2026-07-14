@@ -29,6 +29,7 @@ import {
   Calendar,
   Sun,
   Moon,
+  Activity,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ToastContainer from "../ui/toast";
@@ -62,6 +63,7 @@ const sidebarItems: SidebarItem[] = [
   { key: "payroll", name: "إدارة الرواتب", href: "/hrms/payroll", icon: FileText },
   { key: "employees", name: "الموظفين", href: "/employees", icon: ShieldCheck },
   { key: "users", name: "مستخدمي النظام", href: "/users", icon: UserCheck },
+  { key: "admin", name: "لوحة المشرف", href: "/admin", icon: Activity },
   { key: "settings", name: "الإعدادات العامة", href: "/settings", icon: SettingsIcon },
 ];
 
@@ -87,6 +89,7 @@ const SIDEBAR_PERMISSIONS: Record<string, string> = {
   payroll: "payroll:view",
   employees: "employees:view",
   users: "users:manage",
+  admin: "users:manage",
   settings: "settings:view",
 };
 

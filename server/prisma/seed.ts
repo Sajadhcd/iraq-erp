@@ -1,10 +1,11 @@
+// Production seed file - Prisma database seeder
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Start seeding enterprise RBAC database...");
+  process.stdout.write("Start seeding enterprise RBAC database...\n");
 
   // 1. Create Default Roles
   const roles = [
@@ -35,7 +36,7 @@ async function main() {
       create: r,
     });
     roleEntities[r.name] = role;
-    console.log(`Role created/verified: ${role.name}`);
+    process.stdout.write(`Role created/verified: ${role.name}\n`);
   }
 
   // 2. Create Default Permissions
@@ -121,7 +122,7 @@ async function main() {
     });
     permEntities[p.action] = perm;
   }
-  console.log("Permissions seeded successfully.");
+  process.stdout.write("Permissions seeded successfully.\n");
 
   // Helper to map permissions to roles
   const mapPermissionsToRole = async (roleName: string, actions: string[]) => {
@@ -146,7 +147,7 @@ async function main() {
         },
       });
     }
-    console.log(`Mapped ${actions.length} permissions to role: ${roleName}`);
+    process.stdout.write(`Mapped ${actions.length} permissions to role: ${roleName}\n`);
   };
 
   // Map permissions to roles
@@ -297,7 +298,7 @@ async function main() {
       roleId: superAdminRole.id,
     },
   });
-  console.log(`Default Admin Account: ${adminEmail} / 123456`);
+  process.stdout.write(`Default Admin Account: ${adminEmail} / 123456\n`);
 
   // 4. Create Default Warehouse
   const defaultWarehouse = await prisma.warehouse.upsert({
@@ -352,7 +353,7 @@ async function main() {
   }
 
   // 6. Create Default Chart of Accounts
-  console.log("Seeding Chart of Accounts...");
+  process.stdout.write("Seeding Chart of Accounts...\n");
   
   const rootAccounts = [
     { code: "100000", nameEn: "Assets", nameAr: "الأصول", type: "ASSET" },
@@ -408,14 +409,14 @@ async function main() {
       },
     });
   }
-  console.log("Chart of Accounts seeded.");
+  process.stdout.write("Chart of Accounts seeded.\n");
 
-  console.log("Seeding completed successfully.");
+  process.stdout.write("Seeding completed successfully.\n");
 }
 
 main()
   .catch((e) => {
-    console.error("Error seeding database:", e);
+    process.stderr.write(`Error seeding database: ${e}\n`);
     process.exit(1);
   })
   .finally(async () => {

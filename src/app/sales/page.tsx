@@ -69,7 +69,6 @@ export default function SalesPage() {
         }
       });
     } catch (e) {
-      console.warn("Failed fetching settings in sales ledger page");
     }
   };
 

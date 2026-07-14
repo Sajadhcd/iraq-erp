@@ -68,7 +68,6 @@ export default function ReportsPage() {
         }
       });
     } catch (e) {
-      console.warn("Failed fetching settings in reports page");
     }
   };
 

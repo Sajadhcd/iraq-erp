@@ -64,7 +64,6 @@ export default function ExpensesPage() {
         }
       });
     } catch (e) {
-      console.warn("Failed fetching settings in expenses page");
     }
   };
 

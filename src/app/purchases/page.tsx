@@ -65,7 +65,6 @@ export default function PurchasesPage() {
         }
       });
     } catch (e) {
-      console.warn("Failed fetching settings in purchases page");
     }
   };
 
